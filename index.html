@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Решебник ОГЭ Информатика</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #2481cc;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f0f0f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            max-width: 100%;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 16px 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .app-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -20%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        /* Task cards */
+        .task-card {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin: 6px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-card:active {
+            transform: scale(0.98);
+            opacity: 0.8;
+        }
+
+        .task-num {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .task-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 15px;
+            line-height: 1.3;
+            margin-bottom: 2px;
+        }
+
+        .task-subtitle {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color);
+        }
+
+        .task-arrow {
+            color: var(--tg-theme-hint-color);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* Tab navigation inside task */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            margin: 16px 16px 12px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--tg-theme-hint-color);
+            font-family: inherit;
+        }
+
+        .tab-btn.active {
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            box-shadow: 0 2px 8px rgba(36, 129, 204, 0.3);
+        }
+
+        /* Content area */
+        .content-area {
+            padding: 0 16px 16px;
+        }
+
+        .content-block {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .content-block h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .content-block p, .content-block li {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--tg-theme-text-color);
+            opacity: 0.85;
+        }
+
+        .content-block ul {
+            padding-left: 20px;
+        }
+
+        .content-block li {
+            margin-bottom: 4px;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-left: 4px solid #667eea;
+            border-radius: 0 12px 12px 0;
+            padding: 12px 16px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #11998e15, #38ef7d15);
+            border-left: 4px solid #11998e;
+            border-radius: 0 12px 12px 0;
+            padding: 12px 16px;
+            margin: 10px 0;
+        }
+
+        .example-box .step {
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 6px;
+        }
+
+        .example-box .step b {
+            color: #11998e;
+        }
+
+        .example-box .answer {
+            font-weight: 700;
+            color: #11998e;
+            font-size: 15px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #11998e44;
+        }
+
+        /* Practice section */
+        .practice-question {
+            font-size: 14px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .answer-input-wrap {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .answer-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--tg-theme-secondary-bg-color);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            background: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            transition: border-color 0.2s;
+        }
+
+        .answer-input:focus {
+            border-color: var(--tg-theme-button-color);
+        }
+
+        .check-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .check-btn:active {
+            transform: scale(0.95);
+        }
+
+        .result-msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .result-msg.correct {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .result-msg.wrong {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Back button */
+        .back-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            cursor: pointer;
+        }
+
+        .back-header svg {
+            width: 24px;
+            height: 24px;
+            color: var(--tg-theme-button-color);
+        }
+
+        .back-header span {
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex;
+            gap: 8px;
+            padding: 0 16px;
+            margin-top: -12px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--tg-theme-bg-color);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .stat-card .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card .stat-label {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color);
+            margin-top: 2px;
+        }
+
+        /* Difficulty badge */
+        .diff-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .diff-easy { background: #d4edda; color: #155724; }
+        .diff-medium { background: #fff3cd; color: #856404; }
+        .diff-hard { background: #f8d7da; color: #721c24; }
+
+        /* Category headers */
+        .category-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--tg-theme-hint-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 16px 16px 6px;
+        }
+
+        /* Progress dots */
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .progress-dot.done {
+            background: #38ef7d;
+        }
+
+        /* Guide section (shown outside Telegram) */
+        .guide-section {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        .guide-section h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin: 24px 0 12px;
+        }
+
+        .guide-step {
+            background: var(--tg-theme-secondary-bg-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .guide-step h4 {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guide-step p, .guide-step li {
+            font-size: 14px;
+            line-height: 1.7;
+            opacity: 0.85;
+        }
+
+        .guide-step code {
+            background: #1a1a2e;
+            color: #e94560;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .code-block {
+            background: #1a1a2e;
+            color: #eee;
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .code-block .comment { color: #6a6a8a; }
+        .code-block .keyword { color: #c792ea; }
+        .code-block .string { color: #c3e88d; }
+        .code-block .func { color: #82aaff; }
+
+        .copy-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 8px;
+        }
+
+        .copy-btn:active {
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-in {
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 0; }
+
+        /* Search */
+        .search-wrap {
+            padding: 0 16px;
+            margin: 12px 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: none;
+            border-radius: 12px;
+            background: var(--tg-theme-secondary-bg-color);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            color: var(--tg-theme-text-color);
+        }
+
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--tg-theme-hint-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app"></div>
+
+    <script>
+    // ============================================
+    // TELEGRAM WEB APP INIT
+    // ============================================
+    const tg = window.Telegram?.WebApp;
+    const isInTelegram = !!(tg && tg.initData && tg.initData.length > 0);
+
+    if (tg) {
+        tg.ready();
+        tg.expand();
+        if (tg.themeParams) {
+            const root = document.documentElement.style;
+            if (tg.themeParams.bg_color) root.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            if (tg.themeParams.text_color) root.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            if (tg.themeParams.hint_color) root.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+            if (tg.themeParams.link_color) root.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
+            if (tg.themeParams.button_color) root.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+            if (tg.themeParams.button_text_color) root.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+            if (tg.themeParams.secondary_bg_color) root.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
+        }
+    }
+
+    // ============================================
+    // DATA - All 15 OGE Tasks
+    // ============================================
+    const tasks = [
+        {
+            id: 1, title: "Количественные параметры информации", category: "info",
+            color: "#667eea", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Определение количества информационного объёма текстовых сообщений.</p>
+                <div class="formula-box">N = 2<sup>i</sup><br>где N — мощность алфавита, i — бит на символ</div>
+                <div class="formula-box">V = K × i<br>где V — объём информации, K — кол-во символов</div>
+                <ul>
+                    <li>1 байт = 8 бит</li>
+                    <li>1 Кбайт = 1024 байт</li>
+                    <li>1 Мбайт = 1024 Кбайт</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Статья содержит 60 страниц, на каждой 40 строк по 80 символов. Алфавит — 256 символов. Определите объём статьи в Кбайт.</p>
+                <div class="example-box">
+                    <div class="step"><b>Шаг 1:</b> N = 256, значит i = 8 бит = 1 байт на символ</div>
+                    <div class="step"><b>Шаг 2:</b> Всего символов: K = 60 × 40 × 80 = 192 000</div>
+                    <div class="step"><b>Шаг 3:</b> V = 192 000 × 1 = 192 000 байт</div>
+                    <div class="step"><b>Шаг 4:</b> V = 192 000 / 1024 ≈ 187,5 Кбайт</div>
+                    <div class="answer">✅ Ответ: 187,5 Кбайт</div>
+                </div>`,
+            practice: {
+                question: "Сообщение содержит 4096 символов. Алфавит состоит из 32 символов. Определите информационный объём в байтах.",
+                answer: "2560",
+                hint: "i = 5 бит (2⁵ = 32), V = 4096 × 5 = 20480 бит = 2560 байт"
+            }
+        },
+        {
+            id: 2, title: "Декодирование кодовой последовательности", category: "info",
+            color: "#764ba2", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Декодирование сообщения по заданной таблице кодов. Важно условие Фано — однозначное декодирование.</p>
+                <ul>
+                    <li><b>Условие Фано:</b> никакое кодовое слово не является началом другого</li>
+                    <li>Декодируем слева направо, выбирая подходящий код</li>
+                    <li>Если код не подходит — добавляем следующий бит</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Даны коды: А=00, Б=11, В=010, Г=011. Декодируйте: 0001101100</p>
+                <div class="example-box">
+                    <div class="step"><b>Шаг 1:</b> 00 → А</div>
+                    <div class="step"><b>Шаг 2:</b> 011 → Г</div>
+                    <div class="step"><b>Шаг 3:</b> 01 → не подходит, 011 → Г... Нет, 0110 → нет. Возьмём: 011 → Г</div>
+                    <div class="step"><b>Шаг 4:</b> 00|011|011|00 → А Г Г А... Проверяем: 0001101100</div>
+                    <div class="step"><b>Разбор:</b> 00 = А | 011 = Г | 011 = Г | 00 = А</div>
+                    <div class="answer">✅ Ответ: АГГА</div>
+                </div>`,
+            practice: {
+                question: "Коды: А=0, Б=10, В=110, Г=111. Декодируйте: 1101001110",
+                answer: "ВАБГА",
+                hint: "110 = В | 10 = Б | 0 = А | 111 = Г | 0 = А"
+            }
+        },
+        {
+            id: 3, title: "Линейный алгоритм для формального исполнителя", category: "alg",
+            color: "#11998e", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Определение истинности составного высказывания. Используются логические операции.</p>
+                <ul>
+                    <li><b>И (AND, ∧, &)</b> — истина, когда оба истинны</li>
+                    <li><b>ИЛИ (OR, ∨, |)</b> — истина, когда хотя бы одно истинно</li>
+                    <li><b>НЕ (NOT, ¬, !)</b> — инверсия значения</li>
+                </ul>
+                <div class="formula-box">Приоритет: НЕ → И → ИЛИ</div>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Для какого числа X истинно: (X > 2) И НЕ(X > 4)?</p>
+                <div class="example-box">
+                    <div class="step"><b>Разбор:</b> X > 2 И X ≤ 4</div>
+                    <div class="step"><b>Значит:</b> 2 < X ≤ 4</div>
+                    <div class="step"><b>Целые числа:</b> 3 и 4</div>
+                    <div class="answer">✅ Ответ: 3 или 4</div>
+                </div>`,
+            practice: {
+                question: "Для какого наименьшего целого X истинно: (X > 1) И (X < 7) И НЕ(X < 4)?",
+                answer: "4",
+                hint: "X > 1 И X < 7 И X ≥ 4 → 4 ≤ X < 7 → минимум 4"
+            }
+        },
+        {
+            id: 4, title: "Файловая система", category: "info",
+            color: "#e94560", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Работа с файловой системой: пути к файлам, маски имён файлов.</p>
+                <ul>
+                    <li><b>*</b> — любая последовательность символов (включая пустую)</li>
+                    <li><b>?</b> — ровно один любой символ</li>
+                    <li>Путь: C:\\Папка1\\Папка2\\файл.txt</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Маска: *a*.?t* Какие файлы подходят?<br>1) dad.txt  2) a.tt  3) ab.t  4) aaa.t</p>
+                <div class="example-box">
+                    <div class="step"><b>1) dad.txt:</b> *a* = dad ✓, .?t* = .txt → ? = t ✓</div>
+                    <div class="step"><b>2) a.tt:</b> *a* = a ✓, .?t* = .tt → ? = t, t* = (пусто) ✓</div>
+                    <div class="step"><b>3) ab.t:</b> *a* = ab ✓, .?t* = .t → ? нет символа ✗</div>
+                    <div class="step"><b>4) aaa.t:</b> *a* = aaa ✓, .?t* = .t → ? нет символа ✗</div>
+                    <div class="answer">✅ Ответ: 1, 2</div>
+                </div>`,
+            practice: {
+                question: "Сколько файлов из списка соответствует маске ?ba*.?xt: 1)abac.txt 2)ba.xt 3)1ba1.txt 4)aba.xxt",
+                answer: "2",
+                hint: "Подходят: abac.txt (? = a, * = c) и 1ba1.txt (? = 1, * = 1)"
+            }
+        },
+        {
+            id: 5, title: "Анализ простейшей программы", category: "alg",
+            color: "#f093fb", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Формальное исполнение линейного алгоритма, записанного на языке программирования.</p>
+                <ul>
+                    <li>Последовательно выполняем каждую строку</li>
+                    <li>Следим за значениями переменных</li>
+                    <li><b>div</b> — целочисленное деление</li>
+                    <li><b>mod</b> — остаток от деления</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Определите значение s после выполнения:<br>s = 0; a = 6; b = 3<br>s = a div b + a mod b</p>
+                <div class="example-box">
+                    <div class="step"><b>a div b:</b> 6 div 3 = 2</div>
+                    <div class="step"><b>a mod b:</b> 6 mod 3 = 0</div>
+                    <div class="step"><b>s =</b> 2 + 0 = 2</div>
+                    <div class="answer">✅ Ответ: 2</div>
+                </div>`,
+            practice: {
+                question: "a = 17, b = 5. Чему равно a mod b + a div b?",
+                answer: "5",
+                hint: "17 mod 5 = 2, 17 div 5 = 3, итого 2 + 3 = 5"
+            }
+        },
+        {
+            id: 6, title: "Программа с условным оператором", category: "alg",
+            color: "#4facfe", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Исполнение программы с ветвлением (if-else).</p>
+                <ul>
+                    <li>Проверяем условие в if</li>
+                    <li>Если истина → выполняем блок if</li>
+                    <li>Если ложь → выполняем блок else</li>
+                    <li>Может быть вложенный if</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> a = 3, b = 7.<br>if a > b: c = a else: c = b<br>Чему равно c?</p>
+                <div class="example-box">
+                    <div class="step"><b>Проверка:</b> 3 > 7 → ЛОЖЬ</div>
+                    <div class="step"><b>Выполняем else:</b> c = b = 7</div>
+                    <div class="answer">✅ Ответ: 7</div>
+                </div>`,
+            practice: {
+                question: "a = 12, b = 8. Если a > 10 И b < 10, то s = a + b, иначе s = a - b. Чему равно s?",
+                answer: "20",
+                hint: "12 > 10 = истина, 8 < 10 = истина. Оба истинны → s = 12 + 8 = 20"
+            }
+        },
+        {
+            id: 7, title: "Адресация в электронных таблицах", category: "tech",
+            color: "#fa709a", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Работа с формулами в электронных таблицах.</p>
+                <ul>
+                    <li><b>A1</b> — относительная ссылка (меняется при копировании)</li>
+                    <li><b>$A$1</b> — абсолютная ссылка (не меняется)</li>
+                    <li><b>$A1</b> — смешанная (столбец фиксирован)</li>
+                    <li><b>A$1</b> — смешанная (строка фиксирована)</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> В B1 формула =A1+$C$1. Скопировали в B2. Что получилось?</p>
+                <div class="example-box">
+                    <div class="step"><b>Копирование вниз на 1:</b> строка +1</div>
+                    <div class="step"><b>A1 → A2</b> (относительная, смещается)</div>
+                    <div class="step"><b>$C$1 → $C$1</b> (абсолютная, не меняется)</div>
+                    <div class="answer">✅ Ответ: =A2+$C$1</div>
+                </div>`,
+            practice: {
+                question: "В ячейке D3 формула =A3+$B$2. Её скопировали в D5. Какое число в A-части ссылки? (Введите номер строки для A)",
+                answer: "5",
+                hint: "Копирование из D3 в D5: сдвиг на 2 строки вниз. A3 → A5"
+            }
+        },
+        {
+            id: 8, title: "Программа с циклом", category: "alg",
+            color: "#a18cd1", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Исполнение программы, содержащей цикл while или for.</p>
+                <ul>
+                    <li><b>while</b> — цикл с условием (пока условие истинно)</li>
+                    <li><b>for</b> — цикл со счётчиком</li>
+                    <li>Важно: следите за изменением переменных на каждой итерации</li>
+                    <li>Составляйте таблицу трассировки!</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> s = 0; n = 1. Пока n <= 4: s = s + n, n = n + 1. Чему равно s?</p>
+                <div class="example-box">
+                    <div class="step"><b>n=1:</b> s = 0+1 = 1, n = 2</div>
+                    <div class="step"><b>n=2:</b> s = 1+2 = 3, n = 3</div>
+                    <div class="step"><b>n=3:</b> s = 3+3 = 6, n = 4</div>
+                    <div class="step"><b>n=4:</b> s = 6+4 = 10, n = 5</div>
+                    <div class="step"><b>n=5:</b> 5 <= 4 → ЛОЖЬ, выход</div>
+                    <div class="answer">✅ Ответ: s = 10</div>
+                </div>`,
+            practice: {
+                question: "s = 1, n = 1. Пока n <= 5: s = s * n, n = n + 1. Чему равно s?",
+                answer: "120",
+                hint: "s = 1×1 = 1, 1×2 = 2, 2×3 = 6, 6×4 = 24, 24×5 = 120"
+            }
+        },
+        {
+            id: 9, title: "Количество путей в графе", category: "info",
+            color: "#f5576c", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Подсчёт количества путей между двумя вершинами в графе или таблице.</p>
+                <ul>
+                    <li>Используем метод динамического программирования</li>
+                    <li>Начинаем с начальной вершины (кол-во путей = 1)</li>
+                    <li>Для каждой следующей: сумма путей из всех вершин, откуда можно прийти</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Граф: A→B, A→C, B→C, B→D, C→D. Сколько путей из A в D?</p>
+                <div class="example-box">
+                    <div class="step"><b>A = 1</b> (начало)</div>
+                    <div class="step"><b>B = 1</b> (из A)</div>
+                    <div class="step"><b>C = 1 + 1 = 2</b> (из A и B)</div>
+                    <div class="step"><b>D = 1 + 2 = 3</b> (из B и C)</div>
+                    <div class="answer">✅ Ответ: 3 пути</div>
+                </div>`,
+            practice: {
+                question: "Граф: A→B, A→C, A→D, B→C, B→D, C→D. Сколько путей из A в D?",
+                answer: "5",
+                hint: "A=1, B=1, C=1+1=2, D=1+1+2=4... Нет: A→D тоже есть! D=1(из A)+1(из B)+2(из C)+ прямой A→D... Пересчитаем: D получает из A(1), B(1), C(2) → D = 1+1+2 = 4, плюс прямой A→D уже учтён в A=1"
+            }
+        },
+        {
+            id: 10, title: "Системы счисления", category: "info",
+            color: "#0abde3", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Перевод чисел между системами счисления.</p>
+                <div class="formula-box">Из 10-й в N-ю: делим на N, записываем остатки снизу вверх</div>
+                <div class="formula-box">Из N-й в 10-ю: цифра × N^позиция (справа, с 0)</div>
+                <ul>
+                    <li><b>Двоичная (2):</b> 0, 1</li>
+                    <li><b>Восьмеричная (8):</b> 0-7</li>
+                    <li><b>Шестнадцатеричная (16):</b> 0-9, A-F</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Переведите 156₁₀ в двоичную систему.</p>
+                <div class="example-box">
+                    <div class="step"><b>156 ÷ 2 =</b> 78 остаток 0</div>
+                    <div class="step"><b>78 ÷ 2 =</b> 39 остаток 0</div>
+                    <div class="step"><b>39 ÷ 2 =</b> 19 остаток 1</div>
+                    <div class="step"><b>19 ÷ 2 =</b> 9 остаток 1</div>
+                    <div class="step"><b>9 ÷ 2 =</b> 4 остаток 1</div>
+                    <div class="step"><b>4 ÷ 2 =</b> 2 остаток 0</div>
+                    <div class="step"><b>2 ÷ 2 =</b> 1 остаток 0</div>
+                    <div class="step"><b>1 ÷ 2 =</b> 0 остаток 1</div>
+                    <div class="answer">✅ Ответ: 10011100₂</div>
+                </div>`,
+            practice: {
+                question: "Переведите число 25₁₀ в двоичную систему. Запишите результат (только цифры).",
+                answer: "11001",
+                hint: "25 = 16+8+1 → 11001"
+            }
+        },
+        {
+            id: 11, title: "Поиск информации в базе данных", category: "tech",
+            color: "#ee5a24", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Работа с запросами к базам данных и поисковым системам.</p>
+                <ul>
+                    <li><b>И (&)</b> — сужает поиск (пересечение множеств)</li>
+                    <li><b>ИЛИ (|)</b> — расширяет поиск (объединение множеств)</li>
+                    <li>Чем больше условий через И — тем меньше результатов</li>
+                    <li>Чем больше условий через ИЛИ — тем больше результатов</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Расположите запросы по возрастанию результатов:<br>А) кошки & собаки<br>Б) кошки | собаки<br>В) кошки | собаки | рыбки</p>
+                <div class="example-box">
+                    <div class="step"><b>А (И):</b> только то, что содержит ОБА слова — меньше всего</div>
+                    <div class="step"><b>Б (ИЛИ 2):</b> содержит хотя бы одно из двух — больше</div>
+                    <div class="step"><b>В (ИЛИ 3):</b> содержит хотя бы одно из трёх — ещё больше</div>
+                    <div class="answer">✅ Ответ: А, Б, В</div>
+                </div>`,
+            practice: {
+                question: "Какой запрос даст БОЛЬШЕ результатов: 'котики & пушистые' или 'котики | пушистые'? (Введите: И или ИЛИ)",
+                answer: "ИЛИ",
+                hint: "Оператор ИЛИ (|) объединяет множества → больше результатов"
+            }
+        },
+        {
+            id: 12, title: "Алгоритм для исполнителя Робот", category: "alg",
+            color: "#6c5ce7", difficulty: "hard", points: 2,
+            theory: `<h3>📐 Теория</h3>
+                <p>Исполнитель Робот на клетчатом поле. Команды и циклы.</p>
+                <ul>
+                    <li><b>Команды:</b> вверх, вниз, влево, вправо</li>
+                    <li><b>Проверки:</b> сверху свободно, снизу свободно и т.д.</li>
+                    <li><b>Цикл:</b> нц пока &lt;условие&gt; ... кц</li>
+                    <li>Нужно закрасить клетки или прийти в нужную точку</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Робот должен закрасить горизонтальную полосу неизвестной длины.</p>
+                <div class="example-box">
+                    <div class="step"><b>Алгоритм:</b></div>
+                    <div class="step">нц пока справа свободно</div>
+                    <div class="step">&nbsp;&nbsp;закрасить</div>
+                    <div class="step">&nbsp;&nbsp;вправо</div>
+                    <div class="step">кц</div>
+                    <div class="step">закрасить</div>
+                    <div class="answer">✅ Робот закрасит все клетки до стены включительно</div>
+                </div>`,
+            practice: {
+                question: "Робот стоит в левом верхнем углу поля 1×5 (одна строка, 5 клеток). Сколько раз выполнится тело цикла 'нц пока справа свободно — закрасить, вправо — кц'?",
+                answer: "4",
+                hint: "5 клеток, 4 перехода вправо до стены"
+            }
+        },
+        {
+            id: 13, title: "Дискретная форма представления информации", category: "info",
+            color: "#00b894", difficulty: "medium", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Кодирование графической и звуковой информации.</p>
+                <div class="formula-box">Графика: V = W × H × i<br>W — ширина, H — высота, i — глубина цвета</div>
+                <div class="formula-box">Звук: V = f × i × t × k<br>f — частота, i — разрядность, t — время, k — каналы</div>
+                <ul>
+                    <li>Глубина цвета i бит → 2ⁱ цветов</li>
+                    <li>Частота дискретизации — количество замеров в секунду (Гц)</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Растровое изображение 800×600, 256 цветов. Определите объём в Кбайт.</p>
+                <div class="example-box">
+                    <div class="step"><b>Шаг 1:</b> 256 цветов → i = 8 бит = 1 байт</div>
+                    <div class="step"><b>Шаг 2:</b> V = 800 × 600 × 1 = 480 000 байт</div>
+                    <div class="step"><b>Шаг 3:</b> V = 480 000 / 1024 ≈ 468,75 Кбайт</div>
+                    <div class="answer">✅ Ответ: ≈ 468,75 Кбайт</div>
+                </div>`,
+            practice: {
+                question: "Изображение 100×100 пикселей, 16 цветов. Сколько байт занимает? (без сжатия)",
+                answer: "5000",
+                hint: "16 цветов → i = 4 бита. V = 100×100×4 = 40000 бит = 5000 байт"
+            }
+        },
+        {
+            id: 14, title: "Простой линейный алгоритм (Робот)", category: "alg",
+            color: "#fdcb6e", difficulty: "easy", points: 1,
+            theory: `<h3>📐 Теория</h3>
+                <p>Написание линейного алгоритма для исполнителя Робот.</p>
+                <ul>
+                    <li>Робот выполняет команды последовательно</li>
+                    <li>Нужно точно рассчитать количество шагов</li>
+                    <li>Закрашиваем нужные клетки</li>
+                    <li>Нельзя врезаться в стену!</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Закрасить 3 клетки вправо от робота.</p>
+                <div class="example-box">
+                    <div class="step"><b>1.</b> вправо</div>
+                    <div class="step"><b>2.</b> закрасить</div>
+                    <div class="step"><b>3.</b> вправо</div>
+                    <div class="step"><b>4.</b> закрасить</div>
+                    <div class="step"><b>5.</b> вправо</div>
+                    <div class="step"><b>6.</b> закрасить</div>
+                    <div class="answer">✅ 3 клетки закрашены</div>
+                </div>`,
+            practice: {
+                question: "Робот в точке (1,1). Ему нужно попасть в точку (4,3). Какое минимальное число команд 'вправо' и 'вниз' нужно? (общее число)",
+                answer: "5",
+                hint: "Вправо: 4-1=3, Вниз: 3-1=2, Итого: 3+2=5"
+            }
+        },
+        {
+            id: 15, title: "Алгоритм с циклами и ветвлениями (Робот)", category: "alg",
+            color: "#e17055", difficulty: "hard", points: 2,
+            theory: `<h3>📐 Теория</h3>
+                <p>Написание сложного алгоритма для Робота с использованием циклов и условий.</p>
+                <ul>
+                    <li>Используем цикл <b>нц пока</b> для повторения</li>
+                    <li>Используем <b>если</b> для проверки условий</li>
+                    <li>Комбинируем для обхода препятствий</li>
+                    <li>Алгоритм должен работать для ЛЮБОГО размера поля</li>
+                </ul>`,
+            example: `<h3>💡 Пример</h3>
+                <p><b>Задача:</b> Закрасить все клетки вдоль стены произвольной длины, обходя выступы.</p>
+                <div class="example-box">
+                    <div class="step"><b>Алгоритм:</b></div>
+                    <div class="step">нц пока справа свободно</div>
+                    <div class="step">&nbsp;&nbsp;вправо</div>
+                    <div class="step">&nbsp;&nbsp;если снизу свободно</div>
+                    <div class="step">&nbsp;&nbsp;&nbsp;&nbsp;то закрасить</div>
+                    <div class="step">&nbsp;&nbsp;всё</div>
+                    <div class="step">кц</div>
+                    <div class="answer">✅ Робот закрасит нужные клетки вдоль всей стены</div>
+                </div>`,
+            practice: {
+                question: "В цикле 'нц пока снизу стена' Робот делает 'вправо, закрасить'. Стена внизу длиной 6 клеток. Сколько клеток закрасит Робот?",
+                answer: "6",
+                hint: "Робот проходит 6 клеток вдоль стены, каждую закрашивает"
+            }
+        }
+    ];
+
+    // ============================================
+    // STATE
+    // ============================================
+    let state = {
+        view: 'home', // home, task, guide
+        taskId: null,
+        tab: 'theory',
+        solved: JSON.parse(localStorage.getItem('oge_solved') || '{}'),
+        search: ''
+    };
+
+    function saveSolved() {
+        localStorage.setItem('oge_solved', JSON.stringify(state.solved));
+    }
+
+    // ============================================
+    // RENDER
+    // ============================================
+    function render() {
+        const app = document.getElementById('app');
+        if (state.view === 'home') renderHome(app);
+        else if (state.view === 'task') renderTask(app);
+        else if (state.view === 'guide') renderGuide(app);
+
+        // Telegram back button
+        if (tg && tg.BackButton) {
+            if (state.view === 'home') {
+                tg.BackButton.hide();
+            } else {
+                tg.BackButton.show();
+                tg.BackButton.onClick(() => {
+                    if (state.view === 'task' || state.view === 'guide') {
+                        state.view = 'home';
+                        render();
+                    }
+                });
+            }
+        }
+    }
+
+    function renderHome(app) {
+        const solvedCount = Object.keys(state.solved).length;
+        const totalPoints = tasks.reduce((s, t) => s + t.points, 0);
+        const earnedPoints = Object.keys(state.solved).reduce((s, id) => {
+            const t = tasks.find(t => t.id == id);
+            return s + (t ? t.points : 0);
+        }, 0);
+
+        const categories = {
+            info: { label: "📊 Информация и данные", tasks: [] },
+            alg: { label: "🔄 Алгоритмы и программирование", tasks: [] },
+            tech: { label: "💻 Информационные технологии", tasks: [] }
+        };
+        tasks.forEach(t => categories[t.category].tasks.push(t));
+
+        const filteredTasks = state.search
+            ? tasks.filter(t => t.title.toLowerCase().includes(state.search.toLowerCase()) || t.id.toString() === state.search)
+            : null;
+
+        app.innerHTML = `
+            <div class="app-header">
+                <div style="position:relative;z-index:1">
+                    <div style="font-size:28px;margin-bottom:4px">📚</div>
+                    <h1 style="font-size:22px;font-weight:800;margin-bottom:2px">Решебник ОГЭ</h1>
+                    <p style="font-size:14px;opacity:0.85">Информатика • 9 класс • 2025</p>
+                </div>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-num">${solvedCount}/15</div>
+                    <div class="stat-label">Решено</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num">${earnedPoints}/${totalPoints}</div>
+                    <div class="stat-label">Баллов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-num">${Math.round(solvedCount/15*100)}%</div>
+                    <div class="stat-label">Прогресс</div>
+                </div>
+            </div>
+
+            <div class="search-wrap">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input class="search-input" placeholder="Поиск по заданиям..." value="${state.search}" oninput="state.search=this.value;render()">
+            </div>
+
+            ${filteredTasks
+                ? `<div>${filteredTasks.map(t => taskCard(t)).join('')}</div>`
+                : Object.entries(categories).map(([key, cat]) => `
+                    <div class="category-label">${cat.label}</div>
+                    ${cat.tasks.map(t => taskCard(t)).join('')}
+                `).join('')
+            }
+
+            ${!isInTelegram ? `
+                <div style="padding:16px">
+                    <div class="task-card" onclick="state.view='guide';render()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white">
+                        <div style="font-size:28px">🚀</div>
+                        <div class="task-info">
+                            <div class="task-title" style="color:white">Гайд по запуску в Telegram</div>
+                            <div class="task-subtitle" style="color:rgba(255,255,255,0.7)">Как сделать Mini App</div>
+                        </div>
+                        <div class="task-arrow" style="color:rgba(255,255,255,0.7)">›</div>
+                    </div>
+                </div>
+            ` : ''}
+        `;
+    }
+
+    function taskCard(t) {
+        const solved = state.solved[t.id];
+        return `
+            <div class="task-card animate-in" onclick="openTask(${t.id})" style="animation-delay:${t.id*30}ms">
+                <div class="task-num" style="background:${t.color}">${t.id}</div>
+                <div class="task-info">
+                    <div class="task-title">${t.title}</div>
+                    <div class="task-subtitle">
+                        <span class="diff-badge diff-${t.difficulty}">${t.difficulty === 'easy' ? 'Базовый' : t.difficulty === 'medium' ? 'Средний' : 'Сложный'}</span>
+                        &nbsp;${t.points} ${t.points === 1 ? 'балл' : 'балла'}
+                    </div>
+                </div>
+                ${solved ? '<div style="font-size:20px">✅</div>' : ''}
+                <div class="task-arrow">›</div>
+            </div>
+        `;
+    }
+
+    function openTask(id) {
+        state.view = 'task';
+        state.taskId = id;
+        state.tab = 'theory';
+        render();
+        window.scrollTo(0, 0);
+        if (tg) tg.HapticFeedback?.impactOccurred('light');
+    }
+
+    function renderTask(app) {
+        const t = tasks.find(t => t.id === state.taskId);
+        if (!t) return;
+
+        let content = '';
+        if (state.tab === 'theory') content = t.theory;
+        else if (state.tab === 'example') content = t.example;
+        else if (state.tab === 'practice') content = renderPractice(t);
+
+        app.innerHTML = `
+            <div class="back-header" onclick="state.view='home';render()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                <span>Задание ${t.id}</span>
+                ${state.solved[t.id] ? '<span style="margin-left:auto;font-size:18px">✅</span>' : ''}
+            </div>
+
+            <div style="padding:0 16px 8px">
+                <h2 style="font-size:18px;font-weight:800;margin-bottom:4px">${t.title}</h2>
+                <span class="diff-badge diff-${t.difficulty}">${t.difficulty === 'easy' ? 'Базовый' : t.difficulty === 'medium' ? 'Средний' : 'Сложный'}</span>
+                <span style="font-size:13px;color:var(--tg-theme-hint-color);margin-left:8px">${t.points} ${t.points === 1 ? 'балл' : 'балла'}</span>
+            </div>
+
+            <div class="tab-bar">
+                <button class="tab-btn ${state.tab==='theory'?'active':''}" onclick="switchTab('theory')">📐 Теория</button>
+                <button class="tab-btn ${state.tab==='example'?'active':''}" onclick="switchTab('example')">💡 Пример</button>
+                <button class="tab-btn ${state.tab==='practice'?'active':''}" onclick="switchTab('practice')">✏️ Практика</button>
+            </div>
+
+            <div class="content-area animate-in">
+                <div class="content-block">
+                    ${content}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderPractice(t) {
+        return `
+            <h3>✏️ Практика</h3>
+            <p class="practice-question">${t.practice.question}</p>
+            <div class="answer-input-wrap">
+                <input class="answer-input" id="answerInput" placeholder="Ваш ответ..." autocomplete="off">
+                <button class="check-btn" onclick="checkAnswer(${t.id})">Проверить</button>
+            </div>
+            <div id="resultMsg" class="result-msg"></div>
+            <div style="margin-top:12px">
+                <button onclick="showHint(${t.id})" style="background:none;border:1px solid var(--tg-theme-hint-color);color:var(--tg-theme-hint-color);padding:8px 16px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit">
+                    💡 Показать подсказку
+                </button>
+                <div id="hintBox" style="display:none;margin-top:10px;padding:12px;background:#fff3cd;border-radius:10px;font-size:13px;color:#856404;line-height:1.6"></div>
+            </div>
+        `;
+    }
+
+    function switchTab(tab) {
+        state.tab = tab;
+        render();
+        if (tg) tg.HapticFeedback?.selectionChanged();
+    }
+
+    function checkAnswer(taskId) {
+        const t = tasks.find(t => t.id === taskId);
+        const input = document.getElementById('answerInput');
+        const result = document.getElementById('resultMsg');
+        const userAnswer = input.value.trim().toUpperCase().replace(/\s+/g, '');
+        const correctAnswer = t.practice.answer.toUpperCase().replace(/\s+/g, '');
+
+        if (!userAnswer) {
+            input.style.borderColor = '#e94560';
+            return;
+        }
+
+        if (userAnswer === correctAnswer) {
+            result.className = 'result-msg correct';
+            result.textContent = '🎉 Правильно! Отличная работа!';
+            state.solved[taskId] = true;
+            saveSolved();
+            if (tg) tg.HapticFeedback?.notificationOccurred('success');
+        } else {
+            result.className = 'result-msg wrong';
+            result.textContent = `❌ Неверно. Правильный ответ: ${t.practice.answer}`;
+            if (tg) tg.HapticFeedback?.notificationOccurred('error');
+        }
+    }
+
+    function showHint(taskId) {
+        const t = tasks.find(t => t.id === taskId);
+        const hintBox = document.getElementById('hintBox');
+        hintBox.style.display = 'block';
+        hintBox.textContent = '💡 ' + t.practice.hint;
+    }
+
+    // ============================================
+    // GUIDE (shown outside Telegram)
+    // ============================================
+    function renderGuide(app) {
+        app.innerHTML = `
+            <div class="back-header" onclick="state.view='home';render()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"/>
+                </svg>
+                <span>Назад</span>
+            </div>
+
+            <div class="guide-section">
+                <h1 style="font-size:26px;font-weight:900;margin-bottom:4px">🚀 Гайд по запуску</h1>
+                <p style="color:var(--tg-theme-hint-color);margin-bottom:20px">Как сделать Telegram Mini App</p>
+
+                <div class="guide-step">
+                    <h4>📌 Шаг 1: Захостите этот файл</h4>
+                    <p>Этот <code>index.html</code> файл нужно разместить на хостинге с <b>HTTPS</b>. Бесплатные варианты:</p>
+                    <ul style="padding-left:20px;margin-top:8px">
+                        <li><b>GitHub Pages</b> — бесплатно, просто</li>
+                        <li><b>Vercel</b> — бесплатно, быстро</li>
+                        <li><b>Netlify</b> — бесплатно, удобно</li>
+                        <li><b>Cloudflare Pages</b> — бесплатно</li>
+                    </ul>
+                </div>
+
+                <div class="guide-step">
+                    <h4>🌐 Шаг 1.1: Через GitHub Pages (проще всего)</h4>
+                    <p>1. Зарегистрируйтесь на <b>github.com</b></p>
+                    <p>2. Создайте новый репозиторий (New Repository)</p>
+                    <p>3. Назовите его, например: <code>oge-bot</code></p>
+                    <p>4. Загрузите туда файл <code>index.html</code></p>
+                    <p>5. Перейдите в <b>Settings → Pages</b></p>
+                    <p>6. В разделе Source выберите <b>main</b> и нажмите Save</p>
+                    <p>7. Через минуту ваш сайт будет доступен по адресу:</p>
+                    <div class="code-block">https://ВАШ_ЛОГИН.github.io/oge-bot/</div>
+                </div>
+
+                <div class="guide-step">
+                    <h4>🤖 Шаг 2: Создайте бота в Telegram</h4>
+                    <p>1. Откройте <b>@BotFather</b> в Telegram</p>
+                    <p>2. Отправьте <code>/newbot</code></p>
+                    <p>3. Введите имя бота: <b>Решебник ОГЭ Информатика</b></p>
+                    <p>4. Введите username: <b>oge_info_reshebnik_bot</b> (свой уникальный)</p>
+                    <p>5. Сохраните <b>токен</b> бота</p>
+                </div>
+
+                <div class="guide-step">
+                    <h4>📱 Шаг 3: Настройте Mini App</h4>
+                    <p>В <b>@BotFather</b> отправьте команды:</p>
+                    <div class="code-block"><span class="comment"># 1. Откройте настройки бота</span>
+/mybots
+<span class="comment"># Выберите вашего бота</span>
+
+<span class="comment"># 2. Нажмите "Bot Settings" → "Menu Button"</span>
+<span class="comment"># 3. Нажмите "Configure Menu Button"</span>
+
+<span class="comment"># 4. Отправьте URL вашего сайта:</span>
+https://ВАШ_ЛОГИН.github.io/oge-bot/
+
+<span class="comment"># 5. Отправьте текст кнопки:</span>
+📚 Решебник ОГЭ</div>
+                </div>
+
+                <div class="guide-step">
+                    <h4>🎮 Шаг 4: Включите Web App</h4>
+                    <p>Дополнительно в @BotFather:</p>
+                    <div class="code-block"><span class="comment"># Настройте Web App URL</span>
+/setmenubutton
+
+<span class="comment"># ИЛИ отправьте команду для веб-приложения</span>
+/newapp
+<span class="comment"># Выберите бота</span>
+<span class="comment"># Отправьте название: Решебник ОГЭ</span>
+<span class="comment"># Отправьте описание</span>
+<span class="comment"># Загрузите иконку (640x640 px)</span>
+<span class="comment"># Отправьте URL: https://ВАШ_ЛОГИН.github.io/oge-bot/</span>
+<span class="comment"># Отправьте short_name: oge_reshebnik</span></div>
+                </div>
+
+                <div class="guide-step">
+                    <h4>🐍 Шаг 5 (опционально): Код Python-бота</h4>
+                    <p>Если хотите, чтобы бот также отвечал на сообщения и имел кнопку для открытия Web App:</p>
+                    <div class="code-block" id="pythonCode"><span class="keyword">import</span> logging
+<span class="keyword">from</span> telegram <span class="keyword">import</span> (
+    Update, InlineKeyboardButton,
+    InlineKeyboardMarkup, WebAppInfo
+)
+<span class="keyword">from</span> telegram.ext <span class="keyword">import</span> (
+    ApplicationBuilder, CommandHandler,
+    ContextTypes
+)
+
+<span class="comment"># Вставьте ваш токен от @BotFather</span>
+TOKEN = <span class="string">"YOUR_BOT_TOKEN_HERE"</span>
+
+<span class="comment"># URL вашего захостенного index.html</span>
+WEB_APP_URL = <span class="string">"https://ВАШ_ЛОГИН.github.io/oge-bot/"</span>
+
+logging.basicConfig(level=logging.INFO)
+
+<span class="keyword">async def</span> <span class="func">start</span>(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [[
+        InlineKeyboardButton(
+            text=<span class="string">"📚 Открыть Решебник ОГЭ"</span>,
+            web_app=WebAppInfo(url=WEB_APP_URL)
+        )
+    ]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    <span class="keyword">await</span> update.message.reply_text(
+        <span class="string">"🎓 <b>Решебник ОГЭ — Информатика 9 класс</b>\n\n"</span>
+        <span class="string">"📖 Теория по всем 15 заданиям\n"</span>
+        <span class="string">"💡 Разобранные примеры\n"</span>
+        <span class="string">"✏️ Практика с проверкой ответов\n\n"</span>
+        <span class="string">"Нажмите кнопку ниже, чтобы открыть приложение 👇"</span>,
+        reply_markup=reply_markup,
+        parse_mode=<span class="string">"HTML"</span>
+    )
+
+<span class="keyword">async def</span> <span class="func">help_cmd</span>(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    <span class="keyword">await</span> update.message.reply_text(
+        <span class="string">"ℹ️ Команды:\n"</span>
+        <span class="string">"/start — Открыть решебник\n"</span>
+        <span class="string">"/help — Помощь"</span>
+    )
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler(<span class="string">"start"</span>, start))
+    app.add_handler(CommandHandler(<span class="string">"help"</span>, help_cmd))
+    print(<span class="string">"🤖 Бот запущен!"</span>)
+    app.run_polling()</div>
+
+                    <button class="copy-btn" onclick="copyPythonCode()">📋 Скопировать код Python</button>
+                </div>
+
+                <div class="guide-step">
+                    <h4>⚡ Шаг 6: Запуск Python-бота</h4>
+                    <p>1. Установите Python с <b>python.org</b></p>
+                    <p>2. Откройте терминал и выполните:</p>
+                    <div class="code-block">pip install python-telegram-bot --upgrade</div>
+                    <p>3. Сохраните код в файл <code>bot.py</code></p>
+                    <p>4. Замените <code>YOUR_BOT_TOKEN_HERE</code> на токен от BotFather</p>
+                    <p>5. Замените URL на ваш GitHub Pages URL</p>
+                    <p>6. Запустите:</p>
+                    <div class="code-block">python bot.py</div>
+                </div>
+
+                <div class="guide-step">
+                    <h4>☁️ Шаг 7: Хостинг бота 24/7</h4>
+                    <p>Чтобы бот работал постоянно, разместите <code>bot.py</code> на:</p>
+                    <ul style="padding-left:20px;margin-top:8px">
+                        <li><b>Railway.app</b> — бесплатный план, легко настроить</li>
+                        <li><b>Render.com</b> — бесплатный план</li>
+                        <li><b>PythonAnywhere.com</b> — бесплатный план</li>
+                        <li><b>VPS-сервер</b> — Timeweb, Selectel и др.</li>
+                    </ul>
+                </div>
+
+                <div class="guide-step" style="background:linear-gradient(135deg,#667eea15,#764ba215);border:2px solid #667eea33">
+                    <h4>✅ Итого: Что нужно сделать</h4>
+                    <ol style="padding-left:20px;margin-top:8px;line-height:2">
+                        <li>Захостить <code>index.html</code> на GitHub Pages ✓</li>
+                        <li>Создать бота через @BotFather ✓</li>
+                        <li>Настроить Menu Button с URL сайта ✓</li>
+                        <li>(Опционально) Запустить Python-бот ✓</li>
+                    </ol>
+                    <p style="margin-top:12px;font-weight:700;color:#667eea">После этого приложение будет открываться прямо в Telegram! 🎉</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function copyPythonCode() {
+        const code = document.getElementById('pythonCode').innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = '✅ Скопировано!';
+            setTimeout(() => btn.textContent = '📋 Скопировать код Python', 2000);
+        });
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    render();
+    </script>
+</body>
+</html>
