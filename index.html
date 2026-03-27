@@ -168,11 +168,10 @@
     let progress = {};
     let currentCourseId = null;
     let currentTaskId = null;
-    window.taskState = {}; // Хранилище сгенерированных условий для задач
+    window.taskState = {}; 
 
     if (window.Telegram?.WebApp) { window.Telegram.WebApp.expand(); }
 
-    // --- НАВИГАЦИЯ ---
     function renderCourses() {
       const list = document.getElementById('courses-list');
       list.innerHTML = COURSES.map(c => {
@@ -207,9 +206,7 @@
       const course = COURSES.find(c => c.id === id);
       document.getElementById('course-title').innerText = course.title;
       document.getElementById('course-desc').innerText = course.desc;
-      
       renderTasks(course);
-      
       document.getElementById('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       document.getElementById('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
     }
@@ -254,7 +251,6 @@
           setTimeout(() => icn.classList.remove('animate-spin-slow'), 500);
         }
       }
-
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"></div>`;
@@ -268,9 +264,7 @@
       const taskInfo = course.tasks.find(t => t.id === id);
       document.getElementById('task-title').innerText = taskInfo.title;
       
-      // Генерация новых условий
       if (renderers[id].init) renderers[id].init(id);
-      
       const content = document.getElementById('task-content');
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
@@ -311,7 +305,7 @@
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
-    // --- AI ЧАТ ---
+    // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
       if (show) modal.classList.remove('hidden-chat');
@@ -343,9 +337,9 @@
         </div>`;
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-      // ОПТИМИЗАЦИЯ: Подмешиваем контекст, чтобы ИИ понимал, где находится ученик
+      // Даем ИИ понять контекст текущего задания
       const optimizedPrompt = currentTaskId 
-        ? `[Контекст: Пользователь сейчас решает Задание ${currentTaskId}]. Вопрос: ${text}` 
+        ? `[Пользователь решает Задание ${currentTaskId}]. Вопрос: ${text}` 
         : text;
 
       try {
@@ -355,35 +349,37 @@
         const data = await response.json();
         document.getElementById(typingId).remove();
         
-        // --- ГЕНЕРАЦИЯ ВИЗУАЛЬНЫХ КАРТИНОК-СХЕМ (SVG) ПРЯМО В ЧАТЕ ---
+        // --- БЕСШОВНАЯ ГЕНЕРАЦИЯ КАРТИНОК (SVG) ИИ-НАСТАВНИКОМ ---
         let visualAddon = '';
-        const lowerText = text.toLowerCase();
-        const needsVisual = lowerText.includes('как реш') || lowerText.includes('объясн') || lowerText.includes('схем') || lowerText.includes('картинк') || lowerText.includes('помог');
-
-        if (needsVisual && currentTaskId) {
+        
+        // Показываем картинку, если ученик находится в 4, 8 или 9 задании и задает любой вопрос 
+        if (currentTaskId && [4, 8, 9].includes(currentTaskId)) {
           if (currentTaskId === 9) {
             visualAddon = `
             <div class="mt-4 p-4 bg-teal-950/40 border border-teal-500/30 rounded-xl">
-              <div class="text-xs text-teal-300 font-medium mb-3">Схема: Правило сложения путей графа</div>
-              <svg viewBox="0 0 200 80" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
-                <defs><marker id="arr" markerWidth="6" markerHeight="4" refX="15" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#2dd4bf"/></marker></defs>
-                <line x1="20" y1="40" x2="100" y2="20" stroke="#2dd4bf" stroke-width="1.5" marker-end="url(#arr)"/>
-                <line x1="20" y1="40" x2="100" y2="60" stroke="#2dd4bf" stroke-width="1.5" marker-end="url(#arr)"/>
-                <line x1="100" y1="20" x2="180" y2="40" stroke="#2dd4bf" stroke-width="1.5" marker-end="url(#arr)"/>
-                <line x1="100" y1="60" x2="180" y2="40" stroke="#2dd4bf" stroke-width="1.5" marker-end="url(#arr)"/>
-                <circle cx="20" cy="40" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="20" y="44" fill="white" font-size="10" text-anchor="middle">A</text>
-                <circle cx="100" cy="20" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="24" fill="white" font-size="10" text-anchor="middle">B</text>
-                <circle cx="100" cy="60" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="64" fill="white" font-size="10" text-anchor="middle">C</text>
-                <circle cx="180" cy="40" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="180" y="44" fill="white" font-size="10" text-anchor="middle">D</text>
-                <text x="50" y="20" fill="#a1a1aa" font-size="9">1</text><text x="50" y="72" fill="#a1a1aa" font-size="9">1</text>
-                <text x="180" y="20" fill="#2dd4bf" font-size="11" font-weight="bold">1+1=2</text>
+              <div class="text-xs text-teal-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Сложение путей</div>
+              <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
+                <defs><marker id="arr-ai" markerWidth="6" markerHeight="4" refX="14" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#2dd4bf"/></marker></defs>
+                <line x1="30" y1="50" x2="100" y2="20" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
+                <line x1="30" y1="50" x2="100" y2="80" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
+                <line x1="100" y1="20" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
+                <line x1="100" y1="80" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
+                <line x1="30" y1="50" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
+                <circle cx="30" cy="50" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text>
+                <circle cx="100" cy="20" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text>
+                <circle cx="100" cy="80" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text>
+                <circle cx="170" cy="50" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>
+                <text x="30" y="32" fill="#fde047" font-size="10" text-anchor="middle">1</text>
+                <text x="100" y="10" fill="#fde047" font-size="10" text-anchor="middle">1</text>
+                <text x="100" y="98" fill="#fde047" font-size="10" text-anchor="middle">1</text>
+                <text x="170" y="32" fill="#fde047" font-size="12" text-anchor="middle" font-weight="bold">1+1+1=3</text>
               </svg>
-              <div class="text-[11px] text-zinc-400 mt-2 leading-tight">Количество путей в узел равно сумме путей из всех входящих в него узлов (B и C).</div>
+              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Правило:</b> Число путей в город равно сумме путей всех городов, из которых в него идут стрелки. В город D идут стрелки из A(1), B(1) и C(1). Итого: 3.</div>
             </div>`;
           } else if (currentTaskId === 8) {
             visualAddon = `
             <div class="mt-4 p-4 bg-fuchsia-950/40 border border-fuchsia-500/30 rounded-xl">
-              <div class="text-xs text-fuchsia-300 font-medium mb-3">Визуализация: Круги Эйлера</div>
+              <div class="text-xs text-fuchsia-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Круги Эйлера</div>
               <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
                 <circle cx="75" cy="50" r="40" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/>
                 <circle cx="125" cy="50" r="40" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/>
@@ -391,39 +387,36 @@
                 <text x="145" y="54" fill="white" font-size="12" text-anchor="middle">Собаки</text>
                 <text x="100" y="54" fill="#f0abfc" font-size="10" font-weight="bold" text-anchor="middle">ОБА</text>
               </svg>
-              <div class="text-[11px] text-zinc-400 mt-2 leading-tight">Формула: (А ИЛИ Б) = А + Б - (А И Б). Пересечение вычитается один раз.</div>
+              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Формула:</b> (А ИЛИ Б) = А + Б - (А И Б). Пересечение вычитается один раз, чтобы не считать его дважды.</div>
             </div>`;
           } else if (currentTaskId === 4) {
             visualAddon = `
             <div class="mt-4 p-4 bg-blue-950/40 border border-blue-500/30 rounded-xl">
-              <div class="text-xs text-blue-300 font-medium mb-3">Визуализация: Весовый граф</div>
+              <div class="text-xs text-blue-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Поиск в графе</div>
               <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
                 <line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">2</text>
                 <line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">1</text>
                 <line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">4</text>
                 <line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">3</text>
-                <circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle">A</text>
-                <circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle">B</text>
-                <circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle">C</text>
-                <circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle">D</text>
+                <circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text>
+                <circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text>
+                <circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text>
+                <circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>
               </svg>
-              <div class="text-[11px] text-zinc-400 mt-2 leading-tight">Просчитайте каждую возможную ветку. Например: A→C→D = 1+3 = 4.</div>
-            </div>`;
-          } else {
-            visualAddon = `
-            <div class="mt-4 p-4 bg-indigo-950/30 border border-indigo-500/20 rounded-xl text-center flex flex-col items-center">
-              <div class="p-3 bg-indigo-500/20 rounded-full mb-3"><i data-lucide="image" class="w-6 h-6 text-indigo-400 opacity-90"></i></div>
-              <div class="text-xs text-indigo-200">ИИ сгенерировал подсказку. Применяйте алгоритм из теории!</div>
+              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Алгоритм:</b> Просчитай каждую ветку. Верхний путь A→B→D = 2+4=6. Нижний путь A→C→D = 1+3=4. Выбираем наименьший!</div>
             </div>`;
           }
         }
 
-        const aiText = data.reply || 'Ошибка обработки.';
+        const aiText = data.reply || 'Ошибка обработки на сервере.';
         messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`;
-        lucide.createIcons();
+        
+        // Принудительно рендерим иконки Lucide, которые появились в сгенерированном блоке
+        setTimeout(() => lucide.createIcons(), 10);
+        
       } catch (err) {
         document.getElementById(typingId).remove();
-        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сервер недоступен. Проверь Render.</div></div>`;
+        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сервер недоступен. Убедись, что бэкенд на Render работает.</div></div>`;
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
@@ -796,11 +789,9 @@
           const baseEdges = [ ['A','C'], ['A','E'], ['A','B'], ['B','F'], ['E','G'], ['F','G'], ['D','H'], ['D','G'], ['C','H'], ['G','H'] ];
           const optionalEdges = [ ['A','D'], ['B','E'], ['E','D'], ['D','C'] ];
           
-          // Динамически (рандомно) добавляем/убираем связи
           let currentEdges = [...baseEdges];
           optionalEdges.forEach(edge => { if (Math.random() > 0.4) currentEdges.push(edge); });
           
-          // Топологическая сортировка для подсчета ответа на сгенерированном графе
           let paths = {A: 1, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0};
           const order = ['A', 'B', 'F', 'E', 'D', 'C', 'G', 'H'];
           order.forEach(node => {
