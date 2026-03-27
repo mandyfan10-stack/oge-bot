@@ -121,7 +121,6 @@
 
   <script>
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
-    const TOTAL_TASKS = 20;
 
     // --- СТРУКТУРА КУРСОВ ---
     const COURSES = [
@@ -134,7 +133,7 @@
           { id: 3, title: 'Задание 3', desc: 'Логические выражения', icon: 'git-merge' },
           { id: 4, title: 'Задание 4', desc: 'Графы и маршруты', icon: 'route' },
           { id: 5, title: 'Задание 5', desc: 'Исполнители', icon: 'cpu' },
-          { id: 6, title: 'Задание 6', desc: 'Условия (Python)', icon: 'terminal' },
+          { id: 6, title: 'Задание 6', desc: 'Анализ программы', icon: 'terminal' },
           { id: 7, title: 'Задание 7', desc: 'Адресация URL', icon: 'globe' },
           { id: 8, title: 'Задание 8', desc: 'Множества', icon: 'layers' },
           { id: 9, title: 'Задание 9', desc: 'Количество путей', icon: 'git-branch' },
@@ -305,7 +304,7 @@
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
-    // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
+    // --- AI ЧАТ ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
       if (show) modal.classList.remove('hidden-chat');
@@ -337,10 +336,20 @@
         </div>`;
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-      // Даем ИИ понять контекст текущего задания
-      const optimizedPrompt = currentTaskId 
-        ? `[Пользователь решает Задание ${currentTaskId}]. Вопрос: ${text}` 
-        : text;
+      // Даем ИИ понять контекст текущего задания вместе с переменными
+      let taskContext = "";
+      if (currentTaskId) {
+        const taskTitle = COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId)?.title || `Задание ${currentTaskId}`;
+        // Передаем внутреннее состояние задачи (чтобы ИИ знал правильные ответы и загаданные переменные)
+        const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
+        // Собираем текст со страницы, чтобы ИИ понимал, какие именно цифры сгенерировались в этот раз
+        const contentEl = document.getElementById('task-content');
+        const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
+        
+        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст задачи на экране: "${visibleText}". Скрытые параметры генерации (включая ответы): ${stateInfo}. Опирайся строго на эти данные, помогая ученику, так как условия генерируются случайно каждый раз.]`;
+      }
+
+      const optimizedPrompt = text + taskContext;
 
       try {
         const response = await fetch(BACKEND_URL, {
@@ -349,74 +358,114 @@
         const data = await response.json();
         document.getElementById(typingId).remove();
         
-        // --- БЕСШОВНАЯ ГЕНЕРАЦИЯ КАРТИНОК (SVG) ИИ-НАСТАВНИКОМ ---
+        // --- БЕСШОВНАЯ ГЕНЕРАЦИЯ КАРТИНОК (SVG) ИИ-НАСТАВНИКОМ ДЛЯ ВСЕХ ЗАДАЧ ---
         let visualAddon = '';
-        
-        // Показываем картинку, если ученик находится в 4, 8 или 9 задании и задает любой вопрос 
-        if (currentTaskId && [4, 8, 9].includes(currentTaskId)) {
-          if (currentTaskId === 9) {
-            visualAddon = `
-            <div class="mt-4 p-4 bg-teal-950/40 border border-teal-500/30 rounded-xl">
-              <div class="text-xs text-teal-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Сложение путей</div>
-              <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
-                <defs><marker id="arr-ai" markerWidth="6" markerHeight="4" refX="14" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="#2dd4bf"/></marker></defs>
-                <line x1="30" y1="50" x2="100" y2="20" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
-                <line x1="30" y1="50" x2="100" y2="80" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
-                <line x1="100" y1="20" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
-                <line x1="100" y1="80" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
-                <line x1="30" y1="50" x2="170" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai)"/>
-                <circle cx="30" cy="50" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text>
-                <circle cx="100" cy="20" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text>
-                <circle cx="100" cy="80" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text>
-                <circle cx="170" cy="50" r="12" fill="#134e4a" stroke="#2dd4bf"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>
-                <text x="30" y="32" fill="#fde047" font-size="10" text-anchor="middle">1</text>
-                <text x="100" y="10" fill="#fde047" font-size="10" text-anchor="middle">1</text>
-                <text x="100" y="98" fill="#fde047" font-size="10" text-anchor="middle">1</text>
-                <text x="170" y="32" fill="#fde047" font-size="12" text-anchor="middle" font-weight="bold">1+1+1=3</text>
-              </svg>
-              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Правило:</b> Число путей в город равно сумме путей всех городов, из которых в него идут стрелки. В город D идут стрелки из A(1), B(1) и C(1). Итого: 3.</div>
-            </div>`;
-          } else if (currentTaskId === 8) {
-            visualAddon = `
-            <div class="mt-4 p-4 bg-fuchsia-950/40 border border-fuchsia-500/30 rounded-xl">
-              <div class="text-xs text-fuchsia-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Круги Эйлера</div>
-              <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
-                <circle cx="75" cy="50" r="40" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/>
-                <circle cx="125" cy="50" r="40" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/>
-                <text x="55" y="54" fill="white" font-size="12" text-anchor="middle">Коты</text>
-                <text x="145" y="54" fill="white" font-size="12" text-anchor="middle">Собаки</text>
-                <text x="100" y="54" fill="#f0abfc" font-size="10" font-weight="bold" text-anchor="middle">ОБА</text>
-              </svg>
-              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Формула:</b> (А ИЛИ Б) = А + Б - (А И Б). Пересечение вычитается один раз, чтобы не считать его дважды.</div>
-            </div>`;
-          } else if (currentTaskId === 4) {
-            visualAddon = `
-            <div class="mt-4 p-4 bg-blue-950/40 border border-blue-500/30 rounded-xl">
-              <div class="text-xs text-blue-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> Схема: Поиск в графе</div>
-              <svg viewBox="0 0 200 100" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
-                <line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">2</text>
-                <line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">1</text>
-                <line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">4</text>
-                <line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">3</text>
-                <circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text>
-                <circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text>
-                <circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text>
-                <circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>
-              </svg>
-              <div class="text-[11px] text-zinc-300 mt-2 leading-tight"><b>Алгоритм:</b> Просчитай каждую ветку. Верхний путь A→B→D = 2+4=6. Нижний путь A→C→D = 1+3=4. Выбираем наименьший!</div>
-            </div>`;
-          }
+        if (currentTaskId) {
+            let title = '';
+            let color = 'indigo';
+            let svgBody = '';
+            
+            switch(currentTaskId) {
+                case 1:
+                    title = 'Схема: Биты и Байты'; color = 'indigo';
+                    svgBody = '<rect x="20" y="30" width="160" height="20" fill="none" stroke="#6366f1" stroke-width="2"/><line x1="40" y1="30" x2="40" y2="50" stroke="#6366f1"/><line x1="60" y1="30" x2="60" y2="50" stroke="#6366f1"/><line x1="80" y1="30" x2="80" y2="50" stroke="#6366f1"/><line x1="100" y1="30" x2="100" y2="50" stroke="#6366f1"/><line x1="120" y1="30" x2="120" y2="50" stroke="#6366f1"/><line x1="140" y1="30" x2="140" y2="50" stroke="#6366f1"/><line x1="160" y1="30" x2="160" y2="50" stroke="#6366f1"/><text x="100" y="20" fill="white" font-size="10" text-anchor="middle">1 Символ = 1 Байт = 8 Бит</text>';
+                    break;
+                case 2:
+                    title = 'Схема: Декодирование'; color = 'emerald';
+                    svgBody = '<text x="100" y="25" fill="white" font-size="14" font-family="monospace" text-anchor="middle" tracking="2">01 10 00</text><path d="M 70,30 L 70,45 M 100,30 L 100,45 M 130,30 L 130,45" stroke="#10b981" stroke-width="2"/><text x="70" y="60" fill="#10b981" font-size="14" font-family="monospace" text-anchor="middle">А</text><text x="100" y="60" fill="#10b981" font-size="14" font-family="monospace" text-anchor="middle">Б</text><text x="130" y="60" fill="#10b981" font-size="14" font-family="monospace" text-anchor="middle">В</text>';
+                    break;
+                case 3:
+                    title = 'Схема: Логика на числовой оси'; color = 'pink';
+                    svgBody = '<line x1="20" y1="40" x2="180" y2="40" stroke="white" stroke-width="2"/><circle cx="100" cy="40" r="4" fill="#ec4899"/><text x="100" y="25" fill="white" font-size="11" text-anchor="middle">Найти X (например: X > 10 И Четное)</text><rect x="100" y="38" width="70" height="4" fill="#ec4899" opacity="0.6"/>';
+                    break;
+                case 4:
+                    title = 'Схема: Поиск в графе'; color = 'blue';
+                    svgBody = '<line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">2</text><line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">1</text><line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">4</text><line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">3</text><circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text><circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text><circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text><circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>';
+                    break;
+                case 5:
+                    title = 'Схема: Исполнитель'; color = 'amber';
+                    svgBody = '<rect x="30" y="25" width="30" height="30" fill="#d97706" rx="6"/><text x="45" y="45" fill="white" text-anchor="middle" font-weight="bold">1</text><line x1="65" y1="40" x2="135" y2="40" stroke="white" stroke-width="2" marker-end="url(#arr-ai-amber)" color="white"/><text x="100" y="30" fill="#fcd34d" font-size="12" text-anchor="middle" font-weight="bold">+1 или *2</text><rect x="140" y="25" width="30" height="30" fill="#d97706" rx="6"/><text x="155" y="45" fill="white" text-anchor="middle" font-weight="bold">?</text>';
+                    break;
+                case 6:
+                    title = 'Схема: Ветвление (IF)'; color = 'violet';
+                    svgBody = '<polygon points="100,10 150,35 100,60 50,35" fill="none" stroke="#8b5cf6" stroke-width="2"/><text x="100" y="38" fill="white" font-size="9" text-anchor="middle">УСЛОВИЕ</text><line x1="50" y1="35" x2="20" y2="35" stroke="#8b5cf6"/><line x1="20" y1="35" x2="20" y2="60" stroke="#8b5cf6" marker-end="url(#arr-ai-violet)" color="#8b5cf6"/><text x="35" y="30" fill="#f43f5e" font-size="10">False</text><line x1="150" y1="35" x2="180" y2="35" stroke="#8b5cf6"/><line x1="180" y1="35" x2="180" y2="60" stroke="#8b5cf6" marker-end="url(#arr-ai-violet)" color="#8b5cf6"/><text x="165" y="30" fill="#10b981" font-size="10">True</text>';
+                    break;
+                case 7:
+                    title = 'Схема: Структура URL'; color = 'sky';
+                    svgBody = '<rect x="10" y="30" width="50" height="20" fill="#0284c7" rx="4"/><text x="35" y="44" fill="white" font-size="9" text-anchor="middle">ПРОТОКОЛ</text><text x="70" y="44" fill="white" font-size="12" text-anchor="middle" font-weight="bold">://</text><rect x="80" y="30" width="50" height="20" fill="#0284c7" rx="4"/><text x="105" y="44" fill="white" font-size="9" text-anchor="middle">СЕРВЕР</text><text x="140" y="44" fill="white" font-size="12" text-anchor="middle" font-weight="bold">/</text><rect x="150" y="30" width="40" height="20" fill="#0284c7" rx="4"/><text x="170" y="44" fill="white" font-size="9" text-anchor="middle">ФАЙЛ</text>';
+                    break;
+                case 8:
+                    title = 'Схема: Круги Эйлера'; color = 'fuchsia';
+                    svgBody = '<circle cx="75" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><circle cx="125" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><text x="60" y="44" fill="white" font-size="10" text-anchor="middle">Коты</text><text x="140" y="44" fill="white" font-size="10" text-anchor="middle">Собаки</text><text x="100" y="44" fill="#f0abfc" font-size="9" font-weight="bold" text-anchor="middle">ОБА</text>';
+                    break;
+                case 9:
+                    title = 'Схема: Сложение путей'; color = 'teal';
+                    svgBody = '<line x1="40" y1="50" x2="90" y2="30" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)" color="#2dd4bf"/><line x1="40" y1="50" x2="90" y2="70" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)" color="#2dd4bf"/><line x1="90" y1="30" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)" color="#2dd4bf"/><line x1="90" y1="70" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)" color="#2dd4bf"/><circle cx="40" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="40" y="54" fill="white" font-size="10" text-anchor="middle">A:1</text><circle cx="90" cy="30" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="90" y="34" fill="white" font-size="10" text-anchor="middle">B:1</text><circle cx="90" cy="70" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="90" y="74" fill="white" font-size="10" text-anchor="middle">C:1</text><circle cx="140" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="140" y="54" fill="#fde047" font-size="10" text-anchor="middle">D:2</text>';
+                    break;
+                case 10:
+                    title = 'Схема: Перевод систем счисления'; color = 'indigo';
+                    svgBody = '<text x="100" y="40" fill="white" font-size="14" text-anchor="middle" font-family="monospace">1A<tspan font-size="8" dy="5">16</tspan><tspan dy="-5"> = 1×16¹ + 10×16⁰ = 26</tspan><tspan font-size="8" dy="5">10</tspan></text>';
+                    break;
+                case 11:
+                    title = 'Схема: Поиск слова'; color = 'stone';
+                    svgBody = '<rect x="20" y="10" width="160" height="60" fill="none" stroke="#a8a29e" stroke-width="2" rx="4"/><text x="100" y="30" fill="white" font-size="10" text-anchor="middle">текст текст <tspan fill="#facc15" font-weight="bold">СЛОВО</tspan> текст</text><text x="100" y="50" fill="white" font-size="10" text-anchor="middle"><tspan fill="#facc15" font-weight="bold">СЛОВО</tspan> текст текст</text>';
+                    break;
+                case 12:
+                    title = 'Схема: Файловые маски'; color = 'yellow';
+                    svgBody = '<path d="M 60,20 L 140,20 L 110,50 L 110,70 L 90,70 L 90,50 Z" fill="none" stroke="#eab308" stroke-width="2"/><text x="100" y="15" fill="white" font-size="10" text-anchor="middle">*.pdf (Фильтр)</text><circle cx="100" cy="40" r="3" fill="#eab308"/><text x="130" y="65" fill="#fef08a" font-size="10">doc.pdf</text>';
+                    break;
+                case 13:
+                    title = 'Схема: Форматирование'; color = 'rose';
+                    svgBody = '<rect x="40" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="55" y="40" fill="white" font-weight="bold" text-anchor="middle">Ж</text><rect x="85" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="100" y="40" fill="white" font-style="italic" font-family="serif" text-anchor="middle">К</text><rect x="130" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="145" y="40" fill="white" text-decoration="underline" text-anchor="middle">Ч</text>';
+                    break;
+                case 14:
+                    title = 'Схема: Таблицы'; color = 'green';
+                    svgBody = '<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">A1</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">10</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">A2</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">20</text><text x="75" y="65" fill="#bbf7d0" font-size="10" text-anchor="middle">СУММ</text><text x="125" y="65" fill="#facc15" font-size="10" text-anchor="middle" font-weight="bold">30</text>';
+                    break;
+                case 15:
+                    title = 'Схема: Робот'; color = 'blue';
+                    svgBody = '<rect x="60" y="10" width="80" height="60" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="60" y1="30" x2="140" y2="30" stroke="#3b82f6" stroke-opacity="0.3"/><line x1="60" y1="50" x2="140" y2="50" stroke="#3b82f6" stroke-opacity="0.3"/><line x1="86" y1="10" x2="86" y2="70" stroke="#3b82f6" stroke-opacity="0.3"/><line x1="113" y1="10" x2="113" y2="70" stroke="#3b82f6" stroke-opacity="0.3"/><text x="73" y="24" fill="white" font-size="12" text-anchor="middle">Р</text><path d="M 73,26 L 73,44 L 100,44" fill="none" stroke="#facc15" stroke-width="2" marker-end="url(#arr-ai-blue)" color="#facc15"/><line x1="86" y1="10" x2="86" y2="30" stroke="#f97316" stroke-width="3"/>';
+                    break;
+                case 16:
+                    title = 'Схема: Цикл FOR'; color = 'emerald';
+                    svgBody = '<path d="M 60,40 A 40,20 0 1,1 140,40 A 40,20 0 1,1 60,40" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/><text x="100" y="44" fill="white" font-size="12" text-anchor="middle" font-family="monospace">i = 1, 2, 3...</text>';
+                    break;
+                case 17:
+                    title = 'Схема: Индексы массива'; color = 'emerald';
+                    svgBody = '<rect x="25" y="20" width="30" height="20" fill="none" stroke="#10b981"/><text x="40" y="34" fill="white" font-size="10" text-anchor="middle">10</text><text x="40" y="52" fill="#6ee7b7" font-size="8" text-anchor="middle">idx 0</text><rect x="55" y="20" width="30" height="20" fill="none" stroke="#10b981"/><text x="70" y="34" fill="white" font-size="10" text-anchor="middle">20</text><text x="70" y="52" fill="#6ee7b7" font-size="8" text-anchor="middle">idx 1</text><rect x="85" y="20" width="30" height="20" fill="none" stroke="#10b981"/><text x="100" y="34" fill="white" font-size="10" text-anchor="middle">30</text><text x="100" y="52" fill="#6ee7b7" font-size="8" text-anchor="middle">idx 2</text><rect x="115" y="20" width="30" height="20" fill="none" stroke="#10b981"/><text x="130" y="34" fill="white" font-size="10" text-anchor="middle">40</text><text x="130" y="52" fill="#6ee7b7" font-size="8" text-anchor="middle">idx 3</text><rect x="145" y="20" width="30" height="20" fill="none" stroke="#10b981"/><text x="160" y="34" fill="white" font-size="10" text-anchor="middle">50</text><text x="160" y="52" fill="#6ee7b7" font-size="8" text-anchor="middle">idx 4</text>';
+                    break;
+                case 18:
+                    title = 'Схема: Работа функции'; color = 'emerald';
+                    svgBody = '<rect x="70" y="20" width="60" height="40" fill="#047857" rx="4"/><text x="100" y="44" fill="white" font-size="10" text-anchor="middle" font-family="monospace">x * 2 + N</text><line x1="30" y1="40" x2="65" y2="40" stroke="white" stroke-width="2" marker-end="url(#arr-ai-emerald)" color="white"/><text x="45" y="35" fill="#6ee7b7" font-size="10" text-anchor="middle">Вход</text><line x1="135" y1="40" x2="170" y2="40" stroke="white" stroke-width="2" marker-end="url(#arr-ai-emerald)" color="white"/><text x="155" y="35" fill="#facc15" font-size="10" text-anchor="middle">Выход</text>';
+                    break;
+                case 19:
+                    title = 'Схема: IP-адрес'; color = 'sky';
+                    svgBody = '<rect x="10" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="27.5" y="44" fill="white" font-size="10" text-anchor="middle">192</text><circle cx="52.5" cy="40" r="2" fill="white"/><rect x="60" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="77.5" y="44" fill="white" font-size="10" text-anchor="middle">168</text><circle cx="102.5" cy="40" r="2" fill="white"/><rect x="110" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="127.5" y="44" fill="white" font-size="10" text-anchor="middle">1</text><circle cx="152.5" cy="40" r="2" fill="white"/><rect x="160" y="30" width="30" height="20" fill="#0284c7" rx="4"/><text x="175" y="44" fill="white" font-size="10" text-anchor="middle">15</text><text x="100" y="15" fill="#7dd3fc" font-size="9" text-anchor="middle">4 числа от 0 до 255, разделенные точками</text>';
+                    break;
+                case 20:
+                    title = 'Схема: Устройство ПК'; color = 'sky';
+                    svgBody = '<rect x="30" y="25" width="40" height="30" fill="none" stroke="#38bdf8" stroke-width="2" rx="4"/><text x="50" y="44" fill="white" font-size="10" text-anchor="middle">CPU</text><line x1="75" y1="40" x2="125" y2="40" stroke="#38bdf8" stroke-dasharray="2" stroke-width="2"/><rect x="130" y="25" width="40" height="30" fill="none" stroke="#38bdf8" stroke-width="2" rx="4"/><text x="150" y="44" fill="white" font-size="10" text-anchor="middle">ОЗУ</text><text x="100" y="15" fill="#bae6fd" font-size="9" text-anchor="middle">Процессор (мозг) <-> ОЗУ (кратковременная память)</text>';
+                    break;
+            }
+            
+            if (svgBody) {
+                visualAddon = `
+                <div class="mt-4 p-4 bg-${color}-950/40 border border-${color}-500/30 rounded-xl">
+                  <div class="text-xs text-${color}-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> ${title}</div>
+                  <svg viewBox="0 0 200 80" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
+                    <defs><marker id="arr-ai-${color}" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="currentColor"/></marker></defs>
+                    ${svgBody}
+                  </svg>
+                </div>`;
+            }
         }
 
         const aiText = data.reply || 'Ошибка обработки на сервере.';
         messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`;
-        
-        // Принудительно рендерим иконки Lucide, которые появились в сгенерированном блоке
         setTimeout(() => lucide.createIcons(), 10);
-        
       } catch (err) {
         document.getElementById(typingId).remove();
-        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сервер недоступен. Убедись, что бэкенд на Render работает.</div></div>`;
+        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ.</div></div>`;
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
@@ -426,50 +475,67 @@
     // ==========================================
     const renderers = {
       1: {
-        init: (id) => { window.taskState[id] = { target: [40, 80, 160, 320][Math.floor(Math.random() * 4)] }; },
-        html: (id) => `
+        init: (id) => { 
+          const categories = [
+            { name: 'Животные', words: ['ёж', 'волк', 'слон', 'олень', 'собака', 'медведь', 'леопард', 'крокодил'] },
+            { name: 'Фрукты', words: ['киви', 'слива', 'банан', 'яблоко', 'абрикос', 'апельсин', 'виноград', 'мандарин'] },
+            { name: 'Предметы мебели', words: ['пуф', 'стул', 'диван', 'кресло', 'кровать', 'тумбочка', 'оттоманка', 'раскладушка'] },
+            { name: 'Реки', words: ['Обь', 'Дон', 'Нева', 'Амур', 'Волга', 'Енисей', 'Печора', 'Колыма'] }
+          ];
+          const cat = categories[Math.floor(Math.random() * categories.length)];
+          const encodings = [ {bits: 8, bytes: 1, name: 'КОИ-8'}, {bits: 16, bytes: 2, name: 'Unicode'}, {bits: 32, bytes: 4, name: 'UTF-32'} ];
+          const enc = encodings[Math.floor(Math.random() * encodings.length)];
+          
+          const targetWord = cat.words[Math.floor(Math.random() * cat.words.length)];
+          // Длина удаленного фрагмента = длина слова + запятая + пробел
+          const diffBytes = (targetWord.length + 2) * enc.bytes;
+          const text = `${cat.name}: ${cat.words.join(', ')}.`;
+          
+          window.taskState[id] = { text, targetWord, diffBytes, bits: enc.bits, name: enc.name, bytes: enc.bytes };
+        },
+        html: (id) => {
+          const s = window.taskState[id];
+          return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Объем информации</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Настрой ползунок и кодировку так, чтобы объем составил ровно <b class="text-white">${window.taskState[id].target} байт</b>.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 1: Объем информации</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">В одной из кодировок ${s.name} каждый символ кодируется <b>${s.bits} битами</b>. Ученик написал текст (в нём нет лишних пробелов):</p>
             </div>
-            <div class="space-y-5">
-              <div>
-                <div class="flex justify-between text-xs font-medium text-zinc-400 mb-3"><span>Символов</span><span id="t1-chars-v" class="text-indigo-400">40</span></div>
-                <input type="range" id="t1-chars" min="10" max="160" step="10" value="40" class="w-full accent-indigo-500 h-1.5 bg-white/10 rounded-full appearance-none outline-none">
-              </div>
-              <div>
-                <label class="text-xs font-medium text-zinc-400 mb-2 block">Кодировка (вес символа)</label>
-                <div class="relative">
-                  <select id="t1-bits" class="w-full bg-black/40 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm font-light appearance-none">
-                    <option value="8">8 бит (1 байт)</option>
-                    <option value="16" selected>16 бит (2 байта)</option>
-                    <option value="32">32 бита (4 байта)</option>
-                  </select>
-                  <i data-lucide="chevron-down" class="absolute right-4 top-4 w-4 h-4 text-zinc-500 pointer-events-none"></i>
-                </div>
-              </div>
+            
+            <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-serif text-[15px] text-zinc-200 leading-relaxed shadow-inner">
+              «${s.text}»
             </div>
-            <div class="p-5 bg-black/40 rounded-2xl border border-white/5 flex justify-between">
-              <span class="text-zinc-500 font-light text-sm">Итого:</span>
-              <span class="text-2xl font-light text-white tracking-wide"><span id="t1-res">?</span> <span class="text-sm text-zinc-500">байт</span></span>
+            
+            <p class="text-sm text-zinc-400 font-light leading-relaxed">
+              Ученик удалил из списка одно из названий. Заодно он вычеркнул ставшие лишними запятые и пробелы — два пробела не должны идти подряд.<br><br>
+              При этом размер нового предложения в данной кодировке оказался на <b class="text-white font-medium">${s.diffBytes} байт</b> меньше, чем размер исходного предложения. Напишите в ответе удаленное слово.
+            </p>
+            
+            <div class="flex items-center gap-4 mt-2">
+              <input type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
             </div>
-            <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 transition-colors shadow-lg">Проверить расчет</button>
+            
+            <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
-        `,
+        `},
         setup: (id) => {
-          const update = () => {
-            document.getElementById('t1-chars-v').innerText = document.getElementById('t1-chars').value;
-            document.getElementById('t1-res').innerText = '?'; 
-            document.getElementById(`feedback-${id}`).classList.add('hidden'); 
-          };
-          document.getElementById('t1-chars').oninput = update;
-          document.getElementById('t1-bits').onchange = update;
+          document.getElementById('t1-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t1 = (tid) => {
-            const res = (+document.getElementById('t1-chars').value * +document.getElementById('t1-bits').value) / 8;
-            document.getElementById('t1-res').innerText = res;
-            if (res === window.taskState[tid].target) showFeedback(tid, true, `Блестяще! Объем ровно ${res} байт.`);
-            else showFeedback(tid, false, `Получилось ${res} байт. Нам нужно ${window.taskState[tid].target}.`);
+            const ans = document.getElementById('t1-ans').value.trim().toLowerCase();
+            const target = window.taskState[tid].targetWord.toLowerCase();
+            
+            if (!ans) {
+              showFeedback(tid, false, "Введите удаленное слово в поле ответа.");
+              return;
+            }
+            if (ans === target) {
+              showFeedback(tid, true, `Блестяще! Удаленное слово — «${window.taskState[tid].targetWord}».`);
+            } else {
+              const diffBytes = window.taskState[tid].diffBytes;
+              const bytes = window.taskState[tid].bytes;
+              const expectedLen = (diffBytes / bytes) - 2;
+              showFeedback(tid, false, `Неверно. Подсказка: удалено ${diffBytes} байт. Так как 1 символ = ${bytes} байт(а), то исчезло ${diffBytes/bytes} символов (включая запятую и пробел). Значит в самом слове должно быть ${expectedLen} букв!`);
+            }
           };
         }
       },
@@ -675,37 +741,73 @@
         }
       },
       6: {
-        init: (id) => { window.taskState[id] = { limit: [5, 10, 15, 20][Math.floor(Math.random()*4)] }; },
-        html: (id) => `
+        init: (id) => { 
+          const ops = ['or', 'and'];
+          const signs = ['<', '>'];
+          const op = ops[Math.floor(Math.random() * ops.length)];
+          const signS = signs[Math.floor(Math.random() * signs.length)];
+          const signT = signs[Math.floor(Math.random() * signs.length)];
+          const A = Math.floor(Math.random() * 15) - 5; // от -5 до 9
+          const B = Math.floor(Math.random() * 15) - 5; // от -5 до 9
+          
+          const pairs = [];
+          let yesCount = 0;
+          for (let i = 0; i < 9; i++) {
+            const s = Math.floor(Math.random() * 24) - 12; // от -12 до 11
+            const t = Math.floor(Math.random() * 24) - 12; // от -12 до 11
+            pairs.push(`(${s}, ${t})`);
+            
+            let condS = signS === '<' ? s < A : s > A;
+            let condT = signT === '<' ? t < B : t > B;
+            let isYes = op === 'or' ? (condS || condT) : (condS && condT);
+            if (isYes) yesCount++;
+          }
+          window.taskState[id] = { op, signS, signT, A, B, pairs, yesCount };
+        },
+        html: (id) => {
+          const s = window.taskState[id];
+          return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Условия Python</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Подбери переменные, чтобы программа вывела <b>YES</b>.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 6: Анализ программы</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Было проведено 9 запусков программы, при которых в качестве значений переменных <b>s</b> и <b>t</b> вводились следующие пары чисел. Сколько было запусков, при которых программа напечатала <b>«YES»</b>?</p>
             </div>
-            <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300">
-              <span class="text-violet-400">if</span> s > <span class="text-orange-300">${window.taskState[id].limit}</span> <span class="text-violet-400">or</span> t > <span class="text-orange-300">${window.taskState[id].limit}</span>:<br>
+            
+            <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300 shadow-inner">
+              s = int(input())<br>
+              t = int(input())<br>
+              <span class="text-violet-400">if</span> s ${s.signS} <span class="text-orange-300">${s.A}</span> <span class="text-violet-400">${s.op}</span> t ${s.signT} <span class="text-orange-300">${s.B}</span>:<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-green-300">"YES"</span>)<br>
               <span class="text-violet-400">else</span>:<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-rose-300">"NO"</span>)
             </div>
-            <div class="flex gap-4">
-              <div class="relative flex-1"><span class="absolute left-4 top-3.5 text-zinc-500 font-mono">s=</span><input type="number" id="t6-s" value="0" class="w-full bg-black/40 border border-white/10 pl-10 pr-4 py-3 rounded-xl text-white outline-none"></div>
-              <div class="relative flex-1"><span class="absolute left-4 top-3.5 text-zinc-500 font-mono">t=</span><input type="number" id="t6-t" value="0" class="w-full bg-black/40 border border-white/10 pl-10 pr-4 py-3 rounded-xl text-white outline-none"></div>
+            
+            <div class="p-4 bg-white/5 border border-white/10 rounded-2xl font-mono text-[13px] text-zinc-300 text-center leading-relaxed">
+              ${s.pairs.join('; ')}
             </div>
-            <div class="flex justify-between p-4 bg-white/5 rounded-xl"><span class="text-sm text-zinc-400">Console:</span><span id="t6-out" class="font-mono text-zinc-500">[Ожидание]</span></div>
-            <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg">Запустить скрипт</button>
+            
+            <div class="flex items-center gap-4">
+              <input type="number" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
+            </div>
+            
+            <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `,
+        `},
         setup: (id) => {
-          const reset = () => { document.getElementById('t6-out').innerText = '[Ожидание]'; document.getElementById('t6-out').className = 'font-mono text-zinc-500'; document.getElementById(`feedback-${id}`).classList.add('hidden'); };
-          document.getElementById('t6-s').oninput = reset; document.getElementById('t6-t').oninput = reset;
+          document.getElementById('t6-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t6 = (tid) => {
-            const limit = window.taskState[tid].limit;
-            const yes = (+document.getElementById('t6-s').value > limit) || (+document.getElementById('t6-t').value > limit);
-            document.getElementById('t6-out').innerText = yes ? 'YES' : 'NO';
-            document.getElementById('t6-out').className = yes ? 'font-mono text-emerald-400' : 'font-mono text-rose-400';
-            if (yes) showFeedback(tid, true, "Отлично!");
-            else showFeedback(tid, false, "Условие ложно, программа вывела NO.");
+            const ans = parseInt(document.getElementById('t6-ans').value);
+            const target = window.taskState[tid].yesCount;
+            
+            if (isNaN(ans)) {
+              showFeedback(tid, false, "Введите число запусков (от 0 до 9).");
+              return;
+            }
+            if (ans === target) {
+              showFeedback(tid, true, `Верно! Программа напечатает YES ровно ${target} раз.`);
+            } else {
+              showFeedback(tid, false, `Неверно. Правильный ответ: ${target}. Внимательно проверьте каждую пару скобок.`);
+            }
           };
         }
       },
@@ -785,7 +887,6 @@
       9: {
         init: (id) => { 
           const targetNode = ['G', 'H'][Math.floor(Math.random()*2)];
-          // Базовые рёбра графа
           const baseEdges = [ ['A','C'], ['A','E'], ['A','B'], ['B','F'], ['E','G'], ['F','G'], ['D','H'], ['D','G'], ['C','H'], ['G','H'] ];
           const optionalEdges = [ ['A','D'], ['B','E'], ['E','D'], ['D','C'] ];
           
@@ -810,7 +911,6 @@
             </div>
             
             <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4">
-              <!-- SVG генерируется скриптом -->
             </svg>
 
             <div class="flex items-center gap-4">
@@ -868,202 +968,422 @@
       },
       11: {
         init: (id) => {
-          const opts = [['Блок', 'Блок писал стихи. Блок - гений.'], ['Онегин', 'Онегин любил гулять. Онегин был одет.'], ['Код', 'Пиши код. Код это жизнь.']];
-          window.taskState[id] = opts[Math.floor(Math.random()*opts.length)];
+          const names = ['Семен', 'Иван', 'Петр', 'Алексей', 'Федор'];
+          const targetName = names[Math.floor(Math.random()*names.length)];
+          const text = `— А меня зовут Мармеладов, ${targetName} Захарович, титулярный советник, — гордо ответил посетитель трактира.`;
+          window.taskState[id] = { target: targetName.toLowerCase(), text: text };
         },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Поиск в тексте</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Найди, сколько раз встречается слово <span class="text-white">"${window.taskState[id][0]}"</span> в отрывке.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 11: Поиск в файлах</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">В одном из произведений Ф.М. Достоевского, текст которого приведен в каталоге, присутствует персонаж Мармеладов. Выясните <b>имя</b> этого персонажа.</p>
             </div>
-            <div class="relative">
-              <i data-lucide="search" class="absolute left-4 top-3.5 w-4 h-4 text-zinc-500"></i>
-              <input type="text" id="t11-in" placeholder="Слово..." class="w-full bg-black/40 border border-white/10 pl-11 pr-4 py-3 rounded-xl outline-none text-white text-sm focus:border-stone-500/50">
+            
+            <div class="bg-[#0f111a] rounded-2xl border border-white/5 overflow-hidden shadow-inner">
+              <div class="bg-white/5 border-b border-white/5 p-3 flex items-center gap-2 text-xs text-zinc-500 font-mono">
+                <i data-lucide="folder-open" class="w-4 h-4"></i> /DEMO-12/Проза/Достоевский/Преступление_и_наказание.txt
+              </div>
+              <div class="p-5 font-serif text-[15px] text-zinc-300 leading-relaxed max-h-[150px] overflow-y-auto">
+                ${window.taskState[id].text}
+              </div>
             </div>
-            <div id="t11-txt" class="p-4 bg-white/5 rounded-2xl text-zinc-400 font-light text-sm">${window.taskState[id][1]}</div>
-            <div class="flex justify-between px-2"><span class="text-sm text-zinc-500">Совпадений:</span><span id="t11-count" class="font-medium text-lg text-white">?</span></div>
-            <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg">Выполнить поиск</button>
+
+            <div class="flex items-center gap-4">
+              <input type="text" id="t11-ans" placeholder="Ответ: Имя" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg uppercase tracking-wider">
+            </div>
+            <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `,
         setup: (id) => {
-          const txt = window.taskState[id][1];
-          const target = window.taskState[id][0].toLowerCase();
-          document.getElementById('t11-in').oninput = () => { document.getElementById('t11-count').innerText='?'; document.getElementById('t11-txt').innerHTML=txt; document.getElementById(`feedback-${id}`).classList.add('hidden'); };
+          document.getElementById('t11-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t11 = (tid) => {
-            const q = document.getElementById('t11-in').value.toLowerCase().trim();
-            const matches = q ? (txt.toLowerCase().match(new RegExp(q, 'g')) || []).length : 0;
-            document.getElementById('t11-count').innerText = matches;
-            if (q) document.getElementById('t11-txt').innerHTML = txt.split(new RegExp(`(${q})`, 'gi')).map(p => p.toLowerCase()===q ? `<mark class="bg-yellow-500/80 text-black px-1 rounded-sm">${p}</mark>` : p).join('');
-            if (q === target && matches === 2) showFeedback(tid, true, "Верно! Найдено ровно 2 раза.");
-            else showFeedback(tid, false, "Ошибка. Ищи загаданное слово.");
+            const ans = document.getElementById('t11-ans').value.trim().toLowerCase();
+            const target = window.taskState[tid].target;
+            if (!ans) return showFeedback(tid, false, "Введите имя.");
+            if (ans === target) showFeedback(tid, true, `Верно! Имя персонажа — ${target.charAt(0).toUpperCase() + target.slice(1)}.`);
+            else showFeedback(tid, false, "Неверно. Внимательно прочитайте текст документа.");
           };
         }
       },
       12: {
-        init: (id) => { window.taskState[id] = { targetType: ['*.pdf', '*.jpg', '*.txt'][Math.floor(Math.random()*3)] }; },
+        init: (id) => {
+          const dirs = ['Проза/Достоевский', 'Проза/Толстой', 'Поэзия/Есенин', 'Поэзия/Пушкин', 'Поэзия/Фет'];
+          const exts = ['.jpeg', '.pdf', '.txt', '.docx', '.png'];
+          let files = [];
+          let ans = 0;
+          for(let i=1; i<=25; i++) {
+             let d = dirs[Math.floor(Math.random()*dirs.length)];
+             let e = exts[Math.floor(Math.random()*exts.length)];
+             let f = `документ_${i}${e}`;
+             files.push(`DEMO-12/${d}/${f}`);
+             if ((d === 'Проза/Достоевский' || d === 'Поэзия/Есенин' || d === 'Поэзия/Пушкин') && (e === '.jpeg' || e === '.pdf')) {
+                 ans++;
+             }
+          }
+          window.taskState[id] = { files, ans };
+        },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Файловые маски</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Напиши маску, чтобы отфильтровать только <b>файлы ${window.taskState[id].targetType}</b>.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 12: Файловая система</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Сколько всего файлов с расширениями <b>.jpeg</b> и <b>.pdf</b> содержится в подкаталоге <b>Достоевский</b> каталога DEMO-12/Проза, а также в подкаталогах <b>Есенин</b> и <b>Пушкин</b> каталога DEMO-12/Поэзия?</p>
             </div>
-            <input type="text" id="t12-in" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono" placeholder="Например: *.doc">
-            <div class="bg-black/20 p-4 rounded-2xl border border-white/5 font-mono text-sm space-y-2 text-zinc-600">
-              <div id="f1" class="p-2.5 rounded-xl border border-transparent">document.pdf</div>
-              <div id="f2" class="p-2.5 rounded-xl border border-transparent">image.jpg</div>
-              <div id="f3" class="p-2.5 rounded-xl border border-transparent">report.pdf</div>
-              <div id="f4" class="p-2.5 rounded-xl border border-transparent">photo.jpg</div>
-              <div id="f5" class="p-2.5 rounded-xl border border-transparent">notes.txt</div>
+            
+            <div class="bg-black/60 rounded-2xl border border-white/5 p-4 font-mono text-[12px] text-zinc-500 h-[200px] overflow-y-auto leading-relaxed shadow-inner space-y-1">
+              ${window.taskState[id].files.map(f => `<div>${f}</div>`).join('')}
             </div>
-            <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg">Применить фильтр</button>
+
+            <div class="flex items-center gap-4">
+              <input type="number" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
+            </div>
+            <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `,
         setup: (id) => {
-          const fList = ['document.pdf', 'image.jpg', 'report.pdf', 'photo.jpg', 'notes.txt'];
-          const targetStr = window.taskState[id].targetType.replace('*', '');
-          document.getElementById('t12-in').oninput = () => { fList.forEach((f,i) => document.getElementById(`f${i+1}`).className = "p-2.5 rounded-xl border border-transparent"); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
+          document.getElementById('t12-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t12 = (tid) => {
-            const m = document.getElementById('t12-in').value;
-            let regex; try { regex = new RegExp(`^${m.replace(/\./g,'\\.').replace(/\*/g,'.*').replace(/\?/g,'.')}$`, 'i'); } catch(e){}
-            let matches = 0, validFiles = 0;
-            fList.forEach((f, i) => {
-              const el = document.getElementById(`f${i+1}`);
-              if (f.endsWith(targetStr)) validFiles++;
-              if (m && regex && regex.test(f)) { el.className = "p-2.5 rounded-xl bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"; matches++; }
-              else { el.className = "p-2.5 rounded-xl opacity-30 border border-transparent"; }
-            });
-            if (matches === validFiles && m.includes('*') && m.endsWith(targetStr)) showFeedback(tid, true, "Фильтр сработал идеально!");
-            else showFeedback(tid, false, "Маска захватывает неверные файлы.");
+            const ans = parseInt(document.getElementById('t12-ans').value);
+            const target = window.taskState[tid].ans;
+            if (isNaN(ans)) return showFeedback(tid, false, "Введите число.");
+            if (ans === target) showFeedback(tid, true, `Правильно! Найдено ровно ${target} таких файлов.`);
+            else showFeedback(tid, false, `Неверно. Внимательно пересчитайте файлы, соответствующие условию.`);
           };
         }
       },
       13: {
-        init: (id) => { 
-          const formats = [['b','i','Жирным и Курсивом'], ['b','u','Жирным и Подчеркнутым'], ['i','u','Курсивом и Подчеркнутым']];
-          window.taskState[id] = formats[Math.floor(Math.random()*formats.length)]; 
+        init: (id) => {
+          window.taskState[id] = { }; 
         },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Редактор текста</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Отформатируй текст так, чтобы он был <b>${window.taskState[id][2]}</b>.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 13.2: Редактор текста</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Создайте документ по образцу. Сделайте слово <b class="text-white">Углерод</b> жирным, <b class="text-white">Менделеева</b> подчеркнутым, а <b class="text-white">алмазов</b> курсивом.</p>
             </div>
-            <div class="flex gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5 w-max">
-              <button id="t13-btn-b" onclick="window.t13_toggle('b')" class="p-2 w-12 rounded-lg font-bold text-zinc-400">Ж</button>
-              <button id="t13-btn-i" onclick="window.t13_toggle('i')" class="p-2 w-12 rounded-lg italic text-zinc-400">К</button>
-              <button id="t13-btn-u" onclick="window.t13_toggle('u')" class="p-2 w-12 rounded-lg underline text-zinc-400">Ч</button>
+            
+            <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
+              <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
+                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors">Ж</button>
+                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors">К</button>
+                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors">Ч</button>
+              </div>
+              <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">Углерод — один из химических элементов периодической таблицы Менделеева. На Земле в свободном виде встречается в виде алмазов и графита.</div>
             </div>
-            <div id="t13-txt" class="p-5 bg-[#f8fafc] text-slate-800 rounded-2xl min-h-[90px] flex items-center text-sm transition-all border-2 border-transparent">
-              Информатика — это наука о данных.
-            </div>
-            <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg">Сдать документ</button>
+
+            <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
           </div>
         `,
         setup: (id) => {
-          window.t13f = { b: false, i: false, u: false };
-          window.t13_toggle = (t) => {
-            window.t13f[t] = !window.t13f[t];
-            const txt = document.getElementById('t13-txt');
-            const btn = document.getElementById('t13-btn-'+t);
-            txt.style.fontWeight = window.t13f.b ? 'bold' : 'normal';
-            txt.style.fontStyle = window.t13f.i ? 'italic' : 'normal';
-            txt.style.textDecoration = window.t13f.u ? 'underline' : 'none';
-            txt.classList.remove('border-emerald-500', 'shadow-[0_0_15px_rgba(16,185,129,0.3)]');
-            document.getElementById(`feedback-${id}`).classList.add('hidden');
-            if(window.t13f[t]) { btn.classList.add('bg-rose-600', 'text-white'); btn.classList.remove('text-zinc-400'); }
-            else { btn.classList.remove('bg-rose-600', 'text-white'); btn.classList.add('text-zinc-400'); }
-          };
+          document.getElementById('t13-editor').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t13 = (tid) => {
-            const req = window.taskState[tid];
-            if (window.t13f[req[0]] && window.t13f[req[1]] && !window.t13f[['b','i','u'].find(x=>x!==req[0]&&x!==req[1])]) {
-               document.getElementById('t13-txt').classList.add('border-emerald-500', 'shadow-[0_0_15px_rgba(16,185,129,0.3)]');
-               showFeedback(tid, true, "Форматирование применено верно.");
-            } else showFeedback(tid, false, "Стили не совпадают с заданием.");
+            const editor = document.getElementById('t13-editor');
+            const html = editor.innerHTML.toLowerCase();
+            
+            const hasBold = html.includes('<b>углерод</b>') || html.includes('<strong>углерод</strong>') || html.includes('font-weight: bold;">углерод');
+            const hasUnderline = html.includes('<u>менделеева</u>') || html.includes('text-decoration: underline;">менделеева');
+            const hasItalic = html.includes('<i>алмазов</i>') || html.includes('<em>алмазов</em>') || html.includes('font-style: italic;">алмазов');
+            
+            if (hasBold && hasUnderline && hasItalic) {
+               document.getElementById('t13-container').classList.add('!border-emerald-500', 'shadow-[0_0_20px_rgba(16,185,129,0.2)]');
+               showFeedback(tid, true, "Отлично! Все требования к форматированию выполнены.");
+            } else {
+               document.getElementById('t13-container').classList.remove('!border-emerald-500', 'shadow-[0_0_20px_rgba(16,185,129,0.2)]');
+               let missing = [];
+               if (!hasBold) missing.push('Углерод (жирный)');
+               if (!hasUnderline) missing.push('Менделеева (подчеркнутый)');
+               if (!hasItalic) missing.push('алмазов (курсив)');
+               showFeedback(tid, false, `Форматирование не совпадает с заданием. Не хватает: <b>${missing.join(', ')}</b>. Выделите нужное слово и нажмите кнопку на панели.`);
+            }
           };
         }
       },
       14: {
-        init: (id) => { window.taskState[id] = { target: [50, 100, 150, 200][Math.floor(Math.random()*4)] }; },
-        html: (id) => `
+        init: (id) => { 
+          const names = ['Лиштаев Е.', 'Будин С.', 'Христич А.', 'Иванов Д.', 'Глотова А.', 'Лещенко В.', 'Смирнова К.'];
+          const data = names.map(n => ({
+            name: n, school: Math.floor(Math.random()*4)+1,
+            geo: Math.floor(Math.random()*60)+30, info: Math.floor(Math.random()*60)+30
+          }));
+          const t1 = [40, 50, 60][Math.floor(Math.random()*3)];
+          const t2 = [50, 60, 70][Math.floor(Math.random()*3)];
+
+          let validSums = data.filter(d => d.geo > t1 || d.info > t1).map(d => d.geo + d.info);
+          let ans1 = validSums.length > 0 ? Math.min(...validSums) : 0;
+          let count2 = data.filter(d => d.geo < t2).length;
+          let ans2 = ((count2 / data.length) * 100).toFixed(1);
+
+          window.taskState[id] = { data, t1, t2, ans1, ans2 };
+        },
+        html: (id) => {
+          const s = window.taskState[id];
+          return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Электронные таблицы</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Измени ячейки так, чтобы формула <b>=СУММ(A1:A2)</b> стала равна <b>${window.taskState[id].target}</b>.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 14: Электронные таблицы</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">В таблицу занесли результаты тестирования. Проанализируйте мини-версию файла и ответьте на вопросы.</p>
             </div>
-            <div class="overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-inner">
-              <div class="grid grid-cols-2 text-center border-b border-white/5"><div class="p-3 text-xs text-zinc-600 border-r border-white/5">1</div><div class="p-1"><input type="number" id="t14-a1" value="10" class="w-full bg-transparent p-2 text-center text-white outline-none font-mono"></div></div>
-              <div class="grid grid-cols-2 text-center border-b border-white/5"><div class="p-3 text-xs text-zinc-600 border-r border-white/5">2</div><div class="p-1"><input type="number" id="t14-a2" value="20" class="w-full bg-transparent p-2 text-center text-white outline-none font-mono"></div></div>
-              <div class="grid grid-cols-2 text-center bg-white/5"><div class="p-3 text-xs text-zinc-500 border-r border-white/5">СУММ</div><div class="p-2 text-zinc-300 font-light text-2xl" id="t14-sum">?</div></div>
+            
+            <div class="overflow-x-auto rounded-xl border border-white/10 bg-black/40">
+              <table class="w-full text-center text-xs font-mono whitespace-nowrap">
+                <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
+                  <tr>
+                    <th class="p-2 border-r border-white/5 w-8"></th>
+                    <th class="p-2 border-r border-white/5">A (Ученик)</th>
+                    <th class="p-2 border-r border-white/5">B (Школа)</th>
+                    <th class="p-2 border-r border-white/5">C (География)</th>
+                    <th class="p-2">D (Информатика)</th>
+                  </tr>
+                </thead>
+                <tbody class="text-zinc-300 divide-y divide-white/5">
+                  ${s.data.map((row, i) => `
+                    <tr>
+                      <th class="p-2 bg-white/5 border-r border-white/10 text-zinc-500">${i+1}</th>
+                      <td class="p-2 border-r border-white/5 text-left">${row.name}</td>
+                      <td class="p-2 border-r border-white/5">${row.school}</td>
+                      <td class="p-2 border-r border-white/5">${row.geo}</td>
+                      <td class="p-2">${row.info}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
             </div>
-            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg">Проверить формулу</button>
+
+            <div class="space-y-4 text-sm">
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
+                <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">1.</span> Чему равна наименьшая сумма баллов по двум предметам среди школьников, получивших больше <b>${s.t1}</b> баллов по географии <u>или</u> информатике?</p>
+                <input type="number" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (ячейка F3)">
+              </div>
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
+                <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">2.</span> Сколько процентов от общего числа участников составили ученики, получившие по географии меньше <b>${s.t2}</b> баллов? (С точностью до одного знака)</p>
+                <input type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.5">
+              </div>
+            </div>
+
+            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
           </div>
-        `,
+        `},
         setup: (id) => {
-          const reset = () => { document.getElementById('t14-sum').innerText = '?'; document.getElementById(`feedback-${id}`).classList.add('hidden'); };
-          document.getElementById('t14-a1').oninput = reset; document.getElementById('t14-a2').oninput = reset;
+          document.getElementById('t14-ans1').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          document.getElementById('t14-ans2').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          
           window.check_t14 = (tid) => {
-            const sum = +document.getElementById('t14-a1').value + +document.getElementById('t14-a2').value;
-            document.getElementById('t14-sum').innerText = sum;
-            if (sum === window.taskState[tid].target) showFeedback(tid, true, "Таблица работает! Сумма сошлась.");
-            else showFeedback(tid, false, `Текущая сумма — ${sum}, а нужно ${window.taskState[tid].target}.`);
+            const s = window.taskState[tid];
+            const a1 = parseInt(document.getElementById('t14-ans1').value);
+            // Заменяем запятую на точку для правильного парсинга дробного числа
+            const rawA2 = document.getElementById('t14-ans2').value.replace(',', '.').trim();
+            const a2 = parseFloat(rawA2).toFixed(1);
+            
+            if (isNaN(a1) || rawA2 === '') {
+                showFeedback(tid, false, "Заполните оба поля ответа.");
+                return;
+            }
+
+            if (a1 === s.ans1 && a2 === s.ans2) {
+                showFeedback(tid, true, "Оба ответа верны! Вы отлично справляетесь с анализом данных.");
+            } else if (a1 !== s.ans1 && a2 === s.ans2) {
+                showFeedback(tid, false, "Ответ на вопрос 2 верен, но наименьшая сумма (ответ 1) посчитана неверно.");
+            } else if (a1 === s.ans1 && a2 !== s.ans2) {
+                showFeedback(tid, false, `Ответ на вопрос 1 верен, но процент (ответ 2) посчитан неверно (не забудьте про округление до 1 знака).`);
+            } else {
+                showFeedback(tid, false, "Оба ответа неверны. Внимательно проверьте условия (строго больше/меньше) и вашу арифметику.");
+            }
           };
         }
       },
+      // --- ИЗМЕНЁННАЯ ЗАДАЧА 15 (РОБОТ) ---
       15: {
         init: (id) => { 
-          const targets = [{x:2,y:2, text:'правый нижний'}, {x:2,y:0, text:'правый верхний'}, {x:0,y:2, text:'левый нижний'}];
-          window.taskState[id] = targets[Math.floor(Math.random()*targets.length)];
+          // Генерируем карту со стенами, похожую на задание ОГЭ.
+          window.taskState[id] = {
+            w: 10, h: 10, startX: 1, startY: 3,
+            horizontals: [{x:1,y:2}, {x:2,y:2}, {x:3,y:2}, /* gap 4 */ {x:5,y:2}, {x:6,y:2}, {x:7,y:2}],
+            verticals: [{x:7,y:3}, {x:7,y:4}, /* gap 5 */ {x:7,y:6}, {x:7,y:7}, {x:7,y:8}],
+            targetPainted: new Set(['1,3', '2,3', '3,3', '5,3', '6,3', '7,3', '7,4', '7,6', '7,7', '7,8'])
+          };
         },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Робот</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Доведи робота 🤖 в <b>${window.taskState[id].text}</b> угол. Команды: вправо, влево, вверх, вниз.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 15: Робот</h3>
+              <p class="text-xs text-zinc-400 font-light mt-1">
+                Напиши алгоритм для Робота. Закрась все клетки, расположенные <span class="text-white">непосредственно ниже горизонтальной стены и левее вертикальной</span>. Проходы должны остаться незакрашенными.
+                <br><br><span class="text-blue-300 font-medium">Команды:</span> вверх, вниз, влево, вправо, закрасить
+                <br><span class="text-blue-300 font-medium">Цикл:</span> <span class="font-mono bg-white/5 px-1 rounded">нц пока [усл] ... кц</span>
+                <br><span class="text-blue-300 font-medium">Условия:</span> сверху/снизу/слева/справа свободно
+              </p>
             </div>
-            <div class="flex gap-4">
-              <textarea id="t15-code" class="flex-1 bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-mono text-zinc-300 outline-none focus:border-blue-500/50 resize-none" placeholder="вправо\nвниз"></textarea>
-              <div class="w-1/2 max-w-[150px] aspect-square grid grid-cols-3 gap-1 bg-white/5 p-1 rounded-2xl border border-white/10" id="t15-grid"></div>
+            
+            <div class="flex flex-col md:flex-row gap-4">
+              <textarea id="t15-code" class="flex-1 w-full min-h-[220px] bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-mono text-zinc-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="нц пока не сверху свободно\n  закрасить\n  вправо\nкц\n..."></textarea>
+              <div class="w-full md:w-1/2 max-w-[320px] mx-auto aspect-square flex-shrink-0" id="t15-grid"></div>
             </div>
-            <button id="t15-run-btn" onclick="window.check_t15(${id})" class="w-full mt-2 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg"><span class="flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Запустить скрипт</span></button>
+            
+            <div id="t15-error" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
+            
+            <div class="flex gap-2">
+               <button onclick="window.reset_t15(${id})" class="glass-button p-4 rounded-xl text-zinc-400 hover:text-white"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors">
+                  <span class="flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Запустить алгоритм</span>
+               </button>
+            </div>
           </div>
         `,
         setup: (id) => {
-          const drawGrid = (rx,ry) => {
-            let html = '';
-            for(let y=0; y<3; y++){
-              for(let x=0; x<3; x++){
-                const isR = (x===rx && y===ry);
-                const isTarget = (x===window.taskState[id].x && y===window.taskState[id].y);
-                const bg = isR ? 'bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)] transform scale-105' : (isTarget ? 'bg-white/10' : 'bg-black/40 border border-white/5');
-                html += `<div class="aspect-square flex items-center justify-center rounded-xl transition-all ${bg}">${isR ? '🤖' : (isTarget ? '🎯' : '')}</div>`;
-              }
-            }
-            document.getElementById('t15-grid').innerHTML = html;
+          const map = window.taskState[id];
+          
+          const hasWall = (x, y, dir) => {
+              if (x < 0 || x >= map.w || y < 0 || y >= map.h) return true;
+              if (dir === 'up') return map.horizontals.some(w => w.x === x && w.y === y - 1);
+              if (dir === 'down') return map.horizontals.some(w => w.x === x && w.y === y);
+              if (dir === 'left') return map.verticals.some(w => w.x === x - 1 && w.y === y);
+              if (dir === 'right') return map.verticals.some(w => w.x === x && w.y === y);
+              return false;
           };
-          drawGrid(0,0);
-          
-          document.getElementById('t15-code').oninput = () => { drawGrid(0,0); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
-          
+
+          const evaluateCondition = (robot, condStr) => {
+              let expr = condStr.replace(/\(/g, '').replace(/\)/g, '').toLowerCase();
+              expr = expr.replace(/сверху свободно/g, !hasWall(robot.x, robot.y, 'up'))
+                         .replace(/снизу свободно/g, !hasWall(robot.x, robot.y, 'down'))
+                         .replace(/слева свободно/g, !hasWall(robot.x, robot.y, 'left'))
+                         .replace(/справа свободно/g, !hasWall(robot.x, robot.y, 'right'));
+              expr = expr.replace(/не /g, '! ').replace(/ и /g, ' && ').replace(/ или /g, ' || ');
+              try { return new Function('return !!(' + expr + ')')(); }
+              catch(e) { throw new Error('Некорректное условие: ' + condStr); }
+          };
+
+          const drawGrid = (robot, painted) => {
+              let html = '';
+              for(let y=0; y<map.h; y++){
+                  for(let x=0; x<map.w; x++){
+                      let classes = 'relative border-white/[0.03] transition-colors duration-200 ';
+                      classes += 'border ';
+                      
+                      if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
+                      if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
+                      if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
+                      if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
+
+                      if(painted.has(`${x},${y}`)) classes += 'bg-blue-500/40 ';
+                      else classes += 'bg-black/20 ';
+
+                      let content = '';
+                      if(robot.x === x && robot.y === y) {
+                          content = '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
+                      }
+
+                      html += `<div class="aspect-square ${classes}">${content}</div>`;
+                  }
+              }
+              document.getElementById('t15-grid').innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
+          };
+
+          window.reset_t15 = (tid) => {
+              document.getElementById('t15-error').classList.add('hidden');
+              document.getElementById(`feedback-${tid}`).classList.add('hidden');
+              drawGrid({x: map.startX, y: map.startY}, new Set());
+          };
+
+          window.reset_t15(id);
+          document.getElementById('t15-code').oninput = () => { 
+             document.getElementById('t15-error').classList.add('hidden'); 
+             document.getElementById(`feedback-${id}`).classList.add('hidden'); 
+          };
+
           window.check_t15 = async (tid) => {
-            const btn = document.getElementById('t15-run-btn');
-            btn.disabled = true; btn.classList.add('opacity-50'); document.getElementById(`feedback-${tid}`).classList.add('hidden');
-            
-            const code = document.getElementById('t15-code').value.toLowerCase().split('\n');
-            let x=0, y=0; drawGrid(0,0);
-            
-            for (let c of code) {
-               if(c.trim()==='вправо' && x<2) x++;
-               if(c.trim()==='влево' && x>0) x--;
-               if(c.trim()==='вниз' && y<2) y++;
-               if(c.trim()==='вверх' && y>0) y--;
-               drawGrid(x,y);
-               await new Promise(r => setTimeout(r, 400));
-            }
-            
-            if(x === window.taskState[tid].x && y === window.taskState[tid].y) showFeedback(tid, true, "Отличный алгоритм! Робот на месте.");
-            else showFeedback(tid, false, "Ошибка. Робот не достиг целевой клетки.");
-            btn.disabled = false; btn.classList.remove('opacity-50');
+              const btn = document.getElementById('t15-run-btn');
+              const errEl = document.getElementById('t15-error');
+              btn.disabled = true; btn.classList.add('opacity-50'); 
+              errEl.classList.add('hidden');
+              document.getElementById(`feedback-${tid}`).classList.add('hidden');
+              
+              const code = document.getElementById('t15-code').value;
+              let lines = code.split('\n').map(l => l.trim().toLowerCase()).filter(l => l);
+              let robot = { x: map.startX, y: map.startY, painted: new Set() };
+              
+              drawGrid(robot, robot.painted);
+
+              try {
+                  let i = 0;
+                  let loopStack = [];
+                  let iterations = 0;
+                  let inIfSkip = false;
+                  let ifDepth = 0;
+
+                  while(i < lines.length) {
+                      iterations++;
+                      if(iterations > 2000) throw new Error('Слишком много шагов! Возможно, бесконечный цикл.');
+
+                      let cmd = lines[i];
+
+                      if (inIfSkip) {
+                          if (cmd.startsWith('если')) ifDepth++;
+                          if (cmd === 'все') {
+                              ifDepth--;
+                              if (ifDepth === 0) inIfSkip = false;
+                          }
+                          i++; continue;
+                      }
+
+                      if (cmd === 'вверх') { if(hasWall(robot.x, robot.y, 'up')) throw new Error('Робот разбился о стену сверху!'); robot.y--; }
+                      else if (cmd === 'вниз') { if(hasWall(robot.x, robot.y, 'down')) throw new Error('Робот разбился о стену снизу!'); robot.y++; }
+                      else if (cmd === 'влево') { if(hasWall(robot.x, robot.y, 'left')) throw new Error('Робот разбился о стену слева!'); robot.x--; }
+                      else if (cmd === 'вправо') { if(hasWall(robot.x, robot.y, 'right')) throw new Error('Робот разбился о стену справа!'); robot.x++; }
+                      else if (cmd === 'закрасить') { robot.painted.add(`${robot.x},${robot.y}`); }
+                      
+                      else if (cmd.startsWith('если')) {
+                          let cond = cmd.substring(4).replace(' то', '').trim();
+                          if (!evaluateCondition(robot, cond)) {
+                              inIfSkip = true;
+                              ifDepth = 1;
+                          }
+                      }
+                      else if (cmd === 'все') { /* Конец если - игнорируем */ }
+                      
+                      else if (cmd.startsWith('нц пока')) {
+                          let cond = cmd.substring(7).trim();
+                          if (!evaluateCondition(robot, cond)) {
+                              let depth = 1;
+                              while(depth > 0 && i < lines.length - 1) {
+                                  i++;
+                                  if(lines[i].startsWith('нц пока')) depth++;
+                                  else if(lines[i] === 'кц') depth--;
+                              }
+                              if(depth > 0) throw new Error('Нет парного "кц" для "нц пока"');
+                          } else {
+                              loopStack.push({ start: i, cond: cond });
+                          }
+                      }
+                      else if (cmd === 'кц') {
+                          if(loopStack.length > 0) {
+                              let loop = loopStack[loopStack.length - 1];
+                              if(evaluateCondition(robot, loop.cond)) i = loop.start; // Возврат в начало цикла
+                              else loopStack.pop();
+                          } else throw new Error('Лишний "кц" без "нц пока"');
+                      }
+                      else throw new Error('Неизвестная команда: ' + cmd);
+
+                      drawGrid(robot, robot.painted);
+                      await new Promise(r => setTimeout(r, 60)); // Задержка для анимации
+                      i++;
+                  }
+
+                  // Проверка результата
+                  let success = true;
+                  if(robot.painted.size !== map.targetPainted.size) success = false;
+                  for(let p of map.targetPainted) {
+                      if(!robot.painted.has(p)) success = false;
+                  }
+
+                  if (success) showFeedback(tid, true, "Идеально! Алгоритм успешно закрасил все нужные клетки.");
+                  else showFeedback(tid, false, "Алгоритм завершился, но закрашены не те клетки (или пропущены нужные). Проходы закрашивать нельзя!");
+                  
+              } catch(err) {
+                  errEl.innerText = err.message;
+                  errEl.classList.remove('hidden');
+              }
+
+              btn.disabled = false; btn.classList.remove('opacity-50');
           };
         }
       },
