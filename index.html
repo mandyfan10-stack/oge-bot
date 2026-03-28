@@ -10,41 +10,71 @@
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
     ::-webkit-scrollbar { width: 0px; background: transparent; }
-    body { background-color: #09090b; color: #fafafa; font-family: 'Inter', sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent;}
+    
+    body { 
+      background-color: #09090b; 
+      color: #fafafa; 
+      font-family: 'Inter', sans-serif; 
+      overflow: hidden; 
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    
+    /* Оптимизация скролла для мобильных */
+    .overflow-y-auto {
+      -webkit-overflow-scrolling: touch;
+      will-change: scroll-position;
+    }
+
+    /* Защита от авто-зума на iOS при фокусе */
+    input[type="number"], input[type="text"], textarea, select { 
+      font-size: 16px !important; 
+    }
     
     /* Анимации */
-    .animate-slide-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-    .animate-pop { animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+    .animate-pop { animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
     .animate-shake { animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
     .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
     .animate-message { animation: messagePop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards; transform-origin: bottom left; }
     .animate-message-user { animation: messagePop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards; transform-origin: bottom right; }
     .animate-spin-slow { animation: spin 3s linear infinite; }
 
-    @keyframes slideUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
     @keyframes popIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
-    @keyframes messagePop { 0% { opacity: 0; transform: scale(0.8) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    @keyframes messagePop { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
 
-    /* Премиум компоненты */
-    .glass-panel { background: rgba(24, 24, 27, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); }
-    .glass-button { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
-    .glass-button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    /* Премиум компоненты с аппаратным ускорением для мобилок */
+    .glass-panel { 
+      background: rgba(24, 24, 27, 0.65); 
+      backdrop-filter: blur(12px); 
+      -webkit-backdrop-filter: blur(12px); 
+      border: 1px solid rgba(255, 255, 255, 0.05); 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); 
+      transform: translateZ(0); /* Включает GPU рендеринг, убирая лаги */
+    }
+    .glass-button { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; }
+    
+    @media (hover: hover) {
+      .glass-button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    }
     .glass-button:active { transform: translateY(1px) scale(0.98); }
 
     #chat-modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
     #chat-modal.hidden-chat { opacity: 0; visibility: hidden; pointer-events: none; }
-    #chat-container { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    #chat-container { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
     #chat-modal.hidden-chat #chat-container { transform: translateY(100%); }
   </style>
 </head>
 <body>
   <!-- Окружающее свечение -->
   <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
-    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[100px]"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-blue-600/10 blur-[120px]"></div>
+    <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[100px]" style="transform: translateZ(0);"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-blue-600/10 blur-[120px]" style="transform: translateZ(0);"></div>
   </div>
 
   <!-- ЭКРАН 1: КУРСЫ (МОДУЛИ) -->
@@ -71,11 +101,11 @@
 
   <!-- ЭКРАН 2: СПИСОК ЗАДАЧ КУРСА -->
   <div id="screen-tasks" class="absolute inset-0 bg-[#09090b] transition-transform duration-500 ease-in-out translate-x-full overflow-y-auto p-5 pb-24 z-20">
-    <header class="flex items-center gap-4 pt-4 mb-8">
+    <header class="flex items-center gap-4 pt-4 mb-8 sticky top-0 bg-[#09090b]/90 backdrop-blur-md z-10 py-2 border-b border-white/5">
       <button onclick="closeCourse()" class="p-2 -ml-2 glass-button rounded-xl text-zinc-400 hover:text-white"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
       <div>
         <h2 id="course-title" class="font-medium text-xl text-zinc-100">Название курса</h2>
-        <p id="course-desc" class="text-sm text-zinc-500 font-light"></p>
+        <p id="course-desc" class="text-sm text-zinc-500 font-light truncate max-w-[250px]"></p>
       </div>
     </header>
     <div id="tasks-list" class="space-y-4"></div>
@@ -94,12 +124,12 @@
   </div>
 
   <!-- КНОПКА AI -->
-  <button onclick="toggleChat(true)" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_30px_rgba(99,102,241,0.4)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group">
+  <button onclick="toggleChat(true)" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group">
     <i data-lucide="bot" class="w-6 h-6 group-hover:animate-bounce"></i>
   </button>
 
   <!-- МОДАЛКА AI -->
-  <div id="chat-modal" class="hidden-chat fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end">
+  <div id="chat-modal" class="hidden-chat fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end" style="transform: translateZ(0);">
     <div class="absolute inset-0" onclick="toggleChat(false)"></div>
     <div id="chat-container" class="bg-[#09090b] border-t border-white/10 rounded-t-[2rem] w-full max-h-[85vh] flex flex-col relative z-10 shadow-2xl">
       <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3 mb-2"></div>
@@ -108,12 +138,12 @@
         <button onclick="toggleChat(false)" class="p-2 text-zinc-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
       </header>
       <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-5 scroll-smooth">
-        <div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">Привет! Я ИИ-репетитор. Спрашивай любую задачу, если застрял! ✨</div></div>
+        <div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">Привет! Я ИИ-репетитор. Спрашивай любую задачу, если застрял! ✨</div></div>
       </div>
       <div class="p-4 px-5 glass-panel border-t-0">
         <div class="flex gap-2 bg-black/40 border border-white/10 p-1.5 rounded-2xl">
-          <input type="text" id="chat-input" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-sm font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" class="bg-indigo-600 p-3 rounded-xl text-white"><i data-lucide="send" class="w-4 h-4"></i></button>
+          <input type="text" id="chat-input" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <button onclick="sendChatMessage()" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
       </div>
     </div>
@@ -170,7 +200,7 @@
     let currentTaskId = null;
     window.taskState = {}; 
 
-    if (window.Telegram?.WebApp) { window.Telegram.WebApp.expand(); }
+    if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
 
     function renderCourses() {
       const list = document.getElementById('courses-list');
@@ -196,8 +226,9 @@
             </div>
           </div>
         </button>
-      `}).join('');
-      lucide.createIcons();
+      `;
+      }).join('');
+      lucide.createIcons(); // Глобальный вызов решает проблему пропавших стрелок
       updateGlobalProgress();
     }
 
@@ -280,7 +311,7 @@
       document.getElementById('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
       if (currentCourseId) renderTasks(COURSES.find(c => c.id === currentCourseId));
-      setTimeout(() => { document.getElementById('task-content').innerHTML = ''; }, 500); 
+      setTimeout(() => { document.getElementById('task-content').innerHTML = ''; }, 300); 
     }
 
     function updateGlobalProgress() {
@@ -320,26 +351,29 @@
       inputEl.value = '';
       const messagesDiv = document.getElementById('chat-messages');
       
-      messagesDiv.innerHTML += `
+      messagesDiv.insertAdjacentHTML('beforeend', `
         <div class="flex justify-end animate-message-user">
-          <div class="max-w-[85%] p-4 rounded-2xl rounded-tr-none text-sm bg-indigo-600 text-white font-light shadow-lg">${text}</div>
-        </div>`;
+          <div class="max-w-[90%] p-4 rounded-2xl rounded-tr-none text-sm bg-indigo-600 text-white font-light shadow-lg">${text}</div>
+        </div>
+      `);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
-      messagesDiv.innerHTML += `
+      messagesDiv.insertAdjacentHTML('beforeend', `
         <div id="${typingId}" class="flex justify-start animate-message">
           <div class="p-4 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 flex gap-1 items-center">
             <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
             <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
             <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
           </div>
-        </div>`;
+        </div>
+      `);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       let taskContext = "";
       if (currentTaskId) {
-        const taskTitle = COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId)?.title || `Задание ${currentTaskId}`;
+        const taskObj = COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId);
+        const taskTitle = taskObj ? taskObj.title : `Задание ${currentTaskId}`;
         const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
         const contentEl = document.getElementById('task-content');
         const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
@@ -353,7 +387,9 @@
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: optimizedPrompt })
         });
         const data = await response.json();
-        document.getElementById(typingId).remove();
+        
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
         
         let visualAddon = '';
         if (currentTaskId && window.taskState[currentTaskId]) {
@@ -367,12 +403,13 @@
                     break;
                 case 3:
                     title = 'Схема: Логика на числовой оси'; color = 'pink';
-                    const s3_mark = s.reqSign === '>' ? '180' : '20';
-                    svgBody = `<line x1="20" y1="40" x2="180" y2="40" stroke="white" stroke-width="2"/><circle cx="100" cy="40" r="4" fill="#ec4899"/><text x="100" y="25" fill="white" font-size="11" text-anchor="middle">X ${s.reqSign} ${s.limit} И ${s.reqParity}</text><rect x="${s.reqSign === '>' ? 100 : 20}" y="38" width="80" height="4" fill="#ec4899" opacity="0.6"/>`;
+                    svgBody = `<line x1="20" y1="40" x2="180" y2="40" stroke="white" stroke-width="2"/><circle cx="100" cy="40" r="4" fill="#ec4899"/><text x="100" y="25" fill="white" font-size="11" text-anchor="middle">Найти X для: ${s.truth}</text><rect x="${s.sign === '>' ? 100 : 20}" y="38" width="80" height="4" fill="#ec4899" opacity="0.6"/>`;
                     break;
                 case 4:
                     title = 'Схема: Поиск в графе'; color = 'blue';
-                    if(s.w) svgBody = `<line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">${s.w.AB}</text><line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">${s.w.AC}</text><line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">${s.w.BD}</text><line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">${s.w.CD}</text><line x1="100" y1="20" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/><text x="110" y="55" fill="#93c5fd" font-size="10">${s.w.BC}</text><circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text><circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text><circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text><circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>`;
+                    if(s.w) {
+                        svgBody = `<line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">${s.w.AB}</text><line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">${s.w.AC}</text><line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">${s.w.BD}</text><line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">${s.w.CD}</text><line x1="100" y1="20" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/><text x="110" y="55" fill="#93c5fd" font-size="10">${s.w.BC}</text><circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text><circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text><circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text><circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>`;
+                    }
                     break;
                 case 5:
                     title = 'Схема: Уравнение алгоритма'; color = 'amber';
@@ -390,9 +427,13 @@
                     title = 'Схема: Перевод систем счисления'; color = 'indigo';
                     svgBody = `<text x="100" y="25" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n1}<tspan font-size="6" dy="4">16</tspan><tspan dy="-4"> = ${s.val1}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="45" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n2}<tspan font-size="6" dy="4">8</tspan><tspan dy="-4"> = ${s.val2}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="65" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n3}<tspan font-size="6" dy="4">2</tspan><tspan dy="-4"> = ${s.val3}</tspan><tspan font-size="6" dy="4">10</tspan></text>`;
                     break;
+                case 13:
+                    title = 'Схема: Форматирование текста'; color = 'rose';
+                    svgBody = `<rect x="40" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="55" y="40" fill="white" font-weight="bold" text-anchor="middle">Ж</text><rect x="85" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="100" y="40" fill="white" font-style="italic" font-family="serif" text-anchor="middle">К</text><rect x="130" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="145" y="40" fill="white" text-decoration="underline" text-anchor="middle">Ч</text>`;
+                    break;
                 case 14:
                     title = 'Схема: Таблицы Excel'; color = 'green';
-                    svgBody = `<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">Учеников</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">${s.q1Ans}</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">Процент</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">${s.q2Ans?.toFixed ? s.q2Ans.toFixed(2) : s.q2Ans}%</text>`;
+                    svgBody = `<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">Учеников</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">${s.q1Ans}</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">Процент</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">${typeof s.q2Ans === 'number' ? s.q2Ans.toFixed(2) : s.q2Ans}%</text>`;
                     break;
                 case 16:
                     title = 'Схема: Цикл FOR (range)'; color = 'emerald';
@@ -423,11 +464,14 @@
         }
 
         const aiText = data.reply || 'Ошибка обработки на сервере.';
-        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`;
-        setTimeout(() => lucide.createIcons(), 10);
+        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`);
+        
+        // Оптимизация: сканируем только последнее добавленное сообщение
+        setTimeout(() => lucide.createIcons({ root: messagesDiv.lastElementChild }), 10);
       } catch (err) {
-        document.getElementById(typingId).remove();
-        messagesDiv.innerHTML += `<div class="flex justify-start animate-message"><div class="max-w-[85%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ.</div></div>`;
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
@@ -472,7 +516,8 @@
             </div>
             <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t1-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t1 = (tid) => {
@@ -531,7 +576,8 @@
             <div><input type="text" id="t2-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
             <button onclick="window.check_t2(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t2-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t2 = (tid) => {
@@ -574,7 +620,8 @@
             </div>
             <button onclick="window.check_t3(${id})" class="w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t3-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t3 = (tid) => {
@@ -616,7 +663,7 @@
               <p class="text-sm text-zinc-400 font-light mt-1">Определите длину <b>самого короткого</b> пути между пунктами <b>A</b> и <b>E</b>.</p>
             </div>
             <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 overflow-x-auto">
-              <table class="w-full text-center text-sm font-mono">
+              <table class="w-full text-center text-sm font-mono min-w-[280px]">
                 <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
                   <tr><th class="p-2 border-r border-white/5"></th><th class="p-2">A</th><th class="p-2">B</th><th class="p-2">C</th><th class="p-2">D</th><th class="p-2">E</th></tr>
                 </thead>
@@ -634,7 +681,8 @@
             </div>
             <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t4-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t4 = (tid) => {
@@ -700,7 +748,8 @@
             </div>
             <button onclick="window.check_t5(${id})" class="w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t5-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t5 = (tid) => {
@@ -729,8 +778,13 @@
             const t = Math.floor(Math.random() * 30) - 15; 
             pairs.push(`(${s}, ${t})`);
             
-            let condS = eval(`${s} ${signS} ${A}`);
-            let condT = eval(`${t} ${signT} ${B}`);
+            // Безопасное вычисление без eval
+            let condS = false;
+            if (signS === '<') condS = s < A; else if (signS === '>') condS = s > A; else if (signS === '<=') condS = s <= A; else if (signS === '>=') condS = s >= A;
+            
+            let condT = false;
+            if (signT === '<') condT = t < B; else if (signT === '>') condT = t > B; else if (signT === '<=') condT = t <= B; else if (signT === '>=') condT = t >= B;
+
             let isYes = op === 'or' ? (condS || condT) : (condS && condT);
             if (isYes) yesCount++; else noCount++;
           }
@@ -767,7 +821,8 @@
             
             <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t6-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t6 = (tid) => {
@@ -807,7 +862,8 @@
             </div>
             <button onclick="window.check_t7(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           window.t7url = [];
           window.t7_add = (p) => { window.t7url.push(p); document.getElementById('t7-res').innerHTML = window.t7url.join(''); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
@@ -861,7 +917,8 @@
             </div>
             <button onclick="window.check_t8(${id})" class="w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t8-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t8 = (tid) => {
@@ -922,7 +979,8 @@
             </div>
             <button onclick="window.check_t9(${id})" class="w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           const s = window.taskState[id];
           const coords = { A:[30,110], B:[120,40], C:[120,180], D:[200,110], E:[200,180], F:[280,110], G:[350,70], H:[350,150] };
@@ -982,7 +1040,8 @@
             </div>
             <button onclick="window.check_t10(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t10-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t10 = (tid) => {
@@ -1027,7 +1086,8 @@
             </div>
             <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t11-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t11 = (tid) => {
@@ -1070,7 +1130,8 @@
             </div>
             <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t12-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t12 = (tid) => {
@@ -1083,12 +1144,25 @@
         }
       },
       13: {
-        init: (id) => { window.taskState[id] = { }; },
-        html: (id) => `
+        init: (id) => { 
+          const variants = [
+            { text: "Углерод — один из химических элементов периодической таблицы Менделеева. На Земле в свободном виде встречается в виде алмазов и графита.", words: ["Углерод", "Менделеева", "алмазов"] },
+            { text: "Москва — столица России. Город расположен на живописной реке Москве.", words: ["Москва", "столица", "реке"] },
+            { text: "Байкал — самое глубокое озеро на планете. В нём обитает уникальная нерпа.", words: ["Байкал", "озеро", "нерпа"] },
+            { text: "Пушкин — великий русский поэт. Его чудесные сказки известны всем с детства.", words: ["Пушкин", "поэт", "сказки"] }
+          ];
+          const v = variants[Math.floor(Math.random() * variants.length)];
+          const shuffledWords = [...v.words].sort(() => Math.random() - 0.5);
+          const map = { bold: shuffledWords[0], underline: shuffledWords[1], italic: shuffledWords[2] };
+          window.taskState[id] = { text: v.text, map }; 
+        },
+        html: (id) => {
+          const s = window.taskState[id];
+          return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 13.2: Редактор текста</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Создайте документ по образцу. Сделайте слово <b class="text-white">Углерод</b> жирным, <b class="text-white">Менделеева</b> подчеркнутым, а <b class="text-white">алмазов</b> курсивом.</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Создайте документ по образцу. Сделайте слово <b class="text-white">${s.map.bold}</b> жирным, <b class="text-white">${s.map.underline}</b> подчеркнутым, а <b class="text-white">${s.map.italic}</b> курсивом.</p>
             </div>
             <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
               <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
@@ -1096,20 +1170,37 @@
                 <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors">К</button>
                 <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors">Ч</button>
               </div>
-              <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">Углерод — один из химических элементов периодической таблицы Менделеева. На Земле в свободном виде встречается в виде алмазов и графита.</div>
+              <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
             </div>
             <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
           </div>
-        `,
+        `;
+        },
         setup: (id) => {
           document.getElementById('t13-editor').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t13 = (tid) => {
-            const editor = document.getElementById('t13-editor');
-            const html = editor.innerHTML.toLowerCase();
+            const s = window.taskState[tid];
+            const checkWord = (word, type) => {
+                const editor = document.getElementById('t13-editor');
+                const temp = document.createElement('div');
+                temp.innerHTML = editor.innerHTML;
+                let found = false;
+                const elements = temp.querySelectorAll('*');
+                elements.forEach(el => {
+                    const text = el.textContent.replace(/[.,]/g, '').trim().toLowerCase();
+                    const targetWord = word.replace(/[.,]/g, '').trim().toLowerCase();
+                    if (text === targetWord) {
+                        if (type === 'bold' && (el.tagName === 'B' || el.tagName === 'STRONG' || el.style.fontWeight === 'bold' || el.style.fontWeight >= '700')) found = true;
+                        if (type === 'italic' && (el.tagName === 'I' || el.tagName === 'EM' || el.style.fontStyle === 'italic')) found = true;
+                        if (type === 'underline' && (el.tagName === 'U' || (el.style.textDecoration && el.style.textDecoration.includes('underline')))) found = true;
+                    }
+                });
+                return found;
+            };
             
-            const hasBold = html.includes('<b>углерод</b>') || html.includes('<strong>углерод</strong>') || html.includes('font-weight: bold;">углерод');
-            const hasUnderline = html.includes('<u>менделеева</u>') || html.includes('text-decoration: underline;">менделеева');
-            const hasItalic = html.includes('<i>алмазов</i>') || html.includes('<em>алмазов</em>') || html.includes('font-style: italic;">алмазов');
+            const hasBold = checkWord(s.map.bold, 'bold');
+            const hasUnderline = checkWord(s.map.underline, 'underline');
+            const hasItalic = checkWord(s.map.italic, 'italic');
             
             if (hasBold && hasUnderline && hasItalic) {
                document.getElementById('t13-container').classList.add('!border-emerald-500', 'shadow-[0_0_20px_rgba(16,185,129,0.2)]');
@@ -1187,19 +1278,21 @@
             </div>
             <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t14-ans1').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           document.getElementById('t14-ans2').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t14 = (tid) => {
             const s = window.taskState[tid];
             const a1 = parseInt(document.getElementById('t14-ans1').value);
-            const a2 = parseFloat(document.getElementById('t14-ans2').value.replace(',', '.'));
+            const a2_str = document.getElementById('t14-ans2').value.replace(',', '.');
+            const a2 = parseFloat(a2_str);
             
             if (isNaN(a1) || isNaN(a2)) return showFeedback(tid, false, "Заполните оба поля числами.");
             
             const isA1Correct = a1 === s.q1Ans;
-            const isA2Correct = Math.abs(a2 - s.q2Ans) < 0.011 || a2.toFixed(2) === s.q2Ans.toFixed(2);
+            const isA2Correct = Math.abs(a2 - s.q2Ans) < 0.011 || (typeof s.q2Ans === 'number' && a2.toFixed(2) === s.q2Ans.toFixed(2));
             
             if (isA1Correct && isA2Correct) showFeedback(tid, true, "Оба ответа верны! Отличная аналитика данных.");
             else if (!isA1Correct && isA2Correct) showFeedback(tid, false, "Второй ответ верен, но первый посчитан с ошибкой.");
@@ -1288,7 +1381,7 @@
               let html = '';
               for(let y=0; y<map.h; y++){
                   for(let x=0; x<map.w; x++){
-                      let classes = 'relative border-white/[0.03] transition-colors duration-200 border ';
+                      let classes = 'relative border-white/[0.03] transition-colors duration-150 border ';
                       if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
                       if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
                       if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
@@ -1340,7 +1433,7 @@
                           if (!evaluateCondition(robot, cond)) { inIfSkip = true; ifDepth = 1; }
                       }
                       else if (cmd === 'иначе') { inIfSkip = true; ifDepth = 1; }
-                      else if (cmd === 'все') { }
+                      else if (cmd === 'все') { /* пустой блок */ }
                       else if (cmd.startsWith('нц пока')) {
                           let cond = cmd.substring(7).trim();
                           if (!evaluateCondition(robot, cond)) {
@@ -1360,7 +1453,10 @@
                       }
                       else throw new Error('Неизвестная команда: ' + cmd);
 
-                      drawGrid(robot, robot.painted); await new Promise(r => setTimeout(r, 60)); i++;
+                      drawGrid(robot, robot.painted); 
+                      // Оптимизация анимации
+                      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60))); 
+                      i++;
                   }
 
                   let success = true;
@@ -1397,7 +1493,8 @@
             </div>
             <button onclick="window.check_t16(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t16-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t16 = (tid) => {
@@ -1431,7 +1528,8 @@
             <input type="number" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             <button onclick="window.check_t17(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t17-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t17 = (tid) => {
@@ -1467,7 +1565,8 @@
             <input type="number" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             <button onclick="window.check_t18(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           document.getElementById('t18-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t18 = (tid) => {
@@ -1502,7 +1601,8 @@
             </div>
             <button onclick="window.check_t19(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
           </div>
-        `},
+        `;
+        },
         setup: (id) => {
           window.t19ip = [];
           window.t19_add = (p) => { window.t19ip.push(p); document.getElementById('t19-res').innerText = window.t19ip.join(''); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
@@ -1526,20 +1626,24 @@
           ];
           window.taskState[id] = qs[Math.floor(Math.random()*qs.length)]; 
         },
-        html: (id) => `
+        html: (id) => {
+          const s = window.taskState[id];
+          const buttons = ['HDD/SSD', 'ОЗУ', 'Процессор', 'Видеокарта', 'Материнская плата', 'Кулер'].sort(()=>Math.random()-0.5).map(v => 
+                `<button onclick="window.t20_sel('${v}')" id="t20-btn-${v.replace(/ /g,'-')}" class="t20-btns glass-button p-4 rounded-xl text-sm text-zinc-300 break-words">${v}</button>`
+          ).join('');
+          return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Устройство ПК</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Какое устройство отвечает за: <br><b class="text-white">${window.taskState[id].q}</b>?</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Какое устройство отвечает за: <br><b class="text-white">${s.q}</b>?</p>
             </div>
             <div class="grid grid-cols-2 gap-3">
-              ${['HDD/SSD', 'ОЗУ', 'Процессор', 'Видеокарта', 'Материнская плата', 'Кулер'].sort(()=>Math.random()-0.5).map(v => 
-                `<button onclick="window.t20_sel('${v}')" id="t20-btn-${v.replace(/ /g,'-')}" class="t20-btns glass-button p-4 rounded-xl text-sm text-zinc-300 break-words">${v}</button>`
-              ).join('')}
+              ${buttons}
             </div>
             <button onclick="window.check_t20(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Ответить</button>
           </div>
-        `,
+        `;
+        },
         setup: (id) => {
           window.t20ans = '';
           window.t20_sel = (v) => {
