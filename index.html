@@ -121,6 +121,7 @@
 
   <script>
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
+    const TOTAL_TASKS = 20;
 
     // --- СТРУКТУРА КУРСОВ ---
     const COURSES = [
@@ -132,10 +133,10 @@
           { id: 2, title: 'Задание 2', desc: 'Декодирование', icon: 'key' },
           { id: 3, title: 'Задание 3', desc: 'Логические выражения', icon: 'git-merge' },
           { id: 4, title: 'Задание 4', desc: 'Графы и маршруты', icon: 'route' },
-          { id: 5, title: 'Задание 5', desc: 'Исполнители', icon: 'cpu' },
-          { id: 6, title: 'Задание 6', desc: 'Анализ программы', icon: 'terminal' },
+          { id: 5, title: 'Задание 5', desc: 'Анализ алгоритма', icon: 'cpu' },
+          { id: 6, title: 'Задание 6', desc: 'Программы Python', icon: 'terminal' },
           { id: 7, title: 'Задание 7', desc: 'Адресация URL', icon: 'globe' },
-          { id: 8, title: 'Задание 8', desc: 'Множества', icon: 'layers' },
+          { id: 8, title: 'Задание 8', desc: 'Множества в поиске', icon: 'layers' },
           { id: 9, title: 'Задание 9', desc: 'Количество путей', icon: 'git-branch' },
           { id: 10, title: 'Задание 10', desc: 'Системы счисления', icon: 'binary' },
           { id: 11, title: 'Задание 11', desc: 'Поиск в тексте', icon: 'search' },
@@ -304,7 +305,7 @@
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
-    // --- AI ЧАТ С ДИНАМИЧЕСКИМИ SVG СХЕМАМИ ---
+    // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
       if (show) modal.classList.remove('hidden-chat');
@@ -342,7 +343,7 @@
         const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
         const contentEl = document.getElementById('task-content');
         const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
-        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры (включая ответы): ${stateInfo}. Опирайся строго на эти данные, так как условия генерируются случайно каждый раз.]`;
+        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры (включая ответы): ${stateInfo}. Опирайся строго на эти данные, так как условия генерируются случайно каждый раз. Шаг за шагом объясни решение, используя ТОЛЬКО те числа и параметры, которые сгенерированы в текущей задаче.]`;
       }
 
       const optimizedPrompt = text + taskContext;
@@ -354,7 +355,6 @@
         const data = await response.json();
         document.getElementById(typingId).remove();
         
-        // ДИНАМИЧЕСКИЕ SVG НА ОСНОВЕ СОСТОЯНИЯ ЗАДАЧИ
         let visualAddon = '';
         if (currentTaskId && window.taskState[currentTaskId]) {
             const s = window.taskState[currentTaskId];
@@ -380,15 +380,19 @@
                     break;
                 case 8:
                     title = 'Схема: Круги Эйлера'; color = 'fuchsia';
-                    svgBody = `<circle cx="75" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><circle cx="125" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><text x="60" y="44" fill="white" font-size="10" text-anchor="middle">${s.A}</text><text x="140" y="44" fill="white" font-size="10" text-anchor="middle">${s.B}</text><text x="100" y="44" fill="#f0abfc" font-size="9" font-weight="bold" text-anchor="middle">${s.AB}</text>`;
+                    svgBody = `<circle cx="75" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><circle cx="125" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><text x="60" y="44" fill="white" font-size="10" text-anchor="middle">${s.A}</text><text x="140" y="44" fill="white" font-size="10" text-anchor="middle">${s.B}</text><text x="100" y="44" fill="#f0abfc" font-size="9" font-weight="bold" text-anchor="middle">${s.Inter}</text>`;
+                    break;
+                case 9:
+                    title = 'Схема: Учет путей'; color = 'teal';
+                    svgBody = `<line x1="40" y1="50" x2="90" y2="30" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="40" y1="50" x2="90" y2="70" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="90" y1="30" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="90" y1="70" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><circle cx="40" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="40" y="54" fill="white" font-size="10" text-anchor="middle">A</text><circle cx="90" cy="30" r="10" fill="${s.specNode==='B'&&s.reqType===2?'#991b1b':'#134e4a'}" stroke="${s.specNode==='B'&&s.reqType===1?'#4ade80':'#2dd4bf'}" stroke-width="${s.specNode==='B'?3:1}"/><text x="90" y="34" fill="white" font-size="10" text-anchor="middle">B</text><circle cx="90" cy="70" r="10" fill="${s.specNode==='C'&&s.reqType===2?'#991b1b':'#134e4a'}" stroke="${s.specNode==='C'&&s.reqType===1?'#4ade80':'#2dd4bf'}" stroke-width="${s.specNode==='C'?3:1}"/><text x="90" y="74" fill="white" font-size="10" text-anchor="middle">C</text><circle cx="140" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="140" y="54" fill="#fde047" font-size="10" text-anchor="middle">D</text>`;
                     break;
                 case 10:
                     title = 'Схема: Перевод систем счисления'; color = 'indigo';
-                    svgBody = `<text x="100" y="40" fill="white" font-size="14" text-anchor="middle" font-family="monospace">${s.numStr}<tspan font-size="8" dy="5">${s.base}</tspan><tspan dy="-5"> = ... = ${s.dec}</tspan><tspan font-size="8" dy="5">10</tspan></text>`;
+                    svgBody = `<text x="100" y="25" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n1}<tspan font-size="6" dy="4">16</tspan><tspan dy="-4"> = ${s.val1}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="45" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n2}<tspan font-size="6" dy="4">8</tspan><tspan dy="-4"> = ${s.val2}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="65" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n3}<tspan font-size="6" dy="4">2</tspan><tspan dy="-4"> = ${s.val3}</tspan><tspan font-size="6" dy="4">10</tspan></text>`;
                     break;
                 case 14:
-                    title = 'Схема: Таблицы'; color = 'green';
-                    svgBody = `<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">A1</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">${s.v1 || 'X'}</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">A2</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">${s.v2 || 'Y'}</text><text x="75" y="65" fill="#bbf7d0" font-size="10" text-anchor="middle">${s.op || 'ФУНКЦ'}</text><text x="125" y="65" fill="#facc15" font-size="10" text-anchor="middle" font-weight="bold">${s.target || 'Z'}</text>`;
+                    title = 'Схема: Таблицы Excel'; color = 'green';
+                    svgBody = `<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">Учеников</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">${s.q1Ans}</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">Процент</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">${s.q2Ans?.toFixed ? s.q2Ans.toFixed(2) : s.q2Ans}%</text>`;
                     break;
                 case 16:
                     title = 'Схема: Цикл FOR (range)'; color = 'emerald';
@@ -429,7 +433,7 @@
     }
 
     // ==========================================
-    // ПЕСОЧНИЦЫ (20 штук) - МАКСИМАЛЬНАЯ СЛУЧАЙНОСТЬ
+    // ПЕСОЧНИЦЫ (20 штук) - МАКСИМАЛЬНАЯ ВАРИАТИВНОСТЬ (ОГЭ ФОРМАТ)
     // ==========================================
     const renderers = {
       1: {
@@ -445,7 +449,6 @@
           const encodings = [ {bits: 8, bytes: 1, name: 'КОИ-8'}, {bits: 16, bytes: 2, name: 'Unicode'}, {bits: 32, bytes: 4, name: 'UTF-32'} ];
           const enc = encodings[Math.floor(Math.random() * encodings.length)];
           
-          // Перемешиваем слова для случайного списка
           const shuffledWords = [...cat.words].sort(() => Math.random() - 0.5);
           const targetWord = shuffledWords[Math.floor(Math.random() * shuffledWords.length)];
           
@@ -462,20 +465,11 @@
               <h3 class="font-medium text-zinc-200 text-lg">Задание 1: Объем информации</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">В одной из кодировок ${s.name} каждый символ кодируется <b>${s.bits} битами</b>. Ученик написал текст (в нём нет лишних пробелов):</p>
             </div>
-            
-            <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-serif text-[15px] text-zinc-200 leading-relaxed shadow-inner">
-              «${s.text}»
-            </div>
-            
-            <p class="text-sm text-zinc-400 font-light leading-relaxed">
-              Ученик удалил из списка одно из названий. Заодно он вычеркнул ставшие лишними запятые и пробелы — два пробела не должны идти подряд.<br><br>
-              При этом размер нового предложения в данной кодировке оказался на <b class="text-white font-medium">${s.diffBytes} байт</b> меньше, чем размер исходного предложения. Напишите в ответе удаленное слово.
-            </p>
-            
+            <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-serif text-[15px] text-zinc-200 leading-relaxed shadow-inner">«${s.text}»</div>
+            <p class="text-sm text-zinc-400 font-light leading-relaxed">Ученик удалил из списка одно из названий. Заодно он вычеркнул ставшие лишними запятые и пробелы — два пробела не должны идти подряд.<br><br>При этом размер нового предложения в данной кодировке оказался на <b class="text-white font-medium">${s.diffBytes} байт</b> меньше, чем размер исходного предложения. Напишите в ответе удаленное слово.</p>
             <div class="flex items-center gap-4 mt-2">
               <input type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
             </div>
-            
             <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `},
@@ -484,7 +478,6 @@
           window.check_t1 = (tid) => {
             const ans = document.getElementById('t1-ans').value.trim().toLowerCase();
             const target = window.taskState[tid].targetWord.toLowerCase();
-            
             if (!ans) { showFeedback(tid, false, "Введите удаленное слово в поле ответа."); return; }
             if (ans === target) showFeedback(tid, true, `Блестяще! Удаленное слово — «${window.taskState[tid].targetWord}».`);
             else {
@@ -497,8 +490,7 @@
       2: {
         init: (id) => { 
           const chars = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЬЮЯ".split('');
-          const selectedChars = chars.sort(() => Math.random() - 0.5).slice(0, 4); // Берем 4 случайные буквы
-          // Простейшие безпрефиксные коды (или близкие к ним), чтобы можно было однозначно расшифровать
+          const selectedChars = chars.sort(() => Math.random() - 0.5).slice(0, 4); 
           const codes = ['00', '01', '100', '101', '110', '111'].sort(() => Math.random() - 0.5);
           
           let table = {};
@@ -508,8 +500,7 @@
              htmlTable += `<tr><td class="p-2">${c}</td><td class="p-2 text-emerald-400">${codes[i]}</td></tr>`;
           });
           
-          // Генерируем случайное слово из 3 букв из нашего словаря
-          const wordLen = Math.floor(Math.random() * 2) + 3; // 3-4 буквы
+          const wordLen = Math.floor(Math.random() * 2) + 3; 
           let targetWord = '';
           let encoded = '';
           for(let i=0; i<wordLen; i++) {
@@ -531,21 +522,13 @@
             <div class="p-4 bg-emerald-950/30 border border-emerald-900/50 rounded-2xl text-center">
               <span class="font-mono text-emerald-400 tracking-[0.3em] text-lg">${s.c}</span>
             </div>
-            
             <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40">
               <table class="w-full text-sm text-center font-mono">
-                <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
-                  <tr><th class="p-2 font-medium">Буква</th><th class="p-2 font-medium">Код</th></tr>
-                </thead>
-                <tbody class="text-zinc-300 divide-y divide-white/5">
-                  ${s.htmlTable}
-                </tbody>
+                <thead class="bg-white/5 border-b border-white/10 text-zinc-400"><tr><th class="p-2 font-medium">Буква</th><th class="p-2 font-medium">Код</th></tr></thead>
+                <tbody class="text-zinc-300 divide-y divide-white/5">${s.htmlTable}</tbody>
               </table>
             </div>
-
-            <div>
-              <input type="text" id="t2-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest">
-            </div>
+            <div><input type="text" id="t2-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
             <button onclick="window.check_t2(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
           </div>
         `},
@@ -560,35 +543,20 @@
       },
       3: {
         init: (id) => { 
-          const op = ['И', 'ИЛИ'][Math.floor(Math.random()*2)];
-          const reqSign = ['>', '<'][Math.floor(Math.random()*2)];
-          const reqParity = ['чётное', 'нечётное'][Math.floor(Math.random()*2)];
           const limit = Math.floor(Math.random() * 40) + 10;
+          const parity = ['чётное', 'нечётное'][Math.floor(Math.random()*2)];
           
-          // Для ОГЭ обычно спрашивают наименьшее при '>' и наибольшее при '<'
-          const findStr = reqSign === '>' ? 'наименьшее' : 'наибольшее';
+          const tpls = [
+            { sign: '>', op: 'И', truth: 'ИСТИННО', find: 'наименьшее', calc: (a, par) => { let x=a+1; while(true){ if((par==='чётное'?x%2===0:x%2!==0)) return x; x++; } }, logicStr: `(X > ${limit}) И (X ${parity})` },
+            { sign: '<', op: 'И', truth: 'ИСТИННО', find: 'наибольшее', calc: (a, par) => { let x=a-1; while(true){ if((par==='чётное'?x%2===0:x%2!==0)) return x; x--; } }, logicStr: `(X < ${limit}) И (X ${parity})` },
+            { sign: '<', op: 'ИЛИ', truth: 'ЛОЖНО', find: 'наименьшее', calc: (a, par) => { let x=a; while(true){ if((par==='чётное'?x%2!==0:x%2===0)) return x; x++; } }, logicStr: `(X < ${limit}) ИЛИ (X ${parity})` },
+            { sign: '>', op: 'ИЛИ', truth: 'ЛОЖНО', find: 'наибольшее', calc: (a, par) => { let x=a; while(true){ if((par==='чётное'?x%2!==0:x%2===0)) return x; x--; } }, logicStr: `(X > ${limit}) ИЛИ (X ${parity})` }
+          ];
           
-          // Вычисляем правильный ответ
-          let target = null;
-          if (reqSign === '>') {
-             let x = limit + 1;
-             while(true) {
-                let isParityOk = reqParity === 'чётное' ? (x%2===0) : (x%2!==0);
-                if (op === 'И' && isParityOk) { target = x; break; }
-                if (op === 'ИЛИ' && ((x>limit) || isParityOk)) { target = x; break; }
-                x++;
-             }
-          } else {
-             let x = limit - 1;
-             while(true) {
-                let isParityOk = reqParity === 'чётное' ? (x%2===0) : (x%2!==0);
-                if (op === 'И' && isParityOk) { target = x; break; }
-                if (op === 'ИЛИ' && ((x<limit) || isParityOk)) { target = x; break; }
-                x--;
-             }
-          }
+          const sel = tpls[Math.floor(Math.random() * tpls.length)];
+          const target = sel.calc(limit, parity);
 
-          window.taskState[id] = { op, reqSign, reqParity, limit, findStr, target }; 
+          window.taskState[id] = { op: sel.op, sign: sel.sign, reqParity: parity, limit, findStr: sel.find, truth: sel.truth, logicStr: sel.logicStr, target }; 
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -596,16 +564,14 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 3: Логика</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Найди <b>${s.findStr}</b> целое число X, для которого истинно высказывание:</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Найдите <b>${s.findStr}</b> целое число X, для которого <b class="text-white">${s.truth}</b> высказывание:</p>
             </div>
             <div class="p-4 bg-pink-950/20 border border-pink-900/30 rounded-2xl font-mono text-[15px] text-center text-zinc-300">
-              (X ${s.reqSign} ${s.limit}) <span class="text-pink-400 font-bold">${s.op}</span> (X ${s.reqParity})
+              ${s.logicStr}
             </div>
-            
             <div class="flex items-center gap-4 mt-4">
               <input type="number" id="t3-ans" placeholder="Ваш ответ (X)" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
             </div>
-            
             <button onclick="window.check_t3(${id})" class="w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
           </div>
         `},
@@ -614,32 +580,22 @@
           window.check_t3 = (tid) => {
             const ans = parseInt(document.getElementById('t3-ans').value);
             if(isNaN(ans)) return showFeedback(tid, false, "Введите число.");
-            
             const target = window.taskState[tid].target;
             if (ans === target) showFeedback(tid, true, `Идеально! Правильный ответ: ${target}.`);
-            else showFeedback(tid, false, `Неверно. Правильный ответ: ${target}. Проверьте, подходит ли ваше число под ВСЕ условия (${window.taskState[tid].op}).`);
+            else showFeedback(tid, false, `Неверно. Правильный ответ: ${target}.`);
           };
         }
       },
       4: {
         init: (id) => { 
-          // Динамическая генерация весов графа
           const w = {
              AB: Math.floor(Math.random()*6)+1, AC: Math.floor(Math.random()*8)+3,
              BC: Math.floor(Math.random()*5)+1, BD: Math.floor(Math.random()*7)+2,
              CD: Math.floor(Math.random()*4)+1, CE: Math.floor(Math.random()*7)+3,
              DE: Math.floor(Math.random()*6)+1
           };
+          const graph = { A: {B:w.AB, C:w.AC}, B: {A:w.AB, C:w.BC, D:w.BD}, C: {A:w.AC, B:w.BC, D:w.CD, E:w.CE}, D: {B:w.BD, C:w.CD, E:w.DE}, E: {C:w.CE, D:w.DE} };
           
-          const graph = { 
-            A: {B:w.AB, C:w.AC}, 
-            B: {A:w.AB, C:w.BC, D:w.BD}, 
-            C: {A:w.AC, B:w.BC, D:w.CD, E:w.CE}, 
-            D: {B:w.BD, C:w.CD, E:w.DE}, 
-            E: {C:w.CE, D:w.DE} 
-          };
-          
-          // DFS для поиска кратчайшего пути от A до E
           let minLen = Infinity;
           function dfs(node, len, visited) {
              if(node === 'E') { minLen = Math.min(minLen, len); return; }
@@ -659,7 +615,6 @@
               <h3 class="font-medium text-zinc-200 text-lg">Задание 4: Маршруты</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">Определите длину <b>самого короткого</b> пути между пунктами <b>A</b> и <b>E</b>.</p>
             </div>
-            
             <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40 overflow-x-auto">
               <table class="w-full text-center text-sm font-mono">
                 <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
@@ -674,41 +629,35 @@
                 </tbody>
               </table>
             </div>
-
             <div class="flex items-center gap-4">
-              <input type="number" id="t4-ans" placeholder="Длина кратчайшего пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
+              <input type="number" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить маршрут</button>
+            <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
           </div>
         `},
         setup: (id) => {
           document.getElementById('t4-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t4 = (tid) => {
-            let len = 0;
-            for(let i=0; i<window.t4path.length-1; i++) len += graph[window.t4path[i]][window.t4path[i+1]];
-            document.getElementById('t4-len-text').innerText = len; 
-            const target = window.taskState[tid].targetNode;
-            if (window.t4path[window.t4path.length-1] !== target) showFeedback(tid, false, `Вы не дошли до пункта ${target}.`);
-            else if (len > bestLens[target]) showFeedback(tid, false, `Длина ${len}. Это не кратчайший путь.`);
-            else showFeedback(tid, true, "Идеально! Маршрут рассчитан верно.");
+            const ans = parseInt(document.getElementById('t4-ans').value);
+            const target = window.taskState[tid].minLen;
+            if(isNaN(ans)) return showFeedback(tid, false, "Введите число.");
+            if (ans === target) showFeedback(tid, true, `Идеально! Маршрут рассчитан верно, длина ${target}.`);
+            else showFeedback(tid, false, `Ошибка. Это не кратчайший путь.`);
           };
         }
       },
       5: {
         init: (id) => { 
-          const ops = ['раздели на b', 'умножь на b'];
           const op2_type = Math.random() > 0.5 ? 'div' : 'mul';
           let b, A, start, end, seqArray;
           
-          // Ищем валидную комбинацию (чтобы при делении не было дробных чисел)
           while(true) {
-              b = Math.floor(Math.random() * 8) + 2; // 2..9
-              A = Math.floor(Math.random() * 9) + 1; // 1..9
-              start = Math.floor(Math.random() * 50) + 10; // 10..60
+              b = Math.floor(Math.random() * 8) + 2; 
+              A = Math.floor(Math.random() * 9) + 1; 
+              start = Math.floor(Math.random() * 50) + 10; 
               
-              // Генерируем программу из 5 команд (четыре команды 1 и одна команда 2)
               seqArray = Array(5).fill(1);
-              const pos2 = Math.floor(Math.random() * 3) + 1; // Команда 2 будет на 2, 3 или 4 месте
+              const pos2 = Math.floor(Math.random() * 3) + 1; 
               seqArray[pos2] = 2;
               
               let curr = start;
@@ -726,16 +675,11 @@
                       }
                   }
               }
-              
-              if (valid && curr > 0 && curr !== start) {
-                  end = curr;
-                  break;
-              }
+              if (valid && curr > 0 && curr !== start) { end = curr; break; }
           }
           
           const op2_text = op2_type === 'div' ? 'раздели на b' : 'умножь на b';
-          const seq = seqArray.join('');
-          window.taskState[id] = { A, b, start, end, seq, op2_text, op2_type }; 
+          window.taskState[id] = { A, b, start, end, seq: seqArray.join(''), op2_text, op2_type }; 
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -745,17 +689,12 @@
               <h3 class="font-medium text-zinc-200 text-lg">Задание 5: Анализ алгоритма</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">У исполнителя две команды, которым присвоены номера:</p>
             </div>
-            
             <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-mono text-[15px] text-zinc-300 shadow-inner space-y-2">
               <div><b class="text-amber-400">1.</b> прибавь ${s.A}</div>
               <div><b class="text-amber-400">2.</b> ${s.op2_text}</div>
               <div class="text-xs text-zinc-500 mt-3 pt-3 border-t border-white/5">(b — неизвестное натуральное число; b ≥ 2)</div>
             </div>
-            
-            <p class="text-sm text-zinc-400 font-light leading-relaxed">
-              Известно, что программа <b class="text-white tracking-widest bg-white/10 px-1 rounded">${s.seq}</b> переводит число <b class="text-white">${s.start}</b> в число <b class="text-white">${s.end}</b>. Определите значение <b class="text-white">b</b>.
-            </p>
-            
+            <p class="text-sm text-zinc-400 font-light leading-relaxed">Известно, что программа <b class="text-white tracking-widest bg-white/10 px-1 rounded">${s.seq}</b> переводит число <b class="text-white">${s.start}</b> в число <b class="text-white">${s.end}</b>. Определите значение <b class="text-white">b</b>.</p>
             <div class="flex gap-3">
               <input type="number" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
             </div>
@@ -767,15 +706,9 @@
           window.check_t5 = (tid) => {
             const ans = parseInt(document.getElementById('t5-ans').value);
             const target = window.taskState[tid].b;
-            if (isNaN(ans)) {
-                showFeedback(tid, false, "Введите числовое значение.");
-                return;
-            }
-            if (ans === target) {
-                showFeedback(tid, true, `Верно! Неизвестное число b = ${target}. Вы правильно составили и решили уравнение.`);
-            } else {
-                showFeedback(tid, false, `Неверно. Попробуйте составить уравнение, последовательно применяя команды к числу ${window.taskState[tid].start}.`);
-            }
+            if (isNaN(ans)) { showFeedback(tid, false, "Введите числовое значение."); return; }
+            if (ans === target) showFeedback(tid, true, `Верно! Неизвестное число b = ${target}. Вы правильно составили уравнение.`);
+            else showFeedback(tid, false, `Неверно. Попробуйте применить команды по очереди.`);
           };
         }
       },
@@ -786,11 +719,11 @@
           const op = ops[Math.floor(Math.random() * ops.length)];
           const signS = signs[Math.floor(Math.random() * signs.length)];
           const signT = signs[Math.floor(Math.random() * signs.length)];
-          const A = Math.floor(Math.random() * 20) - 10; // от -10 до 10
+          const A = Math.floor(Math.random() * 20) - 10;
           const B = Math.floor(Math.random() * 20) - 10;
           
           const pairs = [];
-          let yesCount = 0;
+          let yesCount = 0; let noCount = 0;
           for (let i = 0; i < 9; i++) {
             const s = Math.floor(Math.random() * 30) - 15; 
             const t = Math.floor(Math.random() * 30) - 15; 
@@ -799,9 +732,12 @@
             let condS = eval(`${s} ${signS} ${A}`);
             let condT = eval(`${t} ${signT} ${B}`);
             let isYes = op === 'or' ? (condS || condT) : (condS && condT);
-            if (isYes) yesCount++;
+            if (isYes) yesCount++; else noCount++;
           }
-          window.taskState[id] = { op, signS, signT, A, B, pairs, yesCount };
+          const askFor = Math.random() > 0.5 ? 'YES' : 'NO';
+          const targetCount = askFor === 'YES' ? yesCount : noCount;
+
+          window.taskState[id] = { op, signS, signT, A, B, pairs, askFor, targetCount };
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -809,7 +745,7 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 6: Анализ программы</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Было проведено 9 запусков программы. Сколько было запусков, при которых программа напечатала <b>«YES»</b>?</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Было проведено 9 запусков программы. Сколько было запусков, при которых программа напечатала <b class="text-white">«${s.askFor}»</b>?</p>
             </div>
             
             <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300 shadow-inner">
@@ -836,9 +772,9 @@
           document.getElementById('t6-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t6 = (tid) => {
             const ans = parseInt(document.getElementById('t6-ans').value);
-            const target = window.taskState[tid].yesCount;
+            const target = window.taskState[tid].targetCount;
             if (isNaN(ans)) { showFeedback(tid, false, "Введите число."); return; }
-            if (ans === target) showFeedback(tid, true, `Верно! Программа напечатает YES ровно ${target} раз.`);
+            if (ans === target) showFeedback(tid, true, `Верно! Программа напечатает ${window.taskState[tid].askFor} ровно ${target} раз.`);
             else showFeedback(tid, false, `Неверно. Правильный ответ: ${target}.`);
           };
         }
@@ -884,16 +820,23 @@
       },
       8: {
         init: (id) => { 
-          // Динамическая генерация данных для кругов Эйлера
           const words = [['Коты', 'Собаки'], ['Розы', 'Тюльпаны'], ['Чай', 'Кофе'], ['Яблоки', 'Груши']];
           const pair = words[Math.floor(Math.random()*words.length)];
           
           const A = Math.floor(Math.random() * 400) + 200;
           const B = Math.floor(Math.random() * 400) + 200;
-          const AB = Math.floor(Math.random() * Math.min(A,B) * 0.8) + 10;
-          const target = A + B - AB; // A | B
+          const Inter = Math.floor(Math.random() * Math.min(A,B) * 0.8) + 10;
+          const Union = A + B - Inter;
 
-          window.taskState[id] = { pair, A, B, AB, target }; 
+          const types = [
+             { q: `${pair[0]} | ${pair[1]}`, ans: Union, table: [[pair[0], A], [pair[1], B], [`${pair[0]} & ${pair[1]}`, Inter]] },
+             { q: `${pair[0]} & ${pair[1]}`, ans: Inter, table: [[pair[0], A], [pair[1], B], [`${pair[0]} | ${pair[1]}`, Union]] },
+             { q: `${pair[0]}`, ans: A, table: [[`${pair[0]} | ${pair[1]}`, Union], [pair[1], B], [`${pair[0]} & ${pair[1]}`, Inter]] }
+          ];
+          const sel = types[Math.floor(Math.random() * types.length)];
+          const shuffledTable = sel.table.sort(() => Math.random() - 0.5);
+
+          window.taskState[id] = { A, B, Inter, Union, pair, q: sel.q, ans: sel.ans, table: shuffledTable }; 
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -901,24 +844,20 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 8: Множества</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Определи количество страниц (в тысячах) по запросу <b>${s.pair[0]} | ${s.pair[1]}</b>.</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Определи количество страниц (в тысячах) по запросу <b>${s.q}</b>.</p>
             </div>
-            
             <div class="overflow-hidden rounded-xl border border-white/10 bg-black/40">
               <table class="w-full text-sm text-left">
                 <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
                   <tr><th class="p-3 font-medium">Запрос</th><th class="p-3 font-medium text-right">Найдено страниц</th></tr>
                 </thead>
                 <tbody class="text-zinc-300 divide-y divide-white/5 font-mono">
-                  <tr><td class="p-3">${s.pair[0]}</td><td class="p-3 text-right">${s.A}</td></tr>
-                  <tr><td class="p-3">${s.pair[1]}</td><td class="p-3 text-right">${s.B}</td></tr>
-                  <tr><td class="p-3">${s.pair[0]} & ${s.pair[1]}</td><td class="p-3 text-right">${s.AB}</td></tr>
+                  ${s.table.map(row => `<tr><td class="p-3">${row[0]}</td><td class="p-3 text-right">${row[1]}</td></tr>`).join('')}
                 </tbody>
               </table>
             </div>
-
             <div class="flex items-center gap-4">
-              <input type="number" id="t8-ans" placeholder="Ответ: ${s.pair[0]} | ${s.pair[1]}" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
+              <input type="number" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t8(${id})" class="w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
           </div>
@@ -927,14 +866,13 @@
           document.getElementById('t8-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t8 = (tid) => {
             const ans = parseInt(document.getElementById('t8-ans').value);
-            if (ans === window.taskState[tid].target) showFeedback(tid, true, "Верно! Вы правильно использовали формулу включений-исключений.");
-            else showFeedback(tid, false, `Ответ неверный. Подсказка: A | B = A + B - (A & B).`);
+            if (ans === window.taskState[tid].ans) showFeedback(tid, true, "Верно! Вы правильно использовали формулу включений-исключений.");
+            else showFeedback(tid, false, `Ответ неверный. Используйте формулу: A | B = A + B - (A & B).`);
           };
         }
       },
       9: {
         init: (id) => { 
-          // Динамическая генерация направленного ациклического графа (DAG)
           const targetNode = ['G', 'H'][Math.floor(Math.random()*2)];
           const baseEdges = [ ['A','B'], ['A','C'], ['B','D'], ['C','D'], ['C','E'], ['D','F'], ['E','F'], ['F','G'] ];
           const optionalEdges = [ ['A','D'], ['B','F'], ['E','G'], ['D','G'], ['F','H'], ['G','H'] ];
@@ -942,14 +880,33 @@
           let currentEdges = [...baseEdges];
           optionalEdges.forEach(edge => { if (Math.random() > 0.5) currentEdges.push(edge); });
           
-          // Динамическое программирование для подсчета путей
-          let paths = {A: 1, B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, H: 0};
-          const order = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-          order.forEach(node => {
-            currentEdges.filter(e => e[0] === node).forEach(e => { paths[e[1]] += paths[node]; });
+          const specNode = ['B', 'C'][Math.floor(Math.random()*2)];
+          const reqType = Math.floor(Math.random() * 3); 
+          
+          let qText = '';
+          if(reqType === 1) qText = `, проходящих через город <b>${specNode}</b>`;
+          if(reqType === 2) qText = `, <b>НЕ</b> проходящих через город <b>${specNode}</b>`;
+
+          let graph = {};
+          currentEdges.forEach(e => {
+              if(!graph[e[0]]) graph[e[0]] = [];
+              graph[e[0]].push(e[1]);
           });
 
-          window.taskState[id] = { targetNode, edges: currentEdges, answer: paths[targetNode] }; 
+          let count = 0;
+          function dfs(u, visited) {
+             if (u === targetNode) {
+                 if (reqType === 1 && !visited.includes(specNode)) return;
+                 if (reqType === 2 && visited.includes(specNode)) return;
+                 count++; return;
+             }
+             for(let v of graph[u] || []) {
+                 if(!visited.includes(v)) dfs(v, [...visited, v]);
+             }
+          }
+          dfs('A', ['A']);
+
+          window.taskState[id] = { targetNode, edges: currentEdges, qText, specNode, reqType, answer: count }; 
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -957,12 +914,9 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 9: Количество путей</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b> на графе ниже?</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b>${s.qText}?</p>
             </div>
-            
-            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4">
-            </svg>
-
+            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
             <div class="flex items-center gap-4">
               <input type="number" id="t9-ans" placeholder="Ваш ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
             </div>
@@ -971,7 +925,6 @@
         `},
         setup: (id) => {
           const s = window.taskState[id];
-          // Фиксированные координаты для красивой отрисовки, а ребра динамические
           const coords = { A:[30,110], B:[120,40], C:[120,180], D:[200,110], E:[200,180], F:[280,110], G:[350,70], H:[350,150] };
           
           let svgContent = `<defs><marker id="arrow" markerWidth="8" markerHeight="6" refX="21" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2dd4bf" /></marker></defs>`;
@@ -988,20 +941,26 @@
           document.getElementById('t9-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t9 = (tid) => {
             const ans = parseInt(document.getElementById('t9-ans').value);
-            if (ans === s.answer) showFeedback(tid, true, `Верно! В город ${s.targetNode} ведет ровно ${s.answer} путей.`);
-            else showFeedback(tid, false, "Ответ неверен. Попробуйте суммировать пути последовательно по узлам.");
+            if (ans === s.answer) showFeedback(tid, true, `Верно! В город ${s.targetNode} ведет ровно ${s.answer} подходящих путей.`);
+            else showFeedback(tid, false, `Ответ неверен. Правильный ответ: ${s.answer}. Внимательно учтите условие прохождения узлов.`);
           };
         }
       },
       10: {
         init: (id) => { 
-          // Динамические системы счисления
-          const bases = [2, 8, 16];
-          const base = bases[Math.floor(Math.random()*bases.length)];
-          const dec = Math.floor(Math.random()*200) + 50; // случайное число
-          const numStr = dec.toString(base).toUpperCase();
+          const val1 = Math.floor(Math.random()*40)+20;
+          const val2 = Math.floor(Math.random()*40)+20;
+          const val3 = Math.floor(Math.random()*40)+20;
           
-          window.taskState[id] = { base, dec, numStr }; 
+          const findMax = Math.random() > 0.5;
+          const typeStr = findMax ? 'максимальное' : 'минимальное';
+          const target = findMax ? Math.max(val1, val2, val3) : Math.min(val1, val2, val3);
+          
+          const n1 = val1.toString(16).toUpperCase();
+          const n2 = val2.toString(8);
+          const n3 = val3.toString(2);
+          
+          window.taskState[id] = { typeStr, target, val1, val2, val3, n1, n2, n3 }; 
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -1009,12 +968,15 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 10: Системы счисления</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Переведите число <b>${s.numStr}</b> из ${s.base}-й системы счисления в десятичную.</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Среди приведенных ниже трех чисел, записанных в различных системах счисления, найдите <b>${s.typeStr}</b> и запишите его в ответе в десятичной системе.</p>
             </div>
-            <div class="flex items-center justify-center p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner">
-              <span class="font-mono text-3xl text-indigo-300 tracking-widest">${s.numStr}<sub class="text-sm text-zinc-500">${s.base}</sub></span>
+            <div class="flex items-center justify-around p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner text-xl text-indigo-300 font-mono tracking-widest">
+              <span>${s.n1}<sub class="text-[10px] text-zinc-500">16</sub></span>
+              <span class="text-white/20">|</span>
+              <span>${s.n2}<sub class="text-[10px] text-zinc-500">8</sub></span>
+              <span class="text-white/20">|</span>
+              <span>${s.n3}<sub class="text-[10px] text-zinc-500">2</sub></span>
             </div>
-            
             <div class="flex items-center gap-4">
               <input type="number" id="t10-ans" placeholder="Ответ в 10-й системе" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
             </div>
@@ -1025,8 +987,8 @@
           document.getElementById('t10-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t10 = (tid) => {
             const ans = parseInt(document.getElementById('t10-ans').value);
-            if (ans === window.taskState[tid].dec) showFeedback(tid, true, "Идеальный перевод!");
-            else showFeedback(tid, false, `Неверно. Проверьте степени числа ${window.taskState[tid].base}.`);
+            if (ans === window.taskState[tid].target) showFeedback(tid, true, "Идеальный перевод и выбор!");
+            else showFeedback(tid, false, `Неверно. Переведи все 3 числа в десятичную и найди ${window.taskState[tid].typeStr}.`);
           };
         }
       },
@@ -1034,19 +996,16 @@
         init: (id) => {
           const words = ["код", "байт", "цикл", "сеть", "данные"];
           const targetWord = words[Math.floor(Math.random()*words.length)];
-          const count = Math.floor(Math.random()*4) + 2; // От 2 до 5 раз
+          const count = Math.floor(Math.random()*4) + 2; 
           
           let textArray = "Информатика — это наука, изучающая методы сбора, хранения и обработки информации. Основным элементом здесь является алгоритм, который позволяет автоматизировать сложные задачи.".split(' ');
           
-          // Вставляем искомое слово в случайные места
           for(let i=0; i<count; i++) {
              const insertPos = Math.floor(Math.random() * textArray.length);
-             // Случайный регистр и знаки препинания для сложности
              let w = targetWord;
              if (Math.random() > 0.5) w = w.charAt(0).toUpperCase() + w.slice(1);
              if (Math.random() > 0.7) w += ',';
              else if (Math.random() > 0.8) w += '.';
-             
              textArray.splice(insertPos, 0, w);
           }
           
@@ -1060,11 +1019,9 @@
               <h3 class="font-medium text-zinc-200 text-lg">Задание 11: Поиск в тексте</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">Сколько раз встречается слово <b>«${s.target}»</b> (со строчной или заглавной буквы) в тексте ниже?</p>
             </div>
-            
             <div class="bg-[#0f111a] rounded-2xl border border-white/5 overflow-hidden shadow-inner p-5 font-serif text-[15px] text-zinc-300 leading-relaxed max-h-[180px] overflow-y-auto">
               ${s.text}
             </div>
-
             <div class="flex items-center gap-4">
               <input type="number" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
             </div>
@@ -1077,27 +1034,21 @@
             const ans = parseInt(document.getElementById('t11-ans').value);
             const target = window.taskState[tid].count;
             if (ans === target) showFeedback(tid, true, `Верно! Слово встречается ровно ${target} раз.`);
-            else showFeedback(tid, false, "Неверно. Перечитайте текст внимательнее (учитывайте знаки препинания и заглавные буквы).");
+            else showFeedback(tid, false, "Неверно. Перечитайте текст внимательнее (учитывайте знаки препинания).");
           };
         }
       },
       12: {
         init: (id) => {
-          // Динамическая генерация файлов и масок
           const names = ['doc', 'report', 'test', 'data', 'image', 'photo', 'notes', 'archive'];
           const exts = ['pdf', 'txt', 'docx', 'jpg', 'png', 'zip'];
-          
           let files = [];
           for(let i=0; i<8; i++) {
               const prefix = Math.random() > 0.5 ? Math.floor(Math.random()*10) : '';
               files.push(`${names[Math.floor(Math.random()*names.length)]}${prefix}.${exts[Math.floor(Math.random()*exts.length)]}`);
           }
-          
-          // Выбираем маску, которая точно что-то найдет
           const targetExt = files[0].split('.')[1]; 
           const targetMask = `*.${targetExt}`;
-          
-          // Считаем правильный ответ
           let ans = 0;
           files.forEach(f => { if (f.endsWith(targetExt)) ans++; });
           
@@ -1111,11 +1062,9 @@
               <h3 class="font-medium text-zinc-200 text-lg">Задание 12: Файловые маски</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">Определите, сколько файлов из предложенного каталога удовлетворяют маске <b>${s.targetMask}</b>.</p>
             </div>
-            
             <div class="bg-black/60 rounded-2xl border border-white/5 p-4 font-mono text-[14px] text-zinc-400 h-[160px] overflow-y-auto leading-relaxed shadow-inner space-y-1">
               ${s.files.map((f, i) => `<div>${i+1}. ${f}</div>`).join('')}
             </div>
-
             <div class="flex items-center gap-4">
               <input type="number" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
             </div>
@@ -1134,16 +1083,13 @@
         }
       },
       13: {
-        init: (id) => {
-          window.taskState[id] = { }; 
-        },
+        init: (id) => { window.taskState[id] = { }; },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 13.2: Редактор текста</h3>
               <p class="text-sm text-zinc-400 font-light mt-1">Создайте документ по образцу. Сделайте слово <b class="text-white">Углерод</b> жирным, <b class="text-white">Менделеева</b> подчеркнутым, а <b class="text-white">алмазов</b> курсивом.</p>
             </div>
-            
             <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
               <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
                 <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors">Ж</button>
@@ -1152,7 +1098,6 @@
               </div>
               <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">Углерод — один из химических элементов периодической таблицы Менделеева. На Земле в свободном виде встречается в виде алмазов и графита.</div>
             </div>
-
             <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
           </div>
         `,
@@ -1171,30 +1116,46 @@
                showFeedback(tid, true, "Отлично! Все требования к форматированию выполнены.");
             } else {
                document.getElementById('t13-container').classList.remove('!border-emerald-500', 'shadow-[0_0_20px_rgba(16,185,129,0.2)]');
-               let missing = [];
-               if (!hasBold) missing.push('Углерод (жирный)');
-               if (!hasUnderline) missing.push('Менделеева (подчеркнутый)');
-               if (!hasItalic) missing.push('алмазов (курсив)');
-               showFeedback(tid, false, `Форматирование не совпадает с заданием. Не хватает: <b>${missing.join(', ')}</b>. Выделите нужное слово и нажмите кнопку на панели.`);
+               showFeedback(tid, false, "Форматирование не совпадает с заданием. Выделите нужное слово и нажмите кнопку на панели.");
             }
           };
         }
       },
       14: {
         init: (id) => { 
-          // Динамические функции Экселя
-          const v1 = Math.floor(Math.random()*50) + 10;
-          const v2 = Math.floor(Math.random()*50) + 10;
-          const ops = ['СУММ', 'МИН', 'МАКС', 'СРЗНАЧ'];
-          const op = ops[Math.floor(Math.random()*ops.length)];
+          const surnames = ['Александров', 'Иванов', 'Петров', 'Смирнова', 'Ананкина', 'Сидоров', 'Кузнецова', 'Андреев', 'Анай', 'Лиштаев'];
+          const names = ['Артемий', 'Иван', 'Анна', 'Полина', 'Ярослав', 'Дмитрий', 'Елена', 'Александра', 'Ангыр', 'Сергей'];
+          const subjects = ['информатика', 'алгебра', 'геометрия', 'русский язык', 'физика'];
+          const data = [];
+          for(let i=0; i<8; i++) {
+             data.push({
+                surname: surnames[Math.floor(Math.random()*surnames.length)],
+                name: names[Math.floor(Math.random()*names.length)],
+                grade: Math.floor(Math.random()*7) + 5,
+                sub: subjects[Math.floor(Math.random()*subjects.length)],
+                score: Math.floor(Math.random()*4) + 2
+             });
+          }
           
-          let target = 0;
-          if (op === 'СУММ') target = v1 + v2;
-          else if (op === 'МИН') target = Math.min(v1, v2);
-          else if (op === 'МАКС') target = Math.max(v1, v2);
-          else if (op === 'СРЗНАЧ') target = (v1 + v2) / 2;
+          const targetSub = subjects[Math.floor(Math.random()*subjects.length)];
+          const existingGrades = [...new Set(data.map(d => d.grade))];
+          const targetGrade = existingGrades[Math.floor(Math.random()*existingGrades.length)];
+          
+          let q1Ans = 0;
+          data.forEach(d => { if(d.sub === targetSub) q1Ans++; });
+          
+          let gradeCount = 0;
+          let goodScoreCount = 0;
+          data.forEach(d => { 
+              if(d.grade === targetGrade) { 
+                  gradeCount++; 
+                  if(d.score === 4 || d.score === 5) goodScoreCount++; 
+              } 
+          });
+          
+          let q2Ans = gradeCount === 0 ? 0 : (goodScoreCount / gradeCount) * 100;
 
-          window.taskState[id] = { v1, v2, op, target };
+          window.taskState[id] = { data, targetSub, targetGrade, q1Ans, q2Ans };
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -1202,43 +1163,58 @@
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 14: Электронные таблицы</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Определи результат вычисления формулы <b>=${s.op}(A1:A2)</b>.</p>
+              <p class="text-sm text-zinc-400 font-light mt-1">Проанализируй фрагмент таблицы и ответь на два вопроса.</p>
             </div>
-            
-            <div class="overflow-hidden rounded-2xl border border-white/10 bg-black/40 shadow-inner">
-              <div class="grid grid-cols-2 text-center border-b border-white/5"><div class="p-3 text-xs text-zinc-600 border-r border-white/5">1</div><div class="p-3 text-center text-white font-mono">${s.v1}</div></div>
-              <div class="grid grid-cols-2 text-center border-b border-white/5"><div class="p-3 text-xs text-zinc-600 border-r border-white/5">2</div><div class="p-3 text-center text-white font-mono">${s.v2}</div></div>
-              <div class="grid grid-cols-2 text-center bg-white/5"><div class="p-3 text-xs text-emerald-500 border-r border-white/5 font-bold">${s.op}</div><div class="p-2 text-emerald-300 font-light text-2xl" id="t14-res">?</div></div>
+            <div class="overflow-x-auto rounded-xl border border-white/10 bg-black/40">
+              <table class="w-full text-center text-xs font-mono whitespace-nowrap">
+                <thead class="bg-white/5 border-b border-white/10 text-zinc-400">
+                  <tr><th class="p-2 border-r border-white/5">Фамилия</th><th class="p-2 border-r border-white/5">Имя</th><th class="p-2 border-r border-white/5">Класс</th><th class="p-2 border-r border-white/5">Любимый предмет</th><th class="p-2">Оценка</th></tr>
+                </thead>
+                <tbody class="text-zinc-300 divide-y divide-white/5">
+                  ${s.data.map(row => `<tr><td class="p-2 border-r border-white/5">${row.surname}</td><td class="p-2 border-r border-white/5">${row.name}</td><td class="p-2 border-r border-white/5">${row.grade}</td><td class="p-2 border-r border-white/5">${row.sub}</td><td class="p-2">${row.score}</td></tr>`).join('')}
+                </tbody>
+              </table>
             </div>
-
-            <div class="flex items-center gap-4">
-              <input type="number" id="t14-ans" placeholder="Результат функции" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-green-500/50 text-center font-mono text-lg">
+            <div class="space-y-4 text-sm">
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
+                <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">1.</span> Сколько учеников любят предмет <b>${s.targetSub}</b>?</p>
+                <input type="number" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (целое число)">
+              </div>
+              <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
+                <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">2.</span> Какой процент учеников <b>${s.targetGrade} класса</b> имеют оценку за любимый предмет 4 или 5? (с точностью не менее 2 знаков)</p>
+                <input type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.50">
+              </div>
             </div>
-            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
           </div>
         `},
         setup: (id) => {
-          document.getElementById('t14-ans').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          document.getElementById('t14-ans1').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          document.getElementById('t14-ans2').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t14 = (tid) => {
-            const ans = parseFloat(document.getElementById('t14-ans').value);
-            const target = window.taskState[tid].target;
-            if(isNaN(ans)) return showFeedback(tid, false, "Введите число.");
+            const s = window.taskState[tid];
+            const a1 = parseInt(document.getElementById('t14-ans1').value);
+            const a2 = parseFloat(document.getElementById('t14-ans2').value.replace(',', '.'));
             
-            document.getElementById('t14-res').innerText = ans;
-            if (ans === target) showFeedback(tid, true, "Отлично! Электронная таблица работает верно.");
-            else showFeedback(tid, false, `Ошибка. Вспомните, как работает функция ${window.taskState[tid].op}.`);
+            if (isNaN(a1) || isNaN(a2)) return showFeedback(tid, false, "Заполните оба поля числами.");
+            
+            const isA1Correct = a1 === s.q1Ans;
+            const isA2Correct = Math.abs(a2 - s.q2Ans) < 0.011 || a2.toFixed(2) === s.q2Ans.toFixed(2);
+            
+            if (isA1Correct && isA2Correct) showFeedback(tid, true, "Оба ответа верны! Отличная аналитика данных.");
+            else if (!isA1Correct && isA2Correct) showFeedback(tid, false, "Второй ответ верен, но первый посчитан с ошибкой.");
+            else if (isA1Correct && !isA2Correct) showFeedback(tid, false, "Первый ответ верен, но процент посчитан неверно (или не учтена точность 2 знака).");
+            else showFeedback(tid, false, "Оба ответа неверны. Внимательно пересчитайте строки по условиям.");
           };
         }
       },
       15: {
         init: (id) => { 
-          // Динамическая генерация стен и разрывов (в стиле ОГЭ)
-          const cx = Math.floor(Math.random() * 2) + 6; // X-координата угла (6 или 7)
-          const cy = Math.floor(Math.random() * 2) + 2; // Y-координата угла (2 или 3)
-          const start_hx = Math.floor(Math.random() * 2) + 1; // Начало гор. стены
-          const end_vy = Math.floor(Math.random() * 2) + 7;   // Конец верт. стены
+          const cx = Math.floor(Math.random() * 2) + 6; 
+          const cy = Math.floor(Math.random() * 2) + 2; 
+          const start_hx = Math.floor(Math.random() * 2) + 1; 
+          const end_vy = Math.floor(Math.random() * 2) + 7;   
 
-          // Случайные проходы
           const h_gap_start = start_hx + Math.floor(Math.random() * (cx - start_hx - 1)); 
           const h_gap_len = Math.random() > 0.5 ? 2 : 1;
           
@@ -1249,24 +1225,19 @@
           let verticals = [];
           let targetPainted = []; 
           
-          // Строим горизонтальную стену 
           for(let x = start_hx; x <= cx; x++) {
               if (x >= h_gap_start && x < h_gap_start + h_gap_len) continue;
               horizontals.push({x, y: cy});
               if (!targetPainted.includes(`${x},${cy+1}`)) targetPainted.push(`${x},${cy+1}`);
           }
           
-          // Строим вертикальную стену
           for(let y = cy + 1; y <= end_vy; y++) {
               if (y >= v_gap_start && y < v_gap_start + v_gap_len) continue;
               verticals.push({x: cx, y});
               if (!targetPainted.includes(`${cx},${y}`)) targetPainted.push(`${cx},${y}`);
           }
 
-          window.taskState[id] = {
-            w: 10, h: 10, startX: start_hx, startY: cy + 1,
-            horizontals, verticals, targetPainted
-          };
+          window.taskState[id] = { w: 10, h: 10, startX: start_hx, startY: cy + 1, horizontals, verticals, targetPainted };
         },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
@@ -1299,7 +1270,6 @@
         `,
         setup: (id) => {
           const map = window.taskState[id];
-          
           const hasWall = (x, y, dir) => {
               if (x < 0 || x >= map.w || y < 0 || y >= map.h) return true;
               if (dir === 'up') return map.horizontals.some(w => w.x === x && w.y === y - 1);
@@ -1308,62 +1278,36 @@
               if (dir === 'right') return map.verticals.some(w => w.x === x && w.y === y);
               return false;
           };
-
           const evaluateCondition = (robot, condStr) => {
               let expr = condStr.replace(/\(/g, '').replace(/\)/g, '').toLowerCase();
-              expr = expr.replace(/сверху свободно/g, !hasWall(robot.x, robot.y, 'up'))
-                         .replace(/снизу свободно/g, !hasWall(robot.x, robot.y, 'down'))
-                         .replace(/слева свободно/g, !hasWall(robot.x, robot.y, 'left'))
-                         .replace(/справа свободно/g, !hasWall(robot.x, robot.y, 'right'));
+              expr = expr.replace(/сверху свободно/g, !hasWall(robot.x, robot.y, 'up')).replace(/снизу свободно/g, !hasWall(robot.x, robot.y, 'down')).replace(/слева свободно/g, !hasWall(robot.x, robot.y, 'left')).replace(/справа свободно/g, !hasWall(robot.x, robot.y, 'right'));
               expr = expr.replace(/не /g, '! ').replace(/ и /g, ' && ').replace(/ или /g, ' || ');
-              try { return new Function('return !!(' + expr + ')')(); }
-              catch(e) { throw new Error('Некорректное условие: ' + condStr); }
+              try { return new Function('return !!(' + expr + ')')(); } catch(e) { throw new Error('Некорректное условие: ' + condStr); }
           };
-
           const drawGrid = (robot, painted) => {
               let html = '';
               for(let y=0; y<map.h; y++){
                   for(let x=0; x<map.w; x++){
-                      let classes = 'relative border-white/[0.03] transition-colors duration-200 ';
-                      classes += 'border ';
-                      
+                      let classes = 'relative border-white/[0.03] transition-colors duration-200 border ';
                       if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
                       if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
                       if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
                       if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
-
-                      if(painted.has(`${x},${y}`)) classes += 'bg-blue-500/40 ';
-                      else classes += 'bg-black/20 ';
-
-                      let content = '';
-                      if(robot.x === x && robot.y === y) {
-                          content = '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
-                      }
-
+                      if(painted.has(`${x},${y}`)) classes += 'bg-blue-500/40 '; else classes += 'bg-black/20 ';
+                      let content = (robot.x === x && robot.y === y) ? '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>' : '';
                       html += `<div class="aspect-square ${classes}">${content}</div>`;
                   }
               }
               document.getElementById('t15-grid').innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
           };
 
-          window.reset_t15 = (tid) => {
-              document.getElementById('t15-error').classList.add('hidden');
-              document.getElementById(`feedback-${tid}`).classList.add('hidden');
-              drawGrid({x: map.startX, y: map.startY}, new Set());
-          };
-
+          window.reset_t15 = (tid) => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden'); drawGrid({x: map.startX, y: map.startY}, new Set()); };
           window.reset_t15(id);
-          document.getElementById('t15-code').oninput = () => { 
-             document.getElementById('t15-error').classList.add('hidden'); 
-             document.getElementById(`feedback-${id}`).classList.add('hidden'); 
-          };
+          document.getElementById('t15-code').oninput = () => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
 
           window.check_t15 = async (tid) => {
-              const btn = document.getElementById('t15-run-btn');
-              const errEl = document.getElementById('t15-error');
-              btn.disabled = true; btn.classList.add('opacity-50'); 
-              errEl.classList.add('hidden');
-              document.getElementById(`feedback-${tid}`).classList.add('hidden');
+              const btn = document.getElementById('t15-run-btn'); const errEl = document.getElementById('t15-error');
+              btn.disabled = true; btn.classList.add('opacity-50'); errEl.classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden');
               
               const code = document.getElementById('t15-code').value;
               let lines = code.split('\n').map(l => l.trim().toLowerCase()).filter(l => l);
@@ -1372,35 +1316,17 @@
               drawGrid(robot, robot.painted);
 
               try {
-                  let i = 0;
-                  let loopStack = [];
-                  let iterations = 0;
-                  let inIfSkip = false;
-                  let ifDepth = 0;
-
+                  let i = 0, loopStack = [], iterations = 0, inIfSkip = false, ifDepth = 0;
                   while(i < lines.length) {
-                      iterations++;
-                      if(iterations > 2000) throw new Error('Слишком много шагов! Возможно, бесконечный цикл.');
-
+                      iterations++; if(iterations > 2000) throw new Error('Слишком много шагов! Возможно, бесконечный цикл.');
                       let cmd = lines[i];
-                      
-                      // Обработка комментариев
                       if (cmd.includes('|')) cmd = cmd.split('|')[0].trim();
-                      if (!cmd) { i++; continue; }
-
-                      // Игнорируем структурные команды КуМира
-                      if (cmd === 'использовать робот' || cmd.startsWith('алг') || cmd === 'нач' || cmd === 'кон') {
-                          i++; continue;
-                      }
+                      if (!cmd || cmd === 'использовать робот' || cmd.startsWith('алг') || cmd === 'нач' || cmd === 'кон') { i++; continue; }
 
                       if (inIfSkip) {
                           if (cmd.startsWith('если')) ifDepth++;
-                          if (cmd === 'все') {
-                              ifDepth--;
-                              if (ifDepth === 0) inIfSkip = false;
-                          } else if (cmd === 'иначе' && ifDepth === 1) {
-                              inIfSkip = false; // Ветка иначе стала активной
-                          }
+                          if (cmd === 'все') { ifDepth--; if (ifDepth === 0) inIfSkip = false; }
+                          else if (cmd === 'иначе' && ifDepth === 1) inIfSkip = false; 
                           i++; continue;
                       }
 
@@ -1409,75 +1335,49 @@
                       else if (cmd === 'влево') { if(hasWall(robot.x, robot.y, 'left')) throw new Error('Робот разбился о стену слева!'); robot.x--; }
                       else if (cmd === 'вправо') { if(hasWall(robot.x, robot.y, 'right')) throw new Error('Робот разбился о стену справа!'); robot.x++; }
                       else if (cmd === 'закрасить') { robot.painted.add(`${robot.x},${robot.y}`); }
-                      
                       else if (cmd.startsWith('если')) {
                           let cond = cmd.substring(4).replace(' то', '').trim();
-                          if (!evaluateCondition(robot, cond)) {
-                              inIfSkip = true;
-                              ifDepth = 1;
-                          }
+                          if (!evaluateCondition(robot, cond)) { inIfSkip = true; ifDepth = 1; }
                       }
-                      else if (cmd === 'иначе') {
-                          inIfSkip = true;
-                          ifDepth = 1;
-                      }
-                      else if (cmd === 'все') { /* Конец если - игнорируем */ }
-                      
+                      else if (cmd === 'иначе') { inIfSkip = true; ifDepth = 1; }
+                      else if (cmd === 'все') { }
                       else if (cmd.startsWith('нц пока')) {
                           let cond = cmd.substring(7).trim();
                           if (!evaluateCondition(robot, cond)) {
                               let depth = 1;
                               while(depth > 0 && i < lines.length - 1) {
-                                  i++;
-                                  let peekCmd = lines[i].split('|')[0].trim();
-                                  if(peekCmd.startsWith('нц пока')) depth++;
-                                  else if(peekCmd === 'кц') depth--;
+                                  i++; let peekCmd = lines[i].split('|')[0].trim();
+                                  if(peekCmd.startsWith('нц пока')) depth++; else if(peekCmd === 'кц') depth--;
                               }
                               if(depth > 0) throw new Error('Нет парного "кц" для "нц пока"');
-                          } else {
-                              loopStack.push({ start: i, cond: cond });
-                          }
+                          } else loopStack.push({ start: i, cond: cond });
                       }
                       else if (cmd === 'кц') {
                           if(loopStack.length > 0) {
                               let loop = loopStack[loopStack.length - 1];
-                              if(evaluateCondition(robot, loop.cond)) i = loop.start; 
-                              else loopStack.pop();
+                              if(evaluateCondition(robot, loop.cond)) i = loop.start; else loopStack.pop();
                           } else throw new Error('Лишний "кц" без "нц пока"');
                       }
                       else throw new Error('Неизвестная команда: ' + cmd);
 
-                      drawGrid(robot, robot.painted);
-                      await new Promise(r => setTimeout(r, 60)); // Задержка для анимации
-                      i++;
+                      drawGrid(robot, robot.painted); await new Promise(r => setTimeout(r, 60)); i++;
                   }
 
                   let success = true;
                   if(robot.painted.size !== map.targetPainted.length) success = false;
-                  
-                  for(let p of map.targetPainted) {
-                      if(!robot.painted.has(p)) success = false;
-                  }
+                  for(let p of map.targetPainted) { if(!robot.painted.has(p)) success = false; }
 
                   if (success) showFeedback(tid, true, "Идеально! Алгоритм успешно закрасил все нужные клетки.");
                   else showFeedback(tid, false, "Алгоритм завершился, но закрашены не те клетки (или пропущены нужные). Проходы закрашивать нельзя!");
-                  
-              } catch(err) {
-                  errEl.innerText = err.message;
-                  errEl.classList.remove('hidden');
-              }
-
+              } catch(err) { errEl.innerText = err.message; errEl.classList.remove('hidden'); }
               btn.disabled = false; btn.classList.remove('opacity-50');
           };
         }
       },
-      // НОВЫЕ ЗАДАНИЯ КУРСА "PYTHON"
       16: {
         init: (id) => { 
-          // Динамический range()
           const start = Math.floor(Math.random() * 5);
           const stop = Math.floor(Math.random() * 10) + 10;
-          
           window.taskState[id] = { start, stop }; 
         },
         html: (id) => {
@@ -1510,14 +1410,10 @@
       },
       17: {
         init: (id) => { 
-          // Динамический массив и случайный индекс (в т.ч. отрицательный)
           const arr = Array.from({length: 5}, () => Math.floor(Math.random()*90)+10);
           const index = Math.floor(Math.random() * arr.length) * (Math.random() > 0.5 ? 1 : -1);
-          
-          // Вычисление ответа (Python style negative indexing)
           const pyIndex = index < 0 ? arr.length + index : index;
           const target = arr[pyIndex];
-
           window.taskState[id] = { arr, index, target }; 
         },
         html: (id) => {
@@ -1548,12 +1444,10 @@
       },
       18: {
         init: (id) => { 
-          // Динамическая генерация функции
           const a = Math.floor(Math.random() * 4) + 2;
           const b = (Math.floor(Math.random() * 10) + 1) * (Math.random() > 0.5 ? 1 : -1);
           const c = Math.floor(Math.random() * 10) + 2;
           const ans = c * a + b;
-
           window.taskState[id] = { a, b, c, ans }; 
         },
         html: (id) => {
@@ -1584,15 +1478,12 @@
           };
         }
       },
-      // НОВЫЕ ЗАДАНИЯ КУРСА "СЕТИ И ПК"
       19: {
         init: (id) => { 
-          // Динамическая генерация валидного IP-адреса
           const p1 = Math.floor(Math.random()*255);
           const p2 = Math.floor(Math.random()*255);
           const p3 = Math.floor(Math.random()*255);
           const p4 = Math.floor(Math.random()*255);
-          
           window.taskState[id] = { parts: [p1, p2, p3, p4] }; 
         },
         html: (id) => {
@@ -1625,7 +1516,6 @@
       },
       20: {
         init: (id) => { 
-          // Расширенный пул вопросов
           const qs = [
             {q: 'Долговременное хранение файлов', a: 'HDD/SSD'},
             {q: 'Временное хранение запущенных программ', a: 'ОЗУ'},
