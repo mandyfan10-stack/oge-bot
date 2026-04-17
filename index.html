@@ -332,11 +332,13 @@
       void fb.offsetWidth; 
       if (isCorrect) {
         fb.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'animate-pop');
-        fb.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
+        fb.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i><div></div>`;
+        fb.lastElementChild.textContent = msg;
         progress[taskId] = true;
       } else {
         fb.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/20', 'animate-shake');
-        fb.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
+        fb.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i><div></div>`;
+        fb.lastElementChild.textContent = msg;
       }
       lucide.createIcons();
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
