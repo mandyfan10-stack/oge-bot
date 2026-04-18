@@ -225,9 +225,9 @@
               <p class="text-zinc-500 font-light text-sm mt-1 mb-3">${c.desc}</p>
               <div class="flex items-center gap-2">
                 <div class="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div class="h-full bg-gradient-to-r ${c.color} rounded-full transition-all duration-500" style="width: ${(solvedInCourse/total)*100}%"></div>
+                  <div id="course-progress-bar-${c.id}" class="h-full bg-gradient-to-r ${c.color} rounded-full transition-all duration-500" style="width: ${(solvedInCourse/total)*100}%"></div>
                 </div>
-                <span class="text-xs font-mono text-zinc-400">${solvedInCourse}/${total}</span>
+                <span id="course-progress-text-${c.id}" class="text-xs font-mono text-zinc-400">${solvedInCourse}/${total}</span>
               </div>
             </div>
           </div>
@@ -250,7 +250,7 @@
 
     function closeCourse() {
       currentCourseId = null;
-      renderCourses(); 
+
       document.getElementById('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       document.getElementById('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
     }
@@ -316,7 +316,7 @@
       document.getElementById('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       document.getElementById('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
-      if (currentCourseId) renderTasks(COURSES.find(c => c.id === currentCourseId));
+
       setTimeout(() => { document.getElementById('task-content').innerHTML = ''; }, 300); 
     }
 
@@ -333,7 +333,31 @@
       if (isCorrect) {
         fb.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'animate-pop');
         fb.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
-        progress[taskId] = true;
+
+        if (!progress[taskId]) {
+          progress[taskId] = true;
+          updateGlobalProgress();
+
+          // Unhide task checkmark if in task list
+          const taskCheckIcon = document.getElementById(`check-icon-${taskId}`);
+          if (taskCheckIcon) {
+            taskCheckIcon.classList.remove('hidden');
+          }
+
+          // Update course progress directly
+          if (currentCourseId) {
+            const course = COURSES.find(c => c.id === currentCourseId);
+            if (course) {
+              const solvedInCourse = course.tasks.filter(t => progress[t.id]).length;
+              const total = course.tasks.length;
+              const progressBar = document.getElementById(`course-progress-bar-${currentCourseId}`);
+              const progressText = document.getElementById(`course-progress-text-${currentCourseId}`);
+
+              if (progressBar) progressBar.style.width = `${(solvedInCourse/total)*100}%`;
+              if (progressText) progressText.innerText = `${solvedInCourse}/${total}`;
+            }
+          }
+        }
       } else {
         fb.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/20', 'animate-shake');
         fb.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
