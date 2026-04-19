@@ -417,7 +417,7 @@
         const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
         const contentEl = document.getElementById('task-content');
         const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
-        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры (включая ответы): ${stateInfo}. Опирайся строго на эти данные, так как условия генерируются случайно каждый раз. Шаг за шагом объясни решение, используя ТОЛЬКО те числа и параметры, которые сгенерированы в текущей задаче.]`;
+        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры: ${stateInfo}. ТВОЯ ЗАДАЧА: Разжевать решение максимально подробно по шагам (Шаг 1, Шаг 2 и т.д.). Дай четкий, последовательный алгоритм, чтобы любой ученик понял. Обязательно опирайся ТОЛЬКО на числа из этой задачи. В конце напиши правильный ответ. Если ученик спрашивает не по задаче, мягко направь его обратно.]`;
       }
 
       const optimizedPrompt = text + taskContext;
@@ -438,8 +438,12 @@
             
             switch(currentTaskId) {
                 case 1:
-                    title = 'Схема: Биты и Байты'; color = 'indigo';
-                    svgBody = `<rect x="20" y="30" width="160" height="20" fill="none" stroke="#6366f1" stroke-width="2"/><line x1="40" y1="30" x2="40" y2="50" stroke="#6366f1"/><line x1="60" y1="30" x2="60" y2="50" stroke="#6366f1"/><line x1="80" y1="30" x2="80" y2="50" stroke="#6366f1"/><line x1="100" y1="30" x2="100" y2="50" stroke="#6366f1"/><line x1="120" y1="30" x2="120" y2="50" stroke="#6366f1"/><line x1="140" y1="30" x2="140" y2="50" stroke="#6366f1"/><line x1="160" y1="30" x2="160" y2="50" stroke="#6366f1"/><text x="100" y="20" fill="white" font-size="10" text-anchor="middle">1 Символ = ${s.bytes} Байт = ${s.bits} Бит</text>`;
+                    title = 'Схема: Кодирование текста'; color = 'indigo';
+                    svgBody = `<rect x="20" y="30" width="160" height="20" fill="none" stroke="#6366f1" stroke-width="2"/><line x1="40" y1="30" x2="40" y2="50" stroke="#6366f1"/><line x1="60" y1="30" x2="60" y2="50" stroke="#6366f1"/><line x1="80" y1="30" x2="80" y2="50" stroke="#6366f1"/><line x1="100" y1="30" x2="100" y2="50" stroke="#6366f1"/><line x1="120" y1="30" x2="120" y2="50" stroke="#6366f1"/><line x1="140" y1="30" x2="140" y2="50" stroke="#6366f1"/><line x1="160" y1="30" x2="160" y2="50" stroke="#6366f1"/><text x="100" y="20" fill="white" font-size="10" text-anchor="middle">1 Символ = ${s.bytes} Байт = ${s.bits} Бит</text><text x="100" y="65" fill="#818cf8" font-size="9" text-anchor="middle">Удалено байт: ${s.diffBytes} (слово + 2 символа)</text>`;
+                    break;
+                case 2:
+                    title = 'Схема: Декодирование азбуки Морзе'; color = 'violet';
+                    svgBody = `<rect x="10" y="25" width="180" height="30" fill="none" stroke="#8b5cf6" stroke-width="2" rx="4"/><text x="100" y="45" fill="white" font-size="14" text-anchor="middle" font-family="monospace" letter-spacing="2">${s.c}</text><line x1="100" y1="55" x2="100" y2="65" stroke="#a78bfa" marker-end="url(#arr-ai-violet)"/><text x="100" y="75" fill="#c4b5fd" font-size="10" text-anchor="middle">Разделите на уникальные символы</text>`;
                     break;
                 case 3:
                     title = 'Схема: Логика на числовой оси'; color = 'pink';
@@ -448,36 +452,60 @@
                 case 4:
                     title = 'Схема: Поиск в графе'; color = 'blue';
                     if(s.w) {
-                        svgBody = `<line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">${s.w.AB}</text><line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">${s.w.AC}</text><line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">${s.w.BD}</text><line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">${s.w.CD}</text><line x1="100" y1="20" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/><text x="110" y="55" fill="#93c5fd" font-size="10">${s.w.BC}</text><circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text><circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text><circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text><circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">D</text>`;
+                        svgBody = `<line x1="30" y1="50" x2="100" y2="20" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="30" fill="#93c5fd" font-size="10">${s.w.AB}</text><line x1="30" y1="50" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5"/><text x="65" y="75" fill="#93c5fd" font-size="10">${s.w.AC}</text><line x1="100" y1="20" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="30" fill="#93c5fd" font-size="10">${s.w.BD}</text><line x1="100" y1="80" x2="170" y2="50" stroke="#60a5fa" stroke-width="1.5"/><text x="135" y="75" fill="#93c5fd" font-size="10">${s.w.CD}</text><line x1="100" y1="20" x2="100" y2="80" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="2 2"/><text x="110" y="55" fill="#93c5fd" font-size="10">${s.w.BC}</text><circle cx="30" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="30" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">A</text><circle cx="100" cy="20" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="24" fill="white" font-size="11" text-anchor="middle" font-weight="bold">B</text><circle cx="100" cy="80" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="100" y="84" fill="white" font-size="11" text-anchor="middle" font-weight="bold">C</text><circle cx="170" cy="50" r="12" fill="#1e3a8a" stroke="#60a5fa"/><text x="170" y="54" fill="white" font-size="11" text-anchor="middle" font-weight="bold">E</text>`;
                     }
                     break;
                 case 5:
-                    title = 'Схема: Уравнение алгоритма'; color = 'amber';
+                    title = 'Схема: Алгоритм чертежника'; color = 'amber';
                     svgBody = `<rect x="10" y="30" width="30" height="20" fill="#d97706" rx="4"/><text x="25" y="44" fill="white" font-size="10" text-anchor="middle">${s.start}</text><line x1="45" y1="40" x2="155" y2="40" stroke="#f59e0b" stroke-dasharray="4" stroke-width="2" marker-end="url(#arr-ai-amber)"/><text x="100" y="30" fill="#fcd34d" font-size="10" text-anchor="middle">Программа: ${s.seq}</text><rect x="160" y="30" width="30" height="20" fill="#d97706" rx="4"/><text x="175" y="44" fill="white" font-size="10" text-anchor="middle">${s.end}</text>`;
+                    break;
+                case 6:
+                    title = 'Схема: Условный оператор IF'; color = 'rose';
+                    svgBody = `<path d="M 100,10 L 150,40 L 100,70 L 50,40 Z" fill="none" stroke="#f43f5e" stroke-width="2"/><text x="100" y="44" fill="white" font-size="10" text-anchor="middle">s ${s.signS} ${s.A} ${s.op} t ${s.signT} ${s.B}</text><line x1="150" y1="40" x2="180" y2="40" stroke="#fb7185" marker-end="url(#arr-ai-rose)"/><text x="165" y="35" fill="#fda4af" font-size="9" text-anchor="middle">YES</text><line x1="50" y1="40" x2="20" y2="40" stroke="#fb7185" marker-end="url(#arr-ai-rose)"/><text x="35" y="35" fill="#fda4af" font-size="9" text-anchor="middle">NO</text>`;
+                    break;
+                case 7:
+                    title = 'Схема: Структура URL'; color = 'cyan';
+                    svgBody = `<rect x="10" y="30" width="40" height="20" fill="#0891b2" rx="4"/><text x="30" y="44" fill="white" font-size="10" text-anchor="middle">Протокол</text><text x="60" y="44" fill="#67e8f9" font-size="12" text-anchor="middle">://</text><rect x="75" y="30" width="50" height="20" fill="#0891b2" rx="4"/><text x="100" y="44" fill="white" font-size="10" text-anchor="middle">Сервер</text><text x="135" y="44" fill="#67e8f9" font-size="12" text-anchor="middle">/</text><rect x="145" y="30" width="45" height="20" fill="#0891b2" rx="4"/><text x="167.5" y="44" fill="white" font-size="10" text-anchor="middle">Файл</text>`;
                     break;
                 case 8:
                     title = 'Схема: Круги Эйлера'; color = 'fuchsia';
-                    svgBody = `<circle cx="75" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><circle cx="125" cy="40" r="30" fill="rgba(192, 38, 211, 0.3)" stroke="#c026d3" stroke-width="2"/><text x="60" y="44" fill="white" font-size="10" text-anchor="middle">${s.A}</text><text x="140" y="44" fill="white" font-size="10" text-anchor="middle">${s.B}</text><text x="100" y="44" fill="#f0abfc" font-size="9" font-weight="bold" text-anchor="middle">${s.Inter}</text>`;
+                    svgBody = `<circle cx="75" cy="45" r="30" fill="none" stroke="#d946ef" stroke-width="2"/><text x="65" y="48" fill="#f0abfc" font-size="12" text-anchor="middle">A</text><circle cx="125" cy="45" r="30" fill="none" stroke="#d946ef" stroke-width="2"/><text x="135" y="48" fill="#f0abfc" font-size="12" text-anchor="middle">B</text><text x="100" y="48" fill="white" font-size="10" text-anchor="middle">A&B</text><text x="100" y="15" fill="#f5d0fe" font-size="10" text-anchor="middle">Общее: ${s.ans}</text>`;
                     break;
                 case 9:
-                    title = 'Схема: Учет путей'; color = 'teal';
+                    title = 'Схема: Количество путей'; color = 'teal';
                     svgBody = `<line x1="40" y1="50" x2="90" y2="30" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="40" y1="50" x2="90" y2="70" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="90" y1="30" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><line x1="90" y1="70" x2="140" y2="50" stroke="#2dd4bf" stroke-width="2" marker-end="url(#arr-ai-teal)"/><circle cx="40" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="40" y="54" fill="white" font-size="10" text-anchor="middle">A</text><circle cx="90" cy="30" r="10" fill="${s.specNode==='B'&&s.reqType===2?'#991b1b':'#134e4a'}" stroke="${s.specNode==='B'&&s.reqType===1?'#4ade80':'#2dd4bf'}" stroke-width="${s.specNode==='B'?3:1}"/><text x="90" y="34" fill="white" font-size="10" text-anchor="middle">B</text><circle cx="90" cy="70" r="10" fill="${s.specNode==='C'&&s.reqType===2?'#991b1b':'#134e4a'}" stroke="${s.specNode==='C'&&s.reqType===1?'#4ade80':'#2dd4bf'}" stroke-width="${s.specNode==='C'?3:1}"/><text x="90" y="74" fill="white" font-size="10" text-anchor="middle">C</text><circle cx="140" cy="50" r="10" fill="#134e4a" stroke="#2dd4bf"/><text x="140" y="54" fill="#fde047" font-size="10" text-anchor="middle">D</text>`;
                     break;
                 case 10:
-                    title = 'Схема: Перевод систем счисления'; color = 'indigo';
-                    svgBody = `<text x="100" y="25" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n1}<tspan font-size="6" dy="4">16</tspan><tspan dy="-4"> = ${s.val1}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="45" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n2}<tspan font-size="6" dy="4">8</tspan><tspan dy="-4"> = ${s.val2}</tspan><tspan font-size="6" dy="4">10</tspan></text><text x="100" y="65" fill="white" font-size="10" text-anchor="middle" font-family="monospace">${s.n3}<tspan font-size="6" dy="4">2</tspan><tspan dy="-4"> = ${s.val3}</tspan><tspan font-size="6" dy="4">10</tspan></text>`;
+                    title = 'Схема: Системы счисления'; color = 'orange';
+                    svgBody = `<text x="50" y="30" fill="white" font-size="12" text-anchor="middle">${s.n1.toString(s.val1)}<tspan font-size="8" dy="5">${s.val1}</tspan></text><text x="100" y="30" fill="white" font-size="12" text-anchor="middle">${s.n2.toString(s.val2)}<tspan font-size="8" dy="5">${s.val2}</tspan></text><text x="150" y="30" fill="white" font-size="12" text-anchor="middle">${s.n3.toString(s.val3)}<tspan font-size="8" dy="5">${s.val3}</tspan></text><line x1="50" y1="45" x2="50" y2="60" stroke="#fb923c" marker-end="url(#arr-ai-orange)"/><line x1="100" y1="45" x2="100" y2="60" stroke="#fb923c" marker-end="url(#arr-ai-orange)"/><line x1="150" y1="45" x2="150" y2="60" stroke="#fb923c" marker-end="url(#arr-ai-orange)"/><text x="100" y="75" fill="#fdba74" font-size="10" text-anchor="middle">Перевод в 10-ную систему</text>`;
+                    break;
+                case 11:
+                    title = 'Схема: Поиск в каталоге'; color = 'lime';
+                    svgBody = `<rect x="20" y="20" width="40" height="30" fill="none" stroke="#84cc16" stroke-width="2" rx="4"/><line x1="20" y1="30" x2="60" y2="30" stroke="#84cc16"/><text x="40" y="45" fill="white" font-size="10" text-anchor="middle">TXT</text><rect x="80" y="20" width="40" height="30" fill="none" stroke="#84cc16" stroke-width="2" rx="4"/><line x1="80" y1="30" x2="120" y2="30" stroke="#84cc16"/><text x="100" y="45" fill="white" font-size="10" text-anchor="middle">DOCX</text><rect x="140" y="20" width="40" height="30" fill="none" stroke="#84cc16" stroke-width="2" rx="4"/><line x1="140" y1="30" x2="180" y2="30" stroke="#84cc16"/><text x="160" y="45" fill="white" font-size="10" text-anchor="middle">PDF</text><text x="100" y="70" fill="#d9f99d" font-size="10" text-anchor="middle">Поиск слова: ${s.target}</text>`;
+                    break;
+                case 12:
+                    title = 'Схема: Маски файлов'; color = 'cyan';
+                    svgBody = `<text x="100" y="25" fill="#22d3ee" font-size="12" text-anchor="middle" font-family="monospace">Маска: ${s.targetMask}</text><text x="100" y="45" fill="white" font-size="10" text-anchor="middle">* = любое число символов</text><text x="100" y="60" fill="white" font-size="10" text-anchor="middle">? = ровно один символ</text>`;
                     break;
                 case 13:
-                    title = 'Схема: Форматирование текста'; color = 'rose';
-                    svgBody = `<rect x="40" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="55" y="40" fill="white" font-weight="bold" text-anchor="middle">Ж</text><rect x="85" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="100" y="40" fill="white" font-style="italic" font-family="serif" text-anchor="middle">К</text><rect x="130" y="20" width="30" height="30" fill="#e11d48" rx="4"/><text x="145" y="40" fill="white" text-decoration="underline" text-anchor="middle">Ч</text>`;
+                    title = 'Схема: Создание презентаций'; color = 'indigo';
+                    svgBody = `<rect x="30" y="20" width="40" height="30" fill="none" stroke="#6366f1" stroke-width="2" rx="2"/><rect x="80" y="20" width="40" height="30" fill="none" stroke="#6366f1" stroke-width="2" rx="2"/><rect x="130" y="20" width="40" height="30" fill="none" stroke="#6366f1" stroke-width="2" rx="2"/><text x="100" y="70" fill="#a5b4fc" font-size="10" text-anchor="middle">Шрифт, отступы, выравнивание</text>`;
                     break;
                 case 14:
                     title = 'Схема: Таблицы Excel'; color = 'green';
                     svgBody = `<rect x="50" y="10" width="100" height="60" fill="none" stroke="#16a34a" stroke-width="2"/><line x1="50" y1="30" x2="150" y2="30" stroke="#16a34a"/><line x1="50" y1="50" x2="150" y2="50" stroke="#16a34a"/><line x1="100" y1="10" x2="100" y2="70" stroke="#16a34a"/><text x="75" y="25" fill="#bbf7d0" font-size="10" text-anchor="middle">Учеников</text><text x="125" y="25" fill="white" font-size="10" text-anchor="middle">${s.q1Ans}</text><text x="75" y="45" fill="#bbf7d0" font-size="10" text-anchor="middle">Процент</text><text x="125" y="45" fill="white" font-size="10" text-anchor="middle">${typeof s.q2Ans === 'number' ? s.q2Ans.toFixed(2) : s.q2Ans}%</text>`;
                     break;
+                case 15:
+                    title = 'Схема: Робот в лабиринте'; color = 'blue';
+                    svgBody = `<rect x="60" y="20" width="80" height="40" fill="none" stroke="#3b82f6" stroke-width="2"/><line x1="100" y1="20" x2="100" y2="60" stroke="#3b82f6" stroke-width="2"/><circle cx="80" cy="40" r="5" fill="#60a5fa"/><circle cx="120" cy="40" r="5" fill="#bfdbfe" opacity="0.5"/><path d="M 85,40 Q 100,25 115,40" fill="none" stroke="#93c5fd" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arr-ai-blue)"/><text x="100" y="75" fill="#bfdbfe" font-size="10" text-anchor="middle">Движение вдоль стен (Пока Сверху Стена)</text>`;
+                    break;
                 case 16:
                     title = 'Схема: Цикл FOR (range)'; color = 'emerald';
-                    svgBody = `<path d="M 60,40 A 40,20 0 1,1 140,40 A 40,20 0 1,1 60,40" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/><text x="100" y="44" fill="white" font-size="12" text-anchor="middle" font-family="monospace">start: ${s.start}, stop: ${s.stop}</text>`;
+                    svgBody = `<path d="M 60,40 A 40,20 0 1,1 140,40 A 40,20 0 1,1 60,40" fill="none" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/><text x="100" y="44" fill="white" font-size="12" text-anchor="middle" font-family="monospace">start: ${s.start}, stop: ${s.stop}</text><text x="100" y="70" fill="#6ee7b7" font-size="10" text-anchor="middle">Выполняется ${s.stop - s.start} раз</text>`;
+                    break;
+                case 17:
+                    title = 'Схема: Массивы (Списки)'; color = 'amber';
+                    svgBody = `<rect x="20" y="30" width="160" height="20" fill="none" stroke="#f59e0b" stroke-width="2"/><line x1="60" y1="30" x2="60" y2="50" stroke="#f59e0b"/><line x1="100" y1="30" x2="100" y2="50" stroke="#f59e0b"/><line x1="140" y1="30" x2="140" y2="50" stroke="#f59e0b"/><text x="40" y="25" fill="#fcd34d" font-size="8" text-anchor="middle">0</text><text x="80" y="25" fill="#fcd34d" font-size="8" text-anchor="middle">1</text><text x="120" y="25" fill="#fcd34d" font-size="8" text-anchor="middle">...</text><text x="160" y="25" fill="#fcd34d" font-size="8" text-anchor="middle">${s.arr.length-1}</text><text x="100" y="65" fill="white" font-size="10" text-anchor="middle">arr[${s.index}] = ${s.target}</text>`;
                     break;
                 case 18:
                     title = 'Схема: Работа функции'; color = 'emerald';
@@ -489,8 +517,11 @@
                         svgBody = `<rect x="10" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="27.5" y="44" fill="white" font-size="10" text-anchor="middle">${s.parts[0]}</text><circle cx="52.5" cy="40" r="2" fill="white"/><rect x="60" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="77.5" y="44" fill="white" font-size="10" text-anchor="middle">${s.parts[1]}</text><circle cx="102.5" cy="40" r="2" fill="white"/><rect x="110" y="30" width="35" height="20" fill="#0284c7" rx="4"/><text x="127.5" y="44" fill="white" font-size="10" text-anchor="middle">${s.parts[2]}</text><circle cx="152.5" cy="40" r="2" fill="white"/><rect x="160" y="30" width="30" height="20" fill="#0284c7" rx="4"/><text x="175" y="44" fill="white" font-size="10" text-anchor="middle">${s.parts[3]}</text>`;
                     }
                     break;
+                case 20:
+                    title = 'Схема: Устройство компьютера'; color = 'slate';
+                    svgBody = `<rect x="40" y="10" width="120" height="60" fill="none" stroke="#94a3b8" stroke-width="2" rx="4"/><rect x="50" y="20" width="30" height="30" fill="#475569" rx="2"/><text x="65" y="40" fill="white" font-size="10" text-anchor="middle">CPU</text><rect x="90" y="20" width="20" height="30" fill="#475569" rx="2"/><text x="100" y="40" fill="white" font-size="8" text-anchor="middle">RAM</text><rect x="120" y="20" width="30" height="30" fill="#475569" rx="2"/><text x="135" y="40" fill="white" font-size="10" text-anchor="middle">ROM</text><line x1="80" y1="35" x2="90" y2="35" stroke="#cbd5e1"/><line x1="110" y1="35" x2="120" y2="35" stroke="#cbd5e1"/>`;
+                    break;
             }
-            
             if (svgBody) {
                 visualAddon = `
                 <div class="mt-4 p-4 bg-${color}-950/40 border border-${color}-500/30 rounded-xl">
@@ -552,7 +583,7 @@
             <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-serif text-[15px] text-zinc-200 leading-relaxed shadow-inner">«${s.text}»</div>
             <p class="text-sm text-zinc-400 font-light leading-relaxed">Ученик удалил из списка одно из названий. Заодно он вычеркнул ставшие лишними запятые и пробелы — два пробела не должны идти подряд.<br><br>При этом размер нового предложения в данной кодировке оказался на <b class="text-white font-medium">${s.diffBytes} байт</b> меньше, чем размер исходного предложения. Напишите в ответе удаленное слово.</p>
             <div class="flex items-center gap-4 mt-2">
-              <input type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
+              <input inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
             </div>
             <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
@@ -613,8 +644,8 @@
                 <tbody class="text-zinc-300 divide-y divide-white/5">${s.htmlTable}</tbody>
               </table>
             </div>
-            <div><input type="text" id="t2-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
-            <button onclick="window.check_t2(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
+            <div><input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t2-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
+            <button onclick="window.check_t2(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
           </div>
         `;
         },
@@ -647,18 +678,18 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Задание 3: Логика</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Найдите <b>${s.findStr}</b> целое число X, для которого <b class="text-white">${s.truth}</b> высказывание:</p>
+              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 3: Логика</h3>
+              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Найдите <b>${s.findStr}</b> целое число X, для которого <b class="active:scale-95 transition-all shadow-md text-white">${s.truth}</b> высказывание:</p>
             </div>
-            <div class="p-4 bg-pink-950/20 border border-pink-900/30 rounded-2xl font-mono text-[15px] text-center text-zinc-300">
+            <div class="active:scale-95 transition-all shadow-md p-4 bg-pink-950/20 border border-pink-900/30 rounded-2xl font-mono text-[15px] text-center text-zinc-300">
               ${s.logicStr}
             </div>
-            <div class="flex items-center gap-4 mt-4">
-              <input type="number" id="t3-ans" placeholder="Ваш ответ (X)" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
+            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4 mt-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t3-ans" placeholder="Ваш ответ (X)" class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t3(${id})" class="w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
+            <button onclick="window.check_t3(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
           </div>
         `;
         },
@@ -717,9 +748,9 @@
               </table>
             </div>
             <div class="flex items-center gap-4">
-              <input type="number" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
+            <button onclick="window.check_t4(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
           </div>
         `;
         },
@@ -784,9 +815,9 @@
             </div>
             <p class="text-sm text-zinc-400 font-light leading-relaxed">Известно, что программа <b class="text-white tracking-widest bg-white/10 px-1 rounded">${s.seq}</b> переводит число <b class="text-white">${s.start}</b> в число <b class="text-white">${s.end}</b>. Определите значение <b class="text-white">b</b>.</p>
             <div class="flex gap-3">
-              <input type="number" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t5(${id})" class="w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
+            <button onclick="window.check_t5(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `;
         },
@@ -856,10 +887,10 @@
             </div>
             
             <div class="flex items-center gap-4">
-              <input type="number" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
             </div>
             
-            <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t6(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -897,10 +928,10 @@
             </div>
             <div id="t7-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 break-all">...</div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${p}</button>`).join('')}
-              <button onclick="window.t7_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="active:scale-95 transition-all shadow-md glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${p}</button>`).join('')}
+              <button onclick="window.t7_clear()" aria-label="Очистить" title="Очистить" class="active:scale-95 transition-all shadow-md px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="active:scale-95 transition-all shadow-md w-4 h-4"></i></button>
             </div>
-            <button onclick="window.check_t7(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
+            <button onclick="window.check_t7(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
           </div>
         `;
         },
@@ -953,9 +984,9 @@
               </table>
             </div>
             <div class="flex items-center gap-4">
-              <input type="number" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t8(${id})" class="w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
+            <button onclick="window.check_t8(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
           </div>
         `;
         },
@@ -1008,16 +1039,16 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Задание 9: Количество путей</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b>${s.qText}?</p>
+              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 9: Количество путей</h3>
+              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b>${s.qText}?</p>
             </div>
-            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
-            <div class="flex items-center gap-4">
-              <input type="number" id="t9-ans" placeholder="Ваш ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
+            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="active:scale-95 transition-all shadow-md w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
+            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t9-ans" placeholder="Ваш ответ..." class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
             </div>
-            <button onclick="window.check_t9(${id})" class="w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
+            <button onclick="window.check_t9(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
           </div>
         `;
         },
@@ -1063,22 +1094,22 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Задание 10: Системы счисления</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Среди приведенных ниже трех чисел, записанных в различных системах счисления, найдите <b>${s.typeStr}</b> и запишите его в ответе в десятичной системе.</p>
+              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 10: Системы счисления</h3>
+              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Среди приведенных ниже трех чисел, записанных в различных системах счисления, найдите <b>${s.typeStr}</b> и запишите его в ответе в десятичной системе.</p>
             </div>
-            <div class="flex items-center justify-around p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner text-xl text-indigo-300 font-mono tracking-widest">
-              <span>${s.n1}<sub class="text-[10px] text-zinc-500">16</sub></span>
-              <span class="text-white/20">|</span>
-              <span>${s.n2}<sub class="text-[10px] text-zinc-500">8</sub></span>
-              <span class="text-white/20">|</span>
-              <span>${s.n3}<sub class="text-[10px] text-zinc-500">2</sub></span>
+            <div class="active:scale-95 transition-all shadow-md flex items-center justify-around p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner text-xl text-indigo-300 font-mono tracking-widest">
+              <span>${s.n1}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">16</sub></span>
+              <span class="active:scale-95 transition-all shadow-md text-white/20">|</span>
+              <span>${s.n2}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">8</sub></span>
+              <span class="active:scale-95 transition-all shadow-md text-white/20">|</span>
+              <span>${s.n3}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">2</sub></span>
             </div>
-            <div class="flex items-center gap-4">
-              <input type="number" id="t10-ans" placeholder="Ответ в 10-й системе" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
+            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t10-ans" placeholder="Ответ в 10-й системе" class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t10(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
+            <button onclick="window.check_t10(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1122,9 +1153,9 @@
               ${s.text}
             </div>
             <div class="flex items-center gap-4">
-              <input type="number" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
             </div>
-            <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
+            <button onclick="window.check_t11(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `;
         },
@@ -1166,9 +1197,9 @@
               ${s.files.map((f, i) => `<div>${i+1}. ${f}</div>`).join('')}
             </div>
             <div class="flex items-center gap-4">
-              <input type="number" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
             </div>
-            <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t12(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1206,13 +1237,13 @@
             </div>
             <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
               <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
-                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" aria-label="Жирный текст" title="Жирный текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ж</button>
-                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" aria-label="Курсив" title="Курсив" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">К</button>
-                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" aria-label="Подчеркнутый текст" title="Подчеркнутый текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ч</button>
+                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" aria-label="Жирный текст" title="Жирный текст" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ж</button>
+                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" aria-label="Курсив" title="Курсив" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">К</button>
+                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" aria-label="Подчеркнутый текст" title="Подчеркнутый текст" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ч</button>
               </div>
-              <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
+              <div id="t13-editor" contenteditable="true" class="active:scale-95 transition-all shadow-md p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
             </div>
-            <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
+            <button onclick="window.check_t13(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
           </div>
         `;
         },
@@ -1316,14 +1347,14 @@
             <div class="space-y-4 text-sm">
               <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
                 <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">1.</span> Сколько учеников любят предмет <b>${s.targetSub}</b>?</p>
-                <input type="number" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (целое число)">
+                <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (целое число)">
               </div>
               <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
                 <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">2.</span> Какой процент учеников <b>${s.targetGrade} класса</b> имеют оценку за любимый предмет 4 или 5? (с точностью не менее 2 знаков)</p>
                 <input type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.50">
               </div>
             </div>
-            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
+            <button onclick="window.check_t14(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
           </div>
         `;
         },
@@ -1401,9 +1432,9 @@
             <div id="t15-error" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
             
             <div class="flex gap-2">
-               <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
-               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
-                  <span class="flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Запустить алгоритм</span>
+               <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="active:scale-95 transition-all shadow-md glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="active:scale-95 transition-all shadow-md w-5 h-5"></i></button>
+               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="active:scale-95 transition-all shadow-md flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
+                  <span class="active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"><i data-lucide="play" class="active:scale-95 transition-all shadow-md w-4 h-4"></i> Запустить алгоритм</span>
                </button>
             </div>
           </div>
@@ -1476,11 +1507,11 @@
                       if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
                       if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
                       if(painted.has(`${x},${y}`)) classes += 'bg-blue-500/40 '; else classes += 'bg-black/20 ';
-                      let content = (robot.x === x && robot.y === y) ? '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>' : '';
-                      html += `<div class="aspect-square ${classes}">${content}</div>`;
+                      let content = (robot.x === x && robot.y === y) ? '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>' : '';
+                      html += `<div class="active:scale-95 transition-all shadow-md aspect-square ${classes}">${content}</div>`;
                   }
               }
-              document.getElementById('t15-grid').innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
+              document.getElementById('t15-grid').innerHTML = `<div class="active:scale-95 transition-all shadow-md grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
           };
 
           window.reset_t15 = (tid) => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden'); drawGrid({x: map.startX, y: map.startY}, new Set()); };
@@ -1568,19 +1599,19 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="font-medium text-zinc-200 text-lg">Цикл FOR</h3>
-              <p class="text-sm text-zinc-400 font-light mt-1">Какое <b>последнее</b> число выведет эта программа?</p>
+              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Цикл FOR</h3>
+              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Какое <b>последнее</b> число выведет эта программа?</p>
             </div>
-            <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300">
-              <span class="text-violet-400">for</span> i <span class="text-violet-400">in</span> <span class="text-blue-400">range</span>(<span class="text-orange-300">${s.start}</span>, <span class="text-orange-300">${s.stop}</span>):<br>
+            <div class="active:scale-95 transition-all shadow-md bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300">
+              <span class="active:scale-95 transition-all shadow-md text-violet-400">for</span> i <span class="active:scale-95 transition-all shadow-md text-violet-400">in</span> <span class="active:scale-95 transition-all shadow-md text-blue-400">range</span>(<span class="active:scale-95 transition-all shadow-md text-orange-300">${s.start}</span>, <span class="active:scale-95 transition-all shadow-md text-orange-300">${s.stop}</span>):<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(i)
             </div>
-            <div class="flex gap-4 items-center">
-              <input type="number" id="t16-ans" placeholder="Ответ..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <div class="active:scale-95 transition-all shadow-md flex gap-4 items-center">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t16-ans" placeholder="Ответ..." class="active:scale-95 transition-all shadow-md flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             </div>
-            <button onclick="window.check_t16(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t16(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1614,8 +1645,8 @@
               arr = [${s.arr.join(', ')}]<br>
               print(arr[<span class="text-orange-300">${s.index}</span>])
             </div>
-            <input type="number" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
-            <button onclick="window.check_t17(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <button onclick="window.check_t17(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1651,8 +1682,8 @@
               &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">return</span> x * <span class="text-orange-300">${s.a}</span> ${bStr}<br><br>
               print(calc(<span class="text-orange-300">${s.c}</span>))
             </div>
-            <input type="number" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
-            <button onclick="window.check_t18(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <button onclick="window.check_t18(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1685,10 +1716,10 @@
             </div>
             <div id="t19-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 flex items-center justify-center shadow-inner text-xl tracking-widest"></div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${b}</button>`).join('')}
-              <button onclick="window.t19_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
+              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="active:scale-95 transition-all shadow-md glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${b}</button>`).join('')}
+              <button onclick="window.t19_clear()" aria-label="Очистить" title="Очистить" class="active:scale-95 transition-all shadow-md px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="active:scale-95 transition-all shadow-md w-4 h-4"></i></button>
             </div>
-            <button onclick="window.check_t19(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
+            <button onclick="window.check_t19(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
           </div>
         `;
         },
