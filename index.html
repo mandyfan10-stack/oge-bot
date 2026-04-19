@@ -156,6 +156,13 @@
   </div>
 
   <script>
+    // --- УТИЛИТЫ ---
+    function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function shuffleArray(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+    function getRandomBool() { return Math.random() > 0.5; }
+
+
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
     const TOTAL_TASKS = 20;
 
@@ -522,12 +529,12 @@
             { name: 'Реки', words: ['Обь', 'Дон', 'Нева', 'Амур', 'Волга', 'Енисей', 'Печора', 'Колыма'] },
             { name: 'Города', words: ['Уфа', 'Омск', 'Сочи', 'Москва', 'Казань', 'Самара', 'Воронеж', 'Новосибирск'] }
           ];
-          const cat = categories[Math.floor(Math.random() * categories.length)];
+          const cat = getRandomElement(categories);
           const encodings = [ {bits: 8, bytes: 1, name: 'КОИ-8'}, {bits: 16, bytes: 2, name: 'Unicode'}, {bits: 32, bytes: 4, name: 'UTF-32'} ];
-          const enc = encodings[Math.floor(Math.random() * encodings.length)];
+          const enc = getRandomElement(encodings);
           
-          const shuffledWords = [...cat.words].sort(() => Math.random() - 0.5);
-          const targetWord = shuffledWords[Math.floor(Math.random() * shuffledWords.length)];
+          const shuffledWords = shuffleArray([...cat.words]);
+          const targetWord = getRandomElement(shuffledWords);
           
           const diffBytes = (targetWord.length + 2) * enc.bytes; // +2 за запятую и пробел
           const text = `${cat.name}: ${shuffledWords.join(', ')}.`;
@@ -568,8 +575,8 @@
       2: {
         init: (id) => { 
           const chars = "АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЬЮЯ".split('');
-          const selectedChars = chars.sort(() => Math.random() - 0.5).slice(0, 4); 
-          const codes = ['00', '01', '100', '101', '110', '111'].sort(() => Math.random() - 0.5);
+          const selectedChars = shuffleArray(chars).slice(0, 4);
+          const codes = shuffleArray(['00', '01', '100', '101', '110', '111']);
           
           let table = {};
           let htmlTable = '';
@@ -578,11 +585,11 @@
              htmlTable += `<tr><td class="p-2">${c}</td><td class="p-2 text-emerald-400">${codes[i]}</td></tr>`;
           });
           
-          const wordLen = Math.floor(Math.random() * 2) + 3; 
+          const wordLen = getRandomInt(3, 4);
           let targetWord = '';
           let encoded = '';
           for(let i=0; i<wordLen; i++) {
-             const rc = selectedChars[Math.floor(Math.random() * selectedChars.length)];
+             const rc = getRandomElement(selectedChars);
              targetWord += rc;
              encoded += table[rc];
           }
@@ -622,8 +629,8 @@
       },
       3: {
         init: (id) => { 
-          const limit = Math.floor(Math.random() * 40) + 10;
-          const parity = ['чётное', 'нечётное'][Math.floor(Math.random()*2)];
+          const limit = getRandomInt(10, 49);
+          const parity = getRandomElement(['чётное', 'нечётное']);
           
           const tpls = [
             { sign: '>', op: 'И', truth: 'ИСТИННО', find: 'наименьшее', calc: (a, par) => { let x=a+1; while(true){ if((par==='чётное'?x%2===0:x%2!==0)) return x; x++; } }, logicStr: `(X > ${limit}) И (X ${parity})` },
@@ -632,7 +639,7 @@
             { sign: '>', op: 'ИЛИ', truth: 'ЛОЖНО', find: 'наибольшее', calc: (a, par) => { let x=a; while(true){ if((par==='чётное'?x%2!==0:x%2===0)) return x; x--; } }, logicStr: `(X > ${limit}) ИЛИ (X ${parity})` }
           ];
           
-          const sel = tpls[Math.floor(Math.random() * tpls.length)];
+          const sel = getRandomElement(tpls);
           const target = sel.calc(limit, parity);
 
           window.taskState[id] = { op: sel.op, sign: sel.sign, reqParity: parity, limit, findStr: sel.find, truth: sel.truth, logicStr: sel.logicStr, target }; 
@@ -669,10 +676,10 @@
       4: {
         init: (id) => { 
           const w = {
-             AB: Math.floor(Math.random()*6)+1, AC: Math.floor(Math.random()*8)+3,
-             BC: Math.floor(Math.random()*5)+1, BD: Math.floor(Math.random()*7)+2,
-             CD: Math.floor(Math.random()*4)+1, CE: Math.floor(Math.random()*7)+3,
-             DE: Math.floor(Math.random()*6)+1
+             AB: getRandomInt(1, 6), AC: getRandomInt(3, 10),
+             BC: getRandomInt(1, 5), BD: getRandomInt(2, 8),
+             CD: getRandomInt(1, 4), CE: getRandomInt(3, 9),
+             DE: getRandomInt(1, 6)
           };
           const graph = { A: {B:w.AB, C:w.AC}, B: {A:w.AB, C:w.BC, D:w.BD}, C: {A:w.AC, B:w.BC, D:w.CD, E:w.CE}, D: {B:w.BD, C:w.CD, E:w.DE}, E: {C:w.CE, D:w.DE} };
           
@@ -729,16 +736,16 @@
       },
       5: {
         init: (id) => { 
-          const op2_type = Math.random() > 0.5 ? 'div' : 'mul';
+          const op2_type = getRandomBool() ? 'div' : 'mul';
           let b, A, start, end, seqArray;
           
           while(true) {
-              b = Math.floor(Math.random() * 8) + 2; 
-              A = Math.floor(Math.random() * 9) + 1; 
-              start = Math.floor(Math.random() * 50) + 10; 
+              b = getRandomInt(2, 9);
+              A = getRandomInt(1, 9);
+              start = getRandomInt(10, 59);
               
               seqArray = Array(5).fill(1);
-              const pos2 = Math.floor(Math.random() * 3) + 1; 
+              const pos2 = getRandomInt(1, 3);
               seqArray[pos2] = 2;
               
               let curr = start;
@@ -798,17 +805,17 @@
         init: (id) => { 
           const ops = ['or', 'and'];
           const signs = ['<', '>', '<=', '>='];
-          const op = ops[Math.floor(Math.random() * ops.length)];
-          const signS = signs[Math.floor(Math.random() * signs.length)];
-          const signT = signs[Math.floor(Math.random() * signs.length)];
-          const A = Math.floor(Math.random() * 20) - 10;
-          const B = Math.floor(Math.random() * 20) - 10;
+          const op = getRandomElement(ops);
+          const signS = getRandomElement(signs);
+          const signT = getRandomElement(signs);
+          const A = getRandomInt(-10, 9);
+          const B = getRandomInt(-10, 9);
           
           const pairs = [];
           let yesCount = 0; let noCount = 0;
           for (let i = 0; i < 9; i++) {
-            const s = Math.floor(Math.random() * 30) - 15; 
-            const t = Math.floor(Math.random() * 30) - 15; 
+            const s = getRandomInt(-15, 14);
+            const t = getRandomInt(-15, 14);
             pairs.push(`(${s}, ${t})`);
             
             // Безопасное вычисление без eval
@@ -821,7 +828,7 @@
             let isYes = op === 'or' ? (condS || condT) : (condS && condT);
             if (isYes) yesCount++; else noCount++;
           }
-          const askFor = Math.random() > 0.5 ? 'YES' : 'NO';
+          const askFor = getRandomBool() ? 'YES' : 'NO';
           const targetCount = askFor === 'YES' ? yesCount : noCount;
 
           window.taskState[id] = { op, signS, signT, A, B, pairs, askFor, targetCount };
@@ -873,15 +880,15 @@
           const domains = ['edu.ru', 'exam.net', 'test.org', 'school.com'];
           const files = ['index.htm', 'doc.pdf', 'image.jpg', 'archive.zip'];
           
-          const p = protocols[Math.floor(Math.random()*protocols.length)];
-          const d = domains[Math.floor(Math.random()*domains.length)];
-          const f = files[Math.floor(Math.random()*files.length)];
+          const p = getRandomElement(protocols);
+          const d = getRandomElement(domains);
+          const f = getRandomElement(files);
           
           window.taskState[id] = { parts: [p, d, f], full: `${p}://${d}/${f}` }; 
         },
         html: (id) => {
           const t = window.taskState[id].parts;
-          const pieces = ['://', '/', t[2], t[0], t[1]].sort(()=>Math.random()-0.5);
+          const pieces = shuffleArray(['://', '/', t[2], t[0], t[1]]);
           return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
@@ -910,10 +917,10 @@
       8: {
         init: (id) => { 
           const words = [['Коты', 'Собаки'], ['Розы', 'Тюльпаны'], ['Чай', 'Кофе'], ['Яблоки', 'Груши']];
-          const pair = words[Math.floor(Math.random()*words.length)];
+          const pair = getRandomElement(words);
           
-          const A = Math.floor(Math.random() * 400) + 200;
-          const B = Math.floor(Math.random() * 400) + 200;
+          const A = getRandomInt(200, 599);
+          const B = getRandomInt(200, 599);
           const Inter = Math.floor(Math.random() * Math.min(A,B) * 0.8) + 10;
           const Union = A + B - Inter;
 
@@ -922,8 +929,8 @@
              { q: `${pair[0]} & ${pair[1]}`, ans: Inter, table: [[pair[0], A], [pair[1], B], [`${pair[0]} | ${pair[1]}`, Union]] },
              { q: `${pair[0]}`, ans: A, table: [[`${pair[0]} | ${pair[1]}`, Union], [pair[1], B], [`${pair[0]} & ${pair[1]}`, Inter]] }
           ];
-          const sel = types[Math.floor(Math.random() * types.length)];
-          const shuffledTable = sel.table.sort(() => Math.random() - 0.5);
+          const sel = getRandomElement(types);
+          const shuffledTable = shuffleArray(sel.table);
 
           window.taskState[id] = { A, B, Inter, Union, pair, q: sel.q, ans: sel.ans, table: shuffledTable }; 
         },
@@ -963,15 +970,15 @@
       },
       9: {
         init: (id) => { 
-          const targetNode = ['G', 'H'][Math.floor(Math.random()*2)];
+          const targetNode = getRandomElement(['G', 'H']);
           const baseEdges = [ ['A','B'], ['A','C'], ['B','D'], ['C','D'], ['C','E'], ['D','F'], ['E','F'], ['F','G'] ];
           const optionalEdges = [ ['A','D'], ['B','F'], ['E','G'], ['D','G'], ['F','H'], ['G','H'] ];
           
           let currentEdges = [...baseEdges];
-          optionalEdges.forEach(edge => { if (Math.random() > 0.5) currentEdges.push(edge); });
+          optionalEdges.forEach(edge => { if (getRandomBool()) currentEdges.push(edge); });
           
-          const specNode = ['B', 'C'][Math.floor(Math.random()*2)];
-          const reqType = Math.floor(Math.random() * 3); 
+          const specNode = getRandomElement(['B', 'C']);
+          const reqType = getRandomInt(0, 2);
           
           let qText = '';
           if(reqType === 1) qText = `, проходящих через город <b>${specNode}</b>`;
@@ -1039,11 +1046,11 @@
       },
       10: {
         init: (id) => { 
-          const val1 = Math.floor(Math.random()*40)+20;
-          const val2 = Math.floor(Math.random()*40)+20;
-          const val3 = Math.floor(Math.random()*40)+20;
+          const val1 = getRandomInt(20, 59);
+          const val2 = getRandomInt(20, 59);
+          const val3 = getRandomInt(20, 59);
           
-          const findMax = Math.random() > 0.5;
+          const findMax = getRandomBool();
           const typeStr = findMax ? 'максимальное' : 'минимальное';
           const target = findMax ? Math.max(val1, val2, val3) : Math.min(val1, val2, val3);
           
@@ -1087,15 +1094,15 @@
       11: {
         init: (id) => {
           const words = ["код", "байт", "цикл", "сеть", "данные"];
-          const targetWord = words[Math.floor(Math.random()*words.length)];
-          const count = Math.floor(Math.random()*4) + 2; 
+          const targetWord = getRandomElement(words);
+          const count = getRandomInt(2, 5);
           
           let textArray = "Информатика — это наука, изучающая методы сбора, хранения и обработки информации. Основным элементом здесь является алгоритм, который позволяет автоматизировать сложные задачи.".split(' ');
           
           for(let i=0; i<count; i++) {
-             const insertPos = Math.floor(Math.random() * textArray.length);
+             const insertPos = getRandomInt(0, textArray.length - 1);
              let w = targetWord;
-             if (Math.random() > 0.5) w = w.charAt(0).toUpperCase() + w.slice(1);
+             if (getRandomBool()) w = w.charAt(0).toUpperCase() + w.slice(1);
              if (Math.random() > 0.7) w += ',';
              else if (Math.random() > 0.8) w += '.';
              textArray.splice(insertPos, 0, w);
@@ -1137,8 +1144,8 @@
           const exts = ['pdf', 'txt', 'docx', 'jpg', 'png', 'zip'];
           let files = [];
           for(let i=0; i<8; i++) {
-              const prefix = Math.random() > 0.5 ? Math.floor(Math.random()*10) : '';
-              files.push(`${names[Math.floor(Math.random()*names.length)]}${prefix}.${exts[Math.floor(Math.random()*exts.length)]}`);
+              const prefix = getRandomBool() ? getRandomInt(0, 9) : '';
+              files.push(`${getRandomElement(names)}${prefix}.${getRandomElement(exts)}`);
           }
           const targetExt = files[0].split('.')[1]; 
           const targetMask = `*.${targetExt}`;
@@ -1184,8 +1191,8 @@
             { text: "Байкал — самое глубокое озеро на планете. В нём обитает уникальная нерпа.", words: ["Байкал", "озеро", "нерпа"] },
             { text: "Пушкин — великий русский поэт. Его чудесные сказки известны всем с детства.", words: ["Пушкин", "поэт", "сказки"] }
           ];
-          const v = variants[Math.floor(Math.random() * variants.length)];
-          const shuffledWords = [...v.words].sort(() => Math.random() - 0.5);
+          const v = getRandomElement(variants);
+          const shuffledWords = shuffleArray([...v.words]);
           const map = { bold: shuffledWords[0], underline: shuffledWords[1], italic: shuffledWords[2] };
           window.taskState[id] = { text: v.text, map }; 
         },
@@ -1253,17 +1260,17 @@
           const data = [];
           for(let i=0; i<8; i++) {
              data.push({
-                surname: surnames[Math.floor(Math.random()*surnames.length)],
-                name: names[Math.floor(Math.random()*names.length)],
-                grade: Math.floor(Math.random()*7) + 5,
-                sub: subjects[Math.floor(Math.random()*subjects.length)],
-                score: Math.floor(Math.random()*4) + 2
+                surname: getRandomElement(surnames),
+                name: getRandomElement(names),
+                grade: getRandomInt(5, 11),
+                sub: getRandomElement(subjects),
+                score: getRandomInt(2, 5)
              });
           }
           
-          const targetSub = subjects[Math.floor(Math.random()*subjects.length)];
+          const targetSub = getRandomElement(subjects);
           const existingGrades = [...new Set(data.map(d => d.grade))];
-          const targetGrade = existingGrades[Math.floor(Math.random()*existingGrades.length)];
+          const targetGrade = getRandomElement(existingGrades);
           
           let q1Ans = 0;
           data.forEach(d => { if(d.sub === targetSub) q1Ans++; });
@@ -1336,16 +1343,16 @@
       },
       15: {
         init: (id) => { 
-          const cx = Math.floor(Math.random() * 2) + 6; 
-          const cy = Math.floor(Math.random() * 2) + 2; 
-          const start_hx = Math.floor(Math.random() * 2) + 1; 
-          const end_vy = Math.floor(Math.random() * 2) + 7;   
+          const cx = getRandomInt(6, 7);
+          const cy = getRandomInt(2, 3);
+          const start_hx = getRandomInt(1, 2);
+          const end_vy = getRandomInt(7, 8);
 
-          const h_gap_start = start_hx + Math.floor(Math.random() * (cx - start_hx - 1)); 
-          const h_gap_len = Math.random() > 0.5 ? 2 : 1;
+          const h_gap_start = start_hx + getRandomInt(0, cx - start_hx - 2);
+          const h_gap_len = getRandomBool() ? 2 : 1;
           
-          const v_gap_start = cy + 1 + Math.floor(Math.random() * (end_vy - cy - 2));
-          const v_gap_len = Math.random() > 0.5 ? 2 : 1;
+          const v_gap_start = cy + 1 + getRandomInt(0, end_vy - cy - 3);
+          const v_gap_len = getRandomBool() ? 2 : 1;
 
           let horizontals = [];
           let verticals = [];
@@ -1536,8 +1543,8 @@
       },
       16: {
         init: (id) => { 
-          const start = Math.floor(Math.random() * 5);
-          const stop = Math.floor(Math.random() * 10) + 10;
+          const start = getRandomInt(0, 4);
+          const stop = getRandomInt(10, 19);
           window.taskState[id] = { start, stop }; 
         },
         html: (id) => {
@@ -1571,8 +1578,8 @@
       },
       17: {
         init: (id) => { 
-          const arr = Array.from({length: 5}, () => Math.floor(Math.random()*90)+10);
-          const index = Math.floor(Math.random() * arr.length) * (Math.random() > 0.5 ? 1 : -1);
+          const arr = Array.from({length: 5}, () => getRandomInt(10, 99));
+          const index = getRandomInt(0, arr.length - 1) * (getRandomBool() ? 1 : -1);
           const pyIndex = index < 0 ? arr.length + index : index;
           const target = arr[pyIndex];
           window.taskState[id] = { arr, index, target }; 
@@ -1606,9 +1613,9 @@
       },
       18: {
         init: (id) => { 
-          const a = Math.floor(Math.random() * 4) + 2;
-          const b = (Math.floor(Math.random() * 10) + 1) * (Math.random() > 0.5 ? 1 : -1);
-          const c = Math.floor(Math.random() * 10) + 2;
+          const a = getRandomInt(2, 5);
+          const b = (getRandomInt(1, 10)) * (getRandomBool() ? 1 : -1);
+          const c = getRandomInt(2, 11);
           const ans = c * a + b;
           window.taskState[id] = { a, b, c, ans }; 
         },
@@ -1643,15 +1650,15 @@
       },
       19: {
         init: (id) => { 
-          const p1 = Math.floor(Math.random()*255);
-          const p2 = Math.floor(Math.random()*255);
-          const p3 = Math.floor(Math.random()*255);
-          const p4 = Math.floor(Math.random()*255);
+          const p1 = getRandomInt(0, 254);
+          const p2 = getRandomInt(0, 254);
+          const p3 = getRandomInt(0, 254);
+          const p4 = getRandomInt(0, 254);
           window.taskState[id] = { parts: [p1, p2, p3, p4] }; 
         },
         html: (id) => {
           const p = window.taskState[id].parts;
-          const pieces = [p[0]+'.', p[1], '.'+p[2]+'.', p[3]].sort(()=>Math.random()-0.5);
+          const pieces = shuffleArray([p[0]+'.', p[1], '.'+p[2]+'.', p[3]]);
           return `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
@@ -1688,11 +1695,11 @@
             {q: 'Связь компонентов компьютера', a: 'Материнская плата'},
             {q: 'Охлаждение процессора', a: 'Кулер'}
           ];
-          window.taskState[id] = qs[Math.floor(Math.random()*qs.length)]; 
+          window.taskState[id] = getRandomElement(qs);
         },
         html: (id) => {
           const s = window.taskState[id];
-          const buttons = ['HDD/SSD', 'ОЗУ', 'Процессор', 'Видеокарта', 'Материнская плата', 'Кулер'].sort(()=>Math.random()-0.5).map(v => 
+          const buttons = shuffleArray(['HDD/SSD', 'ОЗУ', 'Процессор', 'Видеокарта', 'Материнская плата', 'Кулер']).map(v =>
                 `<button onclick="window.t20_sel('${v}')" id="t20-btn-${v.replace(/ /g,'-')}" class="t20-btns glass-button p-4 rounded-xl text-sm text-zinc-300 break-words">${v}</button>`
           ).join('');
           return `
