@@ -1219,9 +1219,9 @@
                 temp.innerHTML = editor.innerHTML;
                 let found = false;
                 const elements = temp.querySelectorAll('*');
+                const targetWord = word.replace(/[.,]/g, '').trim().toLowerCase();
                 elements.forEach(el => {
                     const text = el.textContent.replace(/[.,]/g, '').trim().toLowerCase();
-                    const targetWord = word.replace(/[.,]/g, '').trim().toLowerCase();
                     if (text === targetWord) {
                         if (type === 'bold' && (el.tagName === 'B' || el.tagName === 'STRONG' || el.style.fontWeight === 'bold' || el.style.fontWeight >= '700')) found = true;
                         if (type === 'italic' && (el.tagName === 'I' || el.tagName === 'EM' || el.style.fontStyle === 'italic')) found = true;
