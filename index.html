@@ -906,8 +906,8 @@
         },
         setup: (id) => {
           window.t7url = [];
-          window.t7_add = (p) => { window.t7url.push(p); document.getElementById('t7-res').innerHTML = window.t7url.join(''); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
-          window.t7_clear = () => { window.t7url = []; document.getElementById('t7-res').innerHTML = '...'; document.getElementById(`feedback-${id}`).classList.add('hidden'); };
+          window.t7_add = (p) => { window.t7url.push(p); document.getElementById('t7-res').textContent = window.t7url.join(''); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
+          window.t7_clear = () => { window.t7url = []; document.getElementById('t7-res').textContent = '...'; document.getElementById(`feedback-${id}`).classList.add('hidden'); };
           window.check_t7 = (tid) => {
             if (window.t7url.join('') === window.taskState[tid].full) showFeedback(tid, true, "URL собран верно.");
             else showFeedback(tid, false, "Ошибка в структуре URL.");
