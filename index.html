@@ -221,7 +221,7 @@
         const solvedInCourse = c.tasks.filter(t => progress[t.id]).length;
         const total = c.tasks.length;
         return `
-        <button onclick="openCourse('${c.id}')" class="w-full text-left p-5 glass-panel rounded-[2rem] relative group animate-slide-up" style="animation-delay: ${c.delay}s;">
+        <button onclick="openCourse('${c.id}')" class="w-full text-left p-5 glass-panel rounded-[2rem] relative group animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]" style="animation-delay: ${c.delay}s;">
           <div class="absolute inset-0 bg-gradient-to-r ${c.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-[2rem]"></div>
           <div class="flex items-start gap-4 relative z-10">
             <div class="p-4 rounded-[1.25rem] bg-gradient-to-br ${c.color} bg-opacity-20 text-white shadow-lg">
@@ -265,7 +265,7 @@
     function renderTasks(course) {
       const list = document.getElementById('tasks-list');
       list.innerHTML = course.tasks.map((task, idx) => `
-        <button onclick="openTask(${task.id})" class="w-full text-left p-4 glass-panel rounded-[1.5rem] flex items-center justify-between group animate-slide-up" style="animation-delay: ${idx * 0.05}s;">
+        <button onclick="openTask(${task.id})" class="w-full text-left p-4 glass-panel rounded-[1.5rem] flex items-center justify-between group animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]" style="animation-delay: ${idx * 0.05}s;">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
               <i data-lucide="${task.icon}" class="w-5 h-5"></i>
