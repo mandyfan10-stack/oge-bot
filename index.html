@@ -102,7 +102,7 @@
   <!-- ЭКРАН 2: СПИСОК ЗАДАЧ КУРСА -->
   <div id="screen-tasks" class="absolute inset-0 bg-[#09090b] transition-transform duration-500 ease-in-out translate-x-full overflow-y-auto z-20">
     <header class="flex items-center gap-4 sticky top-0 bg-[#09090b]/95 backdrop-blur-md z-10 px-5 py-4 border-b border-white/5 shadow-sm">
-      <button onclick="closeCourse()" class="shrink-0 p-2.5 glass-button rounded-xl text-zinc-400 hover:text-white transition-colors">
+      <button onclick="closeCourse()" aria-label="Вернуться к списку курсов" title="Вернуться к списку курсов" class="shrink-0 p-2.5 glass-button rounded-xl text-zinc-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
         <i data-lucide="arrow-left" class="w-5 h-5"></i>
       </button>
       <div class="min-w-0 flex-1">
@@ -117,12 +117,12 @@
   <div id="screen-task" class="absolute inset-0 bg-[#09090b] transition-transform duration-500 ease-in-out translate-x-full flex flex-col z-30">
     <header class="flex items-center justify-between sticky top-0 bg-[#09090b]/95 backdrop-blur-md z-10 px-5 py-4 border-b border-white/5 shadow-sm shrink-0">
       <div class="flex items-center gap-4 min-w-0">
-        <button onclick="closeTask()" class="shrink-0 p-2.5 glass-button rounded-xl text-zinc-400 hover:text-white transition-colors">
+        <button onclick="closeTask()" aria-label="Вернуться к списку заданий" title="Вернуться к списку заданий" class="shrink-0 p-2.5 glass-button rounded-xl text-zinc-400 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
           <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </button>
         <h2 id="task-title" class="font-medium text-lg tracking-wide text-zinc-100 truncate">Задание</h2>
       </div>
-      <button id="btn-regenerate" onclick="regenerateTask()" class="shrink-0 p-2.5 glass-button text-indigo-400 hover:text-indigo-300 transition-colors rounded-xl ml-3" title="Сгенерировать новые условия">
+      <button id="btn-regenerate" onclick="regenerateTask()" aria-label="Сгенерировать новые условия" title="Сгенерировать новые условия" class="shrink-0 p-2.5 glass-button text-indigo-400 hover:text-indigo-300 transition-colors rounded-xl ml-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
         <i data-lucide="refresh-cw" class="w-5 h-5"></i>
       </button>
     </header>
@@ -130,7 +130,7 @@
   </div>
 
   <!-- КНОПКА AI -->
-  <button onclick="toggleChat(true)" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group">
+  <button onclick="toggleChat(true)" aria-label="Открыть ИИ-наставника" title="Открыть ИИ-наставника" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] focus-visible:ring-indigo-500">
     <i data-lucide="bot" class="w-6 h-6 group-hover:animate-bounce"></i>
   </button>
 
@@ -141,15 +141,15 @@
       <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3 mb-2"></div>
       <header class="flex items-center justify-between p-4 px-6 border-b border-white/5">
         <div class="flex items-center gap-3 text-indigo-300 font-medium"><div class="p-2 bg-indigo-500/20 rounded-xl"><i data-lucide="sparkles" class="w-5 h-5"></i></div> ИИ-Наставник</div>
-        <button onclick="toggleChat(false)" class="p-2 text-zinc-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="toggleChat(false)" aria-label="Закрыть чат" title="Закрыть чат" class="p-2 text-zinc-500 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
       </header>
       <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-5 scroll-smooth">
         <div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">Привет! Я ИИ-репетитор. Спрашивай любую задачу, если застрял! ✨</div></div>
       </div>
       <div class="p-4 px-5 glass-panel border-t-0">
-        <div class="flex gap-2 bg-black/40 border border-white/10 p-1.5 rounded-2xl">
-          <input type="text" id="chat-input" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all"><i data-lucide="send" class="w-4 h-4"></i></button>
+        <div class="flex gap-2 bg-black/40 border border-white/10 p-1.5 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500">
+          <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
       </div>
     </div>
@@ -890,8 +890,8 @@
             </div>
             <div id="t7-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 break-all">...</div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm">${p}</button>`).join('')}
-              <button onclick="window.t7_clear()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto"><i data-lucide="trash" class="w-4 h-4"></i></button>
+              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${p}</button>`).join('')}
+              <button onclick="window.t7_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
             </div>
             <button onclick="window.check_t7(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
           </div>
@@ -1199,9 +1199,9 @@
             </div>
             <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
               <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
-                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors">Ж</button>
-                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors">К</button>
-                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors">Ч</button>
+                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" aria-label="Жирный текст" title="Жирный текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ж</button>
+                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" aria-label="Курсив" title="Курсив" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">К</button>
+                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" aria-label="Подчеркнутый текст" title="Подчеркнутый текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ч</button>
               </div>
               <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
             </div>
@@ -1387,8 +1387,8 @@
             <div id="t15-error" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
             
             <div class="flex gap-2">
-               <button onclick="window.reset_t15(${id})" class="glass-button p-4 rounded-xl text-zinc-400 hover:text-white"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
-               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors">
+               <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
                   <span class="flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Запустить алгоритм</span>
                </button>
             </div>
@@ -1629,8 +1629,8 @@
             </div>
             <div id="t19-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 flex items-center justify-center shadow-inner text-xl tracking-widest"></div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm">${b}</button>`).join('')}
-              <button onclick="window.t19_clear()" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto"><i data-lucide="trash" class="w-4 h-4"></i></button>
+              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${b}</button>`).join('')}
+              <button onclick="window.t19_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
             </div>
             <button onclick="window.check_t19(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
           </div>
