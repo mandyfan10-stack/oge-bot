@@ -1213,16 +1213,23 @@
           document.getElementById('t13-editor').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
           window.check_t13 = (tid) => {
             const s = window.taskState[tid];
+
+            const editor = document.getElementById('t13-editor');
+            const temp = document.createElement('div');
+            temp.innerHTML = editor.innerHTML;
+            const elements = temp.querySelectorAll('*');
+
+            const elementsData = Array.from(elements).map(el => ({
+                el,
+                text: el.textContent.replace(/[.,]/g, '').trim().toLowerCase()
+            }));
+
             const checkWord = (word, type) => {
-                const editor = document.getElementById('t13-editor');
-                const temp = document.createElement('div');
-                temp.innerHTML = editor.innerHTML;
                 let found = false;
-                const elements = temp.querySelectorAll('*');
-                elements.forEach(el => {
-                    const text = el.textContent.replace(/[.,]/g, '').trim().toLowerCase();
-                    const targetWord = word.replace(/[.,]/g, '').trim().toLowerCase();
-                    if (text === targetWord) {
+                const targetWord = word.replace(/[.,]/g, '').trim().toLowerCase();
+                elementsData.forEach(data => {
+                    if (data.text === targetWord) {
+                        const el = data.el;
                         if (type === 'bold' && (el.tagName === 'B' || el.tagName === 'STRONG' || el.style.fontWeight === 'bold' || el.style.fontWeight >= '700')) found = true;
                         if (type === 'italic' && (el.tagName === 'I' || el.tagName === 'EM' || el.style.fontStyle === 'italic')) found = true;
                         if (type === 'underline' && (el.tagName === 'U' || (el.style.textDecoration && el.style.textDecoration.includes('underline')))) found = true;
