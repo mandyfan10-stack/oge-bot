@@ -241,7 +241,7 @@
         </button>
       `;
       }).join('');
-      lucide.createIcons(); // Глобальный вызов решает проблему пропавших стрелок
+      lucide.createIcons({ root: list }); // Локальный вызов для оптимизации
       updateGlobalProgress();
     }
 
@@ -281,7 +281,7 @@
           <i data-lucide="chevron-right" class="text-zinc-600 group-hover:text-zinc-300 transition-colors"></i>
         </button>
       `).join('');
-      lucide.createIcons();
+      lucide.createIcons({ root: list });
     }
 
     function regenerateTask() {
@@ -297,9 +297,9 @@
       }
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
-      lucide.createIcons();
+      lucide.createIcons({ root: content });
     }
 
     function openTask(id) {
@@ -310,12 +310,12 @@
       
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
-      lucide.createIcons();
+      lucide.createIcons({ root: content });
     }
 
     function closeTask() {
@@ -337,9 +337,14 @@
       if (!fb) return;
       fb.className = 'mt-6 p-4 rounded-2xl border flex items-start gap-3 text-sm font-medium transition-all duration-300';
       void fb.offsetWidth; 
+
+      const iconContainer = document.getElementById(`feedback-icon-${taskId}`);
+      const msgContainer = document.getElementById(`feedback-msg-${taskId}`);
+
       if (isCorrect) {
         fb.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'animate-pop');
-        fb.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
+        iconContainer.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i>`;
+        msgContainer.textContent = msg;
 
         if (!progress[taskId]) {
           progress[taskId] = true;
@@ -367,9 +372,10 @@
         }
       } else {
         fb.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/20', 'animate-shake');
-        fb.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i><div>${msg}</div>`;
+        iconContainer.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>`;
+        msgContainer.textContent = msg;
       }
-      lucide.createIcons();
+      lucide.createIcons({ root: iconContainer });
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
