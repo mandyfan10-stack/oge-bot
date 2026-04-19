@@ -1406,9 +1406,40 @@
           };
           const evaluateCondition = (robot, condStr) => {
               let expr = condStr.replace(/\(/g, '').replace(/\)/g, '').toLowerCase();
-              expr = expr.replace(/сверху свободно/g, !hasWall(robot.x, robot.y, 'up')).replace(/снизу свободно/g, !hasWall(robot.x, robot.y, 'down')).replace(/слева свободно/g, !hasWall(robot.x, robot.y, 'left')).replace(/справа свободно/g, !hasWall(robot.x, robot.y, 'right'));
-              expr = expr.replace(/не /g, '! ').replace(/ и /g, ' && ').replace(/ или /g, ' || ');
-              try { return new Function('return !!(' + expr + ')')(); } catch(e) { throw new Error('Некорректное условие: ' + condStr); }
+
+              const evalBasic = (cond) => {
+                  let isNot = false;
+                  let str = cond.trim();
+                  while (str.startsWith('не ')) {
+                      isNot = !isNot;
+                      str = str.substring(3).trim();
+                  }
+
+                  let result = false;
+                  if (str === 'сверху свободно') result = !hasWall(robot.x, robot.y, 'up');
+                  else if (str === 'снизу свободно') result = !hasWall(robot.x, robot.y, 'down');
+                  else if (str === 'слева свободно') result = !hasWall(robot.x, robot.y, 'left');
+                  else if (str === 'справа свободно') result = !hasWall(robot.x, robot.y, 'right');
+                  else throw new Error('Некорректное условие: ' + condStr);
+
+                  return isNot ? !result : result;
+              };
+
+              try {
+                  const orParts = expr.split(' или ');
+                  for (const orPart of orParts) {
+                      const andParts = orPart.split(' и ');
+                      let andResult = true;
+                      for (const andPart of andParts) {
+                          andResult = andResult && evalBasic(andPart);
+                          if (!andResult) break;
+                      }
+                      if (andResult) return true;
+                  }
+                  return false;
+              } catch(e) {
+                  throw new Error('Некорректное условие: ' + condStr);
+              }
           };
           const drawGrid = (robot, painted) => {
               let html = '';
