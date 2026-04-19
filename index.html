@@ -381,11 +381,14 @@
       inputEl.value = '';
       const messagesDiv = document.getElementById('chat-messages');
       
-      messagesDiv.insertAdjacentHTML('beforeend', `
-        <div class="flex justify-end animate-message-user">
-          <div class="max-w-[90%] p-4 rounded-2xl rounded-tr-none text-sm bg-indigo-600 text-white font-light shadow-lg">${text}</div>
-        </div>
-      `);
+      // 🛡️ Sentinel: Fix XSS in User Chat Message
+      const userMessageWrapper = document.createElement('div');
+      userMessageWrapper.className = 'flex justify-end animate-message-user';
+      const userMessageBubble = document.createElement('div');
+      userMessageBubble.className = 'max-w-[90%] p-4 rounded-2xl rounded-tr-none text-sm bg-indigo-600 text-white font-light shadow-lg';
+      userMessageBubble.textContent = text;
+      userMessageWrapper.appendChild(userMessageBubble);
+      messagesDiv.appendChild(userMessageWrapper);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
