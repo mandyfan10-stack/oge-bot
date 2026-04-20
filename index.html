@@ -541,10 +541,30 @@
         }
 
         const aiText = data.reply || 'Ошибка обработки на сервере.';
-        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`);
+
+        // 🛡️ Sentinel: Fix XSS in AI Chat Response
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'flex justify-start animate-message';
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed';
+
+        const lines = aiText.split('\n');
+        lines.forEach((line, index) => {
+            bubbleDiv.appendChild(document.createTextNode(line));
+            if (index < lines.length - 1) {
+                bubbleDiv.appendChild(document.createElement('br'));
+            }
+        });
+
+        if (visualAddon) {
+            bubbleDiv.insertAdjacentHTML('beforeend', visualAddon);
+        }
+
+        wrapperDiv.appendChild(bubbleDiv);
+        messagesDiv.appendChild(wrapperDiv);
         
         // Оптимизация: сканируем только последнее добавленное сообщение
-        setTimeout(() => lucide.createIcons({ root: messagesDiv.lastElementChild }), 10);
+        setTimeout(() => lucide.createIcons({ root: wrapperDiv }), 10);
       } catch (err) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
