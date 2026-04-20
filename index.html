@@ -148,8 +148,8 @@
       </div>
       <div class="p-4 px-5 glass-panel border-t-0">
         <div class="flex gap-2 bg-black/40 border border-white/10 p-1.5 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500">
-          <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
+          <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light disabled:opacity-50 disabled:cursor-not-allowed" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <button id="chat-send-btn" onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 disabled:opacity-50 disabled:cursor-not-allowed"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
       </div>
     </div>
@@ -297,7 +297,7 @@
       }
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       lucide.createIcons({ root: content });
     }
@@ -310,7 +310,7 @@
       
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
@@ -427,6 +427,10 @@
       }
 
       const optimizedPrompt = text + taskContext;
+
+      const sendBtn = document.getElementById('chat-send-btn');
+      inputEl.disabled = true;
+      sendBtn.disabled = true;
 
       try {
         const response = await fetch(BACKEND_URL, {
@@ -549,6 +553,10 @@
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
         messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
+      } finally {
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        inputEl.focus();
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
@@ -1435,7 +1443,7 @@
               <div class="w-full md:w-1/2 max-w-[320px] mx-auto aspect-square flex-shrink-0" id="t15-grid"></div>
             </div>
             
-            <div id="t15-error" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
+            <div id="t15-error" aria-live="assertive" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
             
             <div class="flex gap-2">
                <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="active:scale-95 transition-all shadow-md glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="active:scale-95 transition-all shadow-md w-5 h-5"></i></button>
