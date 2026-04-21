@@ -297,7 +297,7 @@
       }
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       lucide.createIcons({ root: content });
     }
@@ -310,7 +310,7 @@
       
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
@@ -388,10 +388,15 @@
 
     async function sendChatMessage() {
       const inputEl = document.getElementById('chat-input');
+      const sendBtn = inputEl.nextElementSibling;
       const text = inputEl.value.trim();
       if (!text) return;
       
       inputEl.value = '';
+      inputEl.disabled = true;
+      sendBtn.disabled = true;
+      inputEl.classList.add('opacity-50');
+      sendBtn.classList.add('opacity-50');
       const messagesDiv = document.getElementById('chat-messages');
       
       // 🛡️ Sentinel: Fix XSS in User Chat Message
@@ -549,6 +554,12 @@
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
         messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
+      } finally {
+        inputEl.disabled = false;
+        sendBtn.disabled = false;
+        inputEl.classList.remove('opacity-50');
+        sendBtn.classList.remove('opacity-50');
+        inputEl.focus();
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
