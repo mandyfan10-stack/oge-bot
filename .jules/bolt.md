@@ -8,3 +8,7 @@
 ## 2024-05-24 - Scoping global library DOM scans
 **Learning:** Frequent state changes (like showing task feedback) that trigger global DOM scans (e.g., `lucide.createIcons()`) without scoping can cause significant lag, particularly on mobile devices. Full `innerHTML` replacements also cause excessive garbage collection and re-parse overhead.
 **Action:** Always scope DOM scanning libraries using `{ root: element }`. Avoid full `innerHTML` re-renders for state updates; instead, use targeted DOM mutations via unique IDs (e.g., modifying specific `textContent` or specific nested element `innerHTML`).
+
+## 2026-04-21 - Optimize Animation Loops
+**Learning:** In interactive tasks using `requestAnimationFrame` for visualization (like the Robot 10x10 grid), rebuilding the entire DOM structure on every tick using `innerHTML` causes heavy layout thrashing and severe performance degradation, especially on mobile devices.
+**Action:** Initialize static HTML structures only once. During the animation loop, perform targeted updates on specific elements (e.g. by setting `className` and changing `innerHTML` of individual cell elements using unique IDs).

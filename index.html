@@ -1504,23 +1504,47 @@
               return evaluator(robot);
           };
           const drawGrid = (robot, painted) => {
-              let html = '';
+              const gridContainer = document.getElementById('t15-grid');
+              let innerContainer = gridContainer.firstElementChild;
+
+              if (!innerContainer || !innerContainer.classList.contains('grid-cols-10')) {
+                  let html = '';
+                  for(let y=0; y<map.h; y++){
+                      for(let x=0; x<map.w; x++){
+                          let classes = 'relative border-white/[0.03] transition-colors duration-150 border ';
+                          if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
+                          if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
+                          if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
+                          if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
+                          html += `<div id="t15-cell-${x}-${y}" data-baseclass="${classes}" class="active:scale-95 transition-all shadow-md aspect-square ${classes}"></div>`;
+                      }
+                  }
+                  gridContainer.innerHTML = `<div class="active:scale-95 transition-all shadow-md grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
+                  innerContainer = gridContainer.firstElementChild;
+              }
+
               for(let y=0; y<map.h; y++){
                   for(let x=0; x<map.w; x++){
-                      let classes = 'relative border-white/[0.03] transition-colors duration-150 border ';
-                      if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
-                      if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
-                      if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
-                      if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
-                      if(painted.has(`${x},${y}`)) classes += 'bg-blue-500/40 '; else classes += 'bg-black/20 ';
-                      let content = (robot.x === x && robot.y === y) ? '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>' : '';
-                      html += `<div class="active:scale-95 transition-all shadow-md aspect-square ${classes}">${content}</div>`;
+                      const cell = document.getElementById(`t15-cell-${x}-${y}`);
+                      if (!cell) continue;
+
+                      let bgClass = painted.has(`${x},${y}`) ? 'bg-blue-500/40 ' : 'bg-black/20 ';
+                      cell.className = `active:scale-95 transition-all shadow-md aspect-square ${cell.dataset.baseclass} ${bgClass}`;
+
+                      if (robot.x === x && robot.y === y) {
+                          if (!cell.hasChildNodes()) {
+                              cell.innerHTML = '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
+                          }
+                      } else {
+                          if (cell.hasChildNodes()) {
+                              cell.innerHTML = '';
+                          }
+                      }
                   }
               }
-              document.getElementById('t15-grid').innerHTML = `<div class="active:scale-95 transition-all shadow-md grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
           };
 
-          window.reset_t15 = (tid) => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden'); drawGrid({x: map.startX, y: map.startY}, new Set()); };
+          window.reset_t15 = (tid) => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden'); document.getElementById('t15-grid').innerHTML = ''; drawGrid({x: map.startX, y: map.startY}, new Set()); };
           window.reset_t15(id);
           document.getElementById('t15-code').oninput = () => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
 
