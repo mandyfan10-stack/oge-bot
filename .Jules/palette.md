@@ -5,3 +5,7 @@
 ## 2024-05-24 - Custom navigation card keyboard accessibility
 **Learning:** Custom interactive elements, like the `.glass-panel` buttons used for the main course and task lists, often lack native focus indicators. While they may have hover states, keyboard users are left without a clear visual cue of their current focus, breaking accessibility.
 **Action:** When implementing custom cards or buttons that act as primary navigation, always explicitly add `focus-visible` styles (e.g., `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]`) to ensure a robust and accessible keyboard navigation experience.
+
+## 2026-04-21 - Dynamically Injected Feedback Accessibility
+**Learning:** In a single-page application heavily relying on dynamic DOM updates for task validation feedback, sighted users see the newly appended message, but screen readers are unaware. Elements that appear asynchronously to provide crucial status information must have an `aria-live` region attribute to trigger screen reader announcements.
+**Action:** Always add `aria-live="polite"` (or `assertive` for critical errors) to feedback containers, especially when they are dynamically appended or toggled visible, ensuring non-sighted users are promptly informed of their interaction results.
