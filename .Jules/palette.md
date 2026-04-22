@@ -9,3 +9,7 @@
 ## 2026-04-21 - Dynamically Injected Feedback Accessibility
 **Learning:** In a single-page application heavily relying on dynamic DOM updates for task validation feedback, sighted users see the newly appended message, but screen readers are unaware. Elements that appear asynchronously to provide crucial status information must have an `aria-live` region attribute to trigger screen reader announcements.
 **Action:** Always add `aria-live="polite"` (or `assertive` for critical errors) to feedback containers, especially when they are dynamically appended or toggled visible, ensuring non-sighted users are promptly informed of their interaction results.
+
+## 2026-04-22 - Single-Page App Dynamic Form Accessibility
+**Learning:** In SPAs where forms are dynamically rendered and not enclosed in a native `<form>` tag, inputs lose their native "Enter to submit" behavior. Sighted users can click the submit button, but keyboard users are left stranded after typing their input, reducing accessibility and causing friction. Furthermore, dynamic inputs without visible labels require an `aria-label` matching their placeholder for screen readers.
+**Action:** When working without native `<form>` tags, always programmatically bind the 'Enter' key on inputs to trigger the main action button (e.g., via `e.key === 'Enter'`). Concurrently, ensure inputs use their `placeholder` text as an `aria-label` if a semantic `<label>` is missing, and explicitly apply `focus-visible` styles to dynamically generated custom buttons.
