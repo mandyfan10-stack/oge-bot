@@ -262,8 +262,27 @@
       document.getElementById('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
     }
 
+    const taskDOMCache = {};
+
     function renderTasks(course) {
       const list = document.getElementById('tasks-list');
+
+      if (taskDOMCache[course.id] && taskDOMCache[course.id].count !== course.tasks.length) {
+        delete taskDOMCache[course.id];
+      }
+
+      if (taskDOMCache[course.id]) {
+        list.replaceChildren(...taskDOMCache[course.id].nodes);
+        course.tasks.forEach(task => {
+          const icon = document.getElementById(`check-icon-${task.id}`);
+          if (icon) {
+            if (progress[task.id]) icon.classList.remove('hidden');
+            else icon.classList.add('hidden');
+          }
+        });
+        return;
+      }
+
       list.innerHTML = course.tasks.map((task, idx) => `
         <button onclick="openTask(${task.id})" class="w-full text-left p-4 glass-panel rounded-[1.5rem] flex items-center justify-between group animate-slide-up focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]" style="animation-delay: ${idx * 0.05}s;">
           <div class="flex items-center gap-4">
@@ -282,6 +301,10 @@
         </button>
       `).join('');
       lucide.createIcons({ root: list });
+      taskDOMCache[course.id] = {
+        count: course.tasks.length,
+        nodes: Array.from(list.childNodes)
+      };
     }
 
     function regenerateTask() {
