@@ -1259,9 +1259,9 @@
             const s = window.taskState[tid];
 
             const editor = document.getElementById('t13-editor');
-            const temp = document.createElement('div');
-            temp.innerHTML = editor.innerHTML;
-            const elements = temp.querySelectorAll('*');
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(editor.innerHTML, 'text/html');
+            const elements = doc.body.querySelectorAll('*');
 
             const elementsData = Array.from(elements).map(el => ({
                 el,
