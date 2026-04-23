@@ -448,7 +448,9 @@
       inputEl.disabled = true;
       sendBtn.disabled = true;
       inputEl.classList.add('opacity-50');
-      sendBtn.classList.add('opacity-50');
+      const originalIcon = sendBtn.innerHTML;
+      sendBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+      lucide.createIcons({ root: sendBtn });
       const messagesDiv = document.getElementById('chat-messages');
       
       // 🛡️ Sentinel: Fix XSS in User Chat Message
@@ -626,7 +628,7 @@
         inputEl.disabled = false;
         sendBtn.disabled = false;
         inputEl.classList.remove('opacity-50');
-        sendBtn.classList.remove('opacity-50');
+        sendBtn.innerHTML = originalIcon;
         inputEl.focus();
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;

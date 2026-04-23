@@ -13,3 +13,7 @@
 ## 2026-04-22 - Single-Page App Dynamic Form Accessibility
 **Learning:** In SPAs where forms are dynamically rendered and not enclosed in a native `<form>` tag, inputs lose their native "Enter to submit" behavior. Sighted users can click the submit button, but keyboard users are left stranded after typing their input, reducing accessibility and causing friction. Furthermore, dynamic inputs without visible labels require an `aria-label` matching their placeholder for screen readers.
 **Action:** When working without native `<form>` tags, always programmatically bind the 'Enter' key on inputs to trigger the main action button (e.g., via `e.key === 'Enter'`). Concurrently, ensure inputs use their `placeholder` text as an `aria-label` if a semantic `<label>` is missing, and explicitly apply `focus-visible` styles to dynamically generated custom buttons.
+
+## 2024-04-24 - Loading states for async action buttons
+**Learning:** For async submission buttons (like sending AI chat messages) that might take a long time and temporarily disable interactions, simply dimming the button (`opacity-50`) is not sufficient. A loading spinner provides much better UX by indicating that an operation is actively in progress. This keeps the user informed and prevents them from thinking the UI has frozen.
+**Action:** Replace the icon of the button with a spinning loader (`loader-2` with `animate-spin` in Lucide/Tailwind) during the async operation, and restore the original icon in a `finally` block when done. Keep the button opaque to ensure the spinner is visible.
