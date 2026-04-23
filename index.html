@@ -307,6 +307,33 @@
       };
     }
 
+    function applyTaskUXEnhancements(taskId) {
+      const content = document.getElementById('task-content');
+      if (!content) return;
+
+      const inputs = content.querySelectorAll('input');
+      inputs.forEach(input => {
+        if (!input.getAttribute('aria-label') && input.getAttribute('placeholder')) {
+          input.setAttribute('aria-label', input.getAttribute('placeholder'));
+        }
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const submitBtn = content.querySelector(`button[onclick*="window.check_t${taskId}"]`);
+            if (submitBtn) {
+              submitBtn.click();
+            }
+          }
+        });
+      });
+
+      const buttons = content.querySelectorAll('button:not([class*="focus-visible:ring-"])');
+      buttons.forEach(button => {
+        button.classList.add('focus-visible:outline-none', 'focus-visible:ring-2', 'focus-visible:ring-indigo-500');
+      });
+    }
+
     function regenerateTask() {
       if (!currentTaskId) return;
       const id = currentTaskId;
@@ -322,6 +349,7 @@
       const content = document.getElementById('task-content');
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
+      applyTaskUXEnhancements(id);
       lucide.createIcons({ root: content });
     }
 
@@ -335,6 +363,7 @@
       const content = document.getElementById('task-content');
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
+      applyTaskUXEnhancements(id);
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
