@@ -7,3 +7,8 @@
 **Vulnerability:** DOM-based Cross-Site Scripting (XSS) vulnerability via `innerHTML` assignment for parsing user-editable rich text.
 **Learning:** The application was extracting text from an editable `div` by assigning its `innerHTML` to a temporary, off-screen element's `innerHTML` property. This caused the browser to execute any malicious scripts embedded within the user-provided HTML string (e.g. `<img onerror="...">`).
 **Prevention:** Use `new DOMParser().parseFromString(htmlString, 'text/html')` to safely parse user-supplied HTML into a DOM document without executing scripts.
+
+## 2026-04-22 - [Fix XSS in AI Chat Messages]
+**Vulnerability:** Cross-Site Scripting (XSS) vulnerability via `insertAdjacentHTML` for AI responses.
+**Learning:** The application directly rendered AI responses (which could potentially be manipulated or contain injected payloads if the backend or transport is compromised) using `insertAdjacentHTML`.
+**Prevention:** Always use safe DOM APIs like `document.createElement` and `textContent` (or `createTextNode`) when rendering dynamic responses, particularly text that might be uncontrolled, and append the elements explicitly.

@@ -598,7 +598,23 @@
         }
 
         const aiText = data.reply || 'Ошибка обработки на сервере.';
-        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">${aiText.replace(/\n/g, '<br>')}${visualAddon}</div></div>`);
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex justify-start animate-message';
+        const bubble = document.createElement('div');
+        bubble.className = 'max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed';
+
+        const lines = aiText.split('\n');
+        lines.forEach((line, i) => {
+            if (i > 0) bubble.appendChild(document.createElement('br'));
+            bubble.appendChild(document.createTextNode(line));
+        });
+
+        if (visualAddon) {
+            bubble.insertAdjacentHTML('beforeend', visualAddon);
+        }
+        wrapper.appendChild(bubble);
+        messagesDiv.appendChild(wrapper);
         
         // Оптимизация: сканируем только последнее добавленное сообщение
         setTimeout(() => lucide.createIcons({ root: messagesDiv.lastElementChild }), 10);
