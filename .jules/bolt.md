@@ -12,3 +12,7 @@
 ## 2026-04-21 - Optimize Animation Loops
 **Learning:** In interactive tasks using `requestAnimationFrame` for visualization (like the Robot 10x10 grid), rebuilding the entire DOM structure on every tick using `innerHTML` causes heavy layout thrashing and severe performance degradation, especially on mobile devices.
 **Action:** Initialize static HTML structures only once. During the animation loop, perform targeted updates on specific elements (e.g. by setting `className` and changing `innerHTML` of individual cell elements using unique IDs).
+
+## 2026-04-22 - Prevent Unnecessary DOM Re-renders and Icon Scans in List Views
+**Learning:** In vanilla JS, repeatedly reconstructing `innerHTML` for static lists on navigation causes redundant parsing, triggers unnecessary garbage collection, and forces global icon libraries (like `lucide.createIcons`) to rescan the DOM needlessly.
+**Action:** Use a global cache (`const taskDOMCache = {}`) to store references to child nodes (`Array.from(list.childNodes)`) the first time a list is generated. On subsequent views, check the cache and use `list.replaceChildren(...cache[id])` to re-insert the existing DOM nodes directly, bypassing parsing and icon scanning entirely.
