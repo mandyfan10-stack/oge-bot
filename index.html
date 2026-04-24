@@ -395,7 +395,11 @@
 
       if (isCorrect) {
         fb.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'animate-pop');
-        iconContainer.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 shrink-0"></i>`;
+        iconContainer.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide', 'check-circle-2');
+        icon.className = 'w-5 h-5 shrink-0';
+        iconContainer.appendChild(icon);
         msgContainer.textContent = msg;
 
         if (!progress[taskId]) {
@@ -424,7 +428,11 @@
         }
       } else {
         fb.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/20', 'animate-shake');
-        iconContainer.innerHTML = `<i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>`;
+        iconContainer.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.setAttribute('data-lucide', 'alert-circle');
+        icon.className = 'w-5 h-5 shrink-0';
+        iconContainer.appendChild(icon);
         msgContainer.textContent = msg;
       }
       lucide.createIcons({ root: iconContainer });

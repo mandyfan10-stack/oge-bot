@@ -12,3 +12,8 @@
 **Vulnerability:** Cross-Site Scripting (XSS) vulnerability via `insertAdjacentHTML` for AI responses.
 **Learning:** The application directly rendered AI responses (which could potentially be manipulated or contain injected payloads if the backend or transport is compromised) using `insertAdjacentHTML`.
 **Prevention:** Always use safe DOM APIs like `document.createElement` and `textContent` (or `createTextNode`) when rendering dynamic responses, particularly text that might be uncontrolled, and append the elements explicitly.
+
+## 2026-04-23 - [Fix DOM XSS in Feedback Alerts]
+**Vulnerability:** DOM-based XSS via `innerHTML` on `iconContainer` in `showFeedback`.
+**Learning:** Direct assignment of strings via `innerHTML` causes arbitrary HTML evaluation, risking DOM XSS. While current usage sets static HTML snippet strings, changing it to `document.createElement` and DOM nodes mitigates future risk if user data gets accidentally concatenated.
+**Prevention:** Use safe DOM APIs like `document.createElement` and avoid `innerHTML`.
