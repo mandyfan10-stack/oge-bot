@@ -130,7 +130,7 @@
   </div>
 
   <!-- КНОПКА AI -->
-  <button onclick="toggleChat(true)" aria-label="Открыть ИИ-наставника" title="Открыть ИИ-наставника" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] focus-visible:ring-indigo-500">
+  <button id="chat-trigger-btn" onclick="toggleChat(true)" aria-label="Открыть ИИ-наставника" title="Открыть ИИ-наставника" class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full text-white shadow-[0_8px_20px_rgba(99,102,241,0.3)] z-40 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] focus-visible:ring-indigo-500">
     <i data-lucide="bot" class="w-6 h-6 group-hover:animate-bounce"></i>
   </button>
 
@@ -442,8 +442,13 @@
     // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
-      if (show) modal.classList.remove('hidden-chat');
-      else modal.classList.add('hidden-chat');
+      if (show) {
+        modal.classList.remove('hidden-chat');
+        setTimeout(() => document.getElementById('chat-input').focus(), 100);
+      } else {
+        modal.classList.add('hidden-chat');
+        document.getElementById('chat-trigger-btn').focus();
+      }
     }
 
     async function sendChatMessage() {
