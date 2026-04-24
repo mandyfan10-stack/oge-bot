@@ -1609,15 +1609,28 @@
                   }
                   gridContainer.innerHTML = `<div class="active:scale-95 transition-all shadow-md grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
                   innerContainer = gridContainer.firstElementChild;
+
+                  // Cache cell DOM nodes to avoid querying 100 cells on every animation frame tick
+                  map.cells = [];
+                  for(let y=0; y<map.h; y++){
+                      map.cells[y] = [];
+                      for(let x=0; x<map.w; x++){
+                          map.cells[y][x] = document.getElementById(`t15-cell-${x}-${y}`);
+                      }
+                  }
               }
 
               for(let y=0; y<map.h; y++){
                   for(let x=0; x<map.w; x++){
-                      const cell = document.getElementById(`t15-cell-${x}-${y}`);
+                      const cell = map.cells[y][x];
                       if (!cell) continue;
 
                       let bgClass = painted.has(`${x},${y}`) ? 'bg-blue-500/40 ' : 'bg-black/20 ';
-                      cell.className = `active:scale-95 transition-all shadow-md aspect-square ${cell.dataset.baseclass} ${bgClass}`;
+                      const newClassName = `active:scale-95 transition-all shadow-md aspect-square ${cell.dataset.baseclass} ${bgClass}`;
+                      // Guard check to prevent redundant style recalculations
+                      if (cell.className !== newClassName) {
+                          cell.className = newClassName;
+                      }
 
                       if (robot.x === x && robot.y === y) {
                           if (!cell.hasChildNodes()) {
