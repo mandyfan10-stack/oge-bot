@@ -17,3 +17,7 @@
 **Vulnerability:** DOM-based XSS via `innerHTML` on `iconContainer` in `showFeedback`.
 **Learning:** Direct assignment of strings via `innerHTML` causes arbitrary HTML evaluation, risking DOM XSS. While current usage sets static HTML snippet strings, changing it to `document.createElement` and DOM nodes mitigates future risk if user data gets accidentally concatenated.
 **Prevention:** Use safe DOM APIs like `document.createElement` and avoid `innerHTML`.
+## 2024-05-24 - Missing Timeout and Max Length Limits on AI Chat Input
+**Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
+**Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
+**Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
