@@ -16,3 +16,7 @@
 ## 2026-04-22 - Prevent Unnecessary DOM Re-renders and Icon Scans in List Views
 **Learning:** In vanilla JS, repeatedly reconstructing `innerHTML` for static lists on navigation causes redundant parsing, triggers unnecessary garbage collection, and forces global icon libraries (like `lucide.createIcons`) to rescan the DOM needlessly.
 **Action:** Use a global cache (`const taskDOMCache = {}`) to store references to child nodes (`Array.from(list.childNodes)`) the first time a list is generated. On subsequent views, check the cache and use `list.replaceChildren(...cache[id])` to re-insert the existing DOM nodes directly, bypassing parsing and icon scanning entirely.
+
+## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
+**Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
+**Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
