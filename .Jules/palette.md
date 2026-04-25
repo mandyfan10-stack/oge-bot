@@ -17,3 +17,6 @@
 ## 2024-04-24 - Loading states for async action buttons
 **Learning:** For async submission buttons (like sending AI chat messages) that might take a long time and temporarily disable interactions, simply dimming the button (`opacity-50`) is not sufficient. A loading spinner provides much better UX by indicating that an operation is actively in progress. This keeps the user informed and prevents them from thinking the UI has frozen.
 **Action:** Replace the icon of the button with a spinning loader (`loader-2` with `animate-spin` in Lucide/Tailwind) during the async operation, and restore the original icon in a `finally` block when done. Keep the button opaque to ensure the spinner is visible.
+## 2024-04-24 - Modal Focus Management
+**Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
+**Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
