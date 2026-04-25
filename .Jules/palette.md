@@ -20,3 +20,7 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+
+## 2024-04-25 - Execution Button Feedback
+**Learning:** During long-running tasks like algorithm execution (e.g., Task 15 "Run Algorithm"), simply disabling the button with `opacity-50` leaves the user unsure if the code is actually running or if the UI is stuck, especially since the algorithm has a `requestAnimationFrame` delay loop.
+**Action:** Always provide explicit visual feedback during lengthy async operations. Replace the button's icon with a spinning loader (`loader-2` with `animate-spin` in Lucide) and modify the text to indicate progress (e.g., "Выполнение..."). Ensure the original HTML content is cached and reliably restored in a `finally` block, and remember to re-run `lucide.createIcons({ root: button })` on the restored content so the icon appears correctly.
