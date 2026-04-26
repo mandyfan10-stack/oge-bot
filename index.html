@@ -616,6 +616,10 @@
 
       const inputs = content.querySelectorAll('input');
       inputs.forEach(input => {
+        if (!input.hasAttribute('maxlength')) {
+          input.setAttribute('maxlength', '250');
+        }
+
         if (!input.getAttribute('aria-label') && input.getAttribute('placeholder')) {
           input.setAttribute('aria-label', input.getAttribute('placeholder'));
         }
@@ -629,6 +633,13 @@
             }
           }
         });
+      });
+
+      const textareas = content.querySelectorAll('textarea');
+      textareas.forEach(textarea => {
+        if (!textarea.hasAttribute('maxlength')) {
+          textarea.setAttribute('maxlength', '2000');
+        }
       });
 
       const buttons = content.querySelectorAll('button:not([class*="focus-visible:ring-"])');
