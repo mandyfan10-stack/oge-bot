@@ -47,6 +47,7 @@
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     @keyframes messagePop { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
     /* Премиум компоненты с аппаратным ускорением для мобилок */
     .glass-panel { 
@@ -211,6 +212,7 @@
     let progress = {};
     let currentCourseId = null;
     let currentTaskId = null;
+    let taskCloseCleanupTimer = null;
     window.taskState = {}; 
 
     if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
@@ -336,6 +338,10 @@
 
     function regenerateTask() {
       if (!currentTaskId) return;
+      if (taskCloseCleanupTimer) {
+        clearTimeout(taskCloseCleanupTimer);
+        taskCloseCleanupTimer = null;
+      }
       const id = currentTaskId;
       const btn = document.getElementById('btn-regenerate');
       if (btn) {
@@ -354,6 +360,10 @@
     }
 
     function openTask(id) {
+      if (taskCloseCleanupTimer) {
+        clearTimeout(taskCloseCleanupTimer);
+        taskCloseCleanupTimer = null;
+      }
       currentTaskId = id;
       const course = COURSES.find(c => c.id === currentCourseId);
       const taskInfo = course.tasks.find(t => t.id === id);
@@ -376,7 +386,13 @@
       document.getElementById('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
 
-      setTimeout(() => { document.getElementById('task-content').innerHTML = ''; }, 300); 
+      taskCloseCleanupTimer = setTimeout(() => {
+        const taskScreen = document.getElementById('screen-task');
+        if (currentTaskId === null && taskScreen.classList.contains('translate-x-full')) {
+          document.getElementById('task-content').innerHTML = '';
+        }
+        taskCloseCleanupTimer = null;
+      }, 300); 
     }
 
     function updateGlobalProgress() {
@@ -1926,7 +1942,8 @@
       }
     };
 
-    renderCourses(); 
+    renderCourses();
+    lucide.createIcons();
   </script>
 </body>
 </html>
