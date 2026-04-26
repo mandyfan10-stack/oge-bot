@@ -76,6 +76,173 @@
     #task-content .shadow-md:not(button):not(.glass-panel), #task-content h3.shadow-md, #task-content p.shadow-md, #task-content span.shadow-md, #task-content sub.shadow-md { box-shadow: none !important; }
     #task-content [class*="active:scale-95"]:not(button):not(input):not(textarea) { transform: none !important; }
     .t20-btns[aria-pressed="true"] { background: rgba(14, 165, 233, 0.16) !important; border-color: rgb(14, 165, 233) !important; color: white !important; box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.22); }
+
+    button, [role="button"] { touch-action: manipulation; }
+    .interactive-control {
+      position: relative;
+      overflow: hidden;
+      transform: translateZ(0);
+      transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
+      will-change: transform;
+    }
+    .interactive-control.is-pressing { transform: translateY(1px) scale(0.985); filter: brightness(1.08); }
+    .interactive-control:disabled { cursor: not-allowed; filter: grayscale(0.2); transform: none !important; }
+    .interactive-control .lucide { transition: transform 0.18s ease, opacity 0.18s ease; }
+    @media (hover: hover) {
+      .interactive-control:not(:disabled):hover .lucide { transform: scale(1.08); }
+      button.glass-panel:hover { border-color: rgba(129, 140, 248, 0.35) !important; box-shadow: 0 14px 36px rgba(15, 23, 42, 0.28); }
+    }
+
+    .feedback-card {
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.22);
+    }
+    .feedback-card.feedback-success { animation: feedbackSuccess 0.44s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .feedback-card.feedback-error { animation: feedbackError 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+    @keyframes feedbackSuccess {
+      0% { opacity: 0; transform: translateY(10px) scale(0.98); }
+      65% { opacity: 1; transform: translateY(-1px) scale(1.01); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes feedbackError {
+      0% { opacity: 0; transform: translateX(0) translateY(8px); }
+      20% { opacity: 1; transform: translateX(-4px) translateY(0); }
+      40% { transform: translateX(4px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(2px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    #chat-trigger-btn {
+      overflow: visible;
+      isolation: isolate;
+      box-shadow: 0 14px 38px rgba(99, 102, 241, 0.34), inset 0 1px 0 rgba(255,255,255,0.24);
+    }
+    #chat-trigger-btn::before {
+      content: "";
+      position: absolute;
+      inset: -9px;
+      z-index: -1;
+      border-radius: 999px;
+      border: 1px solid rgba(167, 139, 250, 0.42);
+      opacity: 0.72;
+      animation: mentorHalo 2.4s ease-in-out infinite;
+    }
+    @keyframes mentorHalo {
+      0%, 100% { transform: scale(0.88); opacity: 0.25; }
+      45% { transform: scale(1.12); opacity: 0.75; }
+    }
+
+    #chat-modal {
+      background: radial-gradient(circle at 50% 100%, rgba(79,70,229,0.22), rgba(0,0,0,0.72) 42%, rgba(0,0,0,0.82));
+    }
+    #chat-container {
+      background:
+        radial-gradient(circle at top left, rgba(99,102,241,0.18), transparent 36%),
+        linear-gradient(180deg, rgba(18, 18, 25, 0.98), rgba(8, 8, 11, 0.98));
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: 0 -28px 70px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+    #chat-modal:not(.hidden-chat) #chat-container { animation: chatSheetIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    @keyframes chatSheetIn {
+      0% { transform: translateY(24px) scale(0.985); opacity: 0.84; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .mentor-avatar {
+      background: linear-gradient(135deg, rgba(99,102,241,0.28), rgba(168,85,247,0.24));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 12px 26px rgba(79,70,229,0.22);
+    }
+    .mentor-presence {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #34d399;
+      box-shadow: 0 0 0 4px rgba(52,211,153,0.12), 0 0 14px rgba(52,211,153,0.5);
+      animation: presencePulse 1.9s ease-in-out infinite;
+    }
+    @keyframes presencePulse {
+      0%, 100% { transform: scale(0.92); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .chat-message-bubble {
+      max-width: 90%;
+      padding: 14px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.55;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    }
+    .chat-message-ai {
+      border-top-left-radius: 6px;
+      background: rgba(255,255,255,0.065);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #e4e4e7;
+    }
+    .chat-message-user {
+      border-top-right-radius: 6px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      box-shadow: 0 14px 32px rgba(79,70,229,0.28);
+    }
+    .typing-card {
+      padding: 13px 15px;
+      border-radius: 18px;
+      border-top-left-radius: 6px;
+      background: rgba(255,255,255,0.065);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+    }
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #a5b4fc;
+      animation: typingDot 1s ease-in-out infinite;
+    }
+    @keyframes typingDot {
+      0%, 100% { transform: translateY(0); opacity: 0.42; }
+      50% { transform: translateY(-4px); opacity: 1; }
+    }
+    .chat-input-panel {
+      background: rgba(12,12,17,0.92) !important;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 -12px 36px rgba(0,0,0,0.24);
+    }
+    .chat-input-shell {
+      background: rgba(0,0,0,0.42);
+      border: 1px solid rgba(255,255,255,0.11);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .chat-input-shell:focus-within {
+      border-color: rgba(129,140,248,0.62);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.5);
+    }
+    .mentor-chip {
+      border: 1px solid rgba(129,140,248,0.24);
+      background: rgba(99,102,241,0.1);
+      color: #c7d2fe;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .mentor-chip:hover { background: rgba(99,102,241,0.18); border-color: rgba(129,140,248,0.4); color: white; }
+    .mentor-visual-card {
+      background: rgba(15, 23, 42, 0.54);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    @media (min-width: 760px) {
+      #chat-container { max-width: 720px; margin-left: auto; margin-right: auto; border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1); border-radius: 24px 24px 0 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -145,19 +312,37 @@
   <!-- МОДАЛКА AI -->
   <div id="chat-modal" class="hidden-chat fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex flex-col justify-end" style="transform: translateZ(0);">
     <div class="absolute inset-0" onclick="toggleChat(false)"></div>
-    <div id="chat-container" class="bg-[#09090b] border-t border-white/10 rounded-t-[2rem] w-full max-h-[85vh] flex flex-col relative z-10 shadow-2xl">
+    <div id="chat-container" class="bg-[#09090b] border-t border-white/10 rounded-t-[2rem] w-full max-h-[88vh] flex flex-col relative z-10 shadow-2xl">
       <div class="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3 mb-2"></div>
-      <header class="flex items-center justify-between p-4 px-6 border-b border-white/5">
-        <div class="flex items-center gap-3 text-indigo-300 font-medium"><div class="p-2 bg-indigo-500/20 rounded-xl"><i data-lucide="sparkles" class="w-5 h-5"></i></div> ИИ-Наставник</div>
-        <button onclick="toggleChat(false)" aria-label="Закрыть чат" title="Закрыть чат" class="p-2 text-zinc-500 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
+      <header class="flex items-center justify-between p-4 px-5 border-b border-white/5">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="mentor-avatar w-11 h-11 rounded-xl flex items-center justify-center text-indigo-200 shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 class="font-semibold text-zinc-100 leading-tight truncate">ИИ-наставник</h3>
+              <span class="mentor-presence shrink-0"></span>
+            </div>
+            <p id="mentor-context-label" class="text-xs text-zinc-500 mt-0.5 truncate">Готов к разбору</p>
+          </div>
+        </div>
+        <button onclick="toggleChat(false)" aria-label="Закрыть чат" title="Закрыть чат" class="p-2.5 glass-button text-zinc-500 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"><i data-lucide="x" class="w-5 h-5"></i></button>
       </header>
       <div id="chat-messages" class="flex-1 overflow-y-auto p-5 space-y-5 scroll-smooth">
-        <div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed">Привет! Я ИИ-репетитор. Спрашивай любую задачу, если застрял! ✨</div></div>
+        <div class="flex justify-start animate-message">
+          <div class="chat-message-bubble chat-message-ai">Разберем задачу спокойно: идея, шаги, затем ответ.</div>
+        </div>
       </div>
-      <div class="p-4 px-5 glass-panel border-t-0">
-        <div class="flex gap-2 bg-black/40 border border-white/10 p-1.5 rounded-2xl focus-within:ring-2 focus-within:ring-indigo-500">
+      <div class="chat-input-panel p-4 px-5 glass-panel border-t-0 space-y-3">
+        <div class="flex gap-2 overflow-x-auto pb-1">
+          <button type="button" onclick="askMentorPreset('hint')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Подсказка</button>
+          <button type="button" onclick="askMentorPreset('steps')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">По шагам</button>
+          <button type="button" onclick="askMentorPreset('check')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Проверь ход</button>
+        </div>
+        <div class="chat-input-shell flex gap-2 p-1.5 rounded-xl">
           <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." maxlength="250" class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-xl text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
+          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-lg text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
       </div>
     </div>
@@ -172,6 +357,85 @@
     function renderLucideIcons(root = document) {
       if (!window.lucide || !root || !root.querySelector('i[data-lucide]')) return;
       lucide.createIcons({ root });
+    }
+
+    let lastHapticAt = 0;
+
+    function runHaptic(kind = 'impact', value = 'light') {
+      const now = Date.now();
+      if (kind !== 'notification' && now - lastHapticAt < 90) return;
+      lastHapticAt = now;
+      const webApp = window.Telegram?.WebApp;
+      const feedback = webApp?.HapticFeedback;
+      const versionParts = (webApp?.version || '').split('.').map(part => parseInt(part, 10));
+      const hasVersion = Number.isFinite(versionParts[0]);
+      const versionSupportsHaptics = hasVersion
+        ? (versionParts[0] > 6 || (versionParts[0] === 6 && (versionParts[1] || 0) >= 1))
+        : (!webApp?.isVersionAtLeast || webApp.isVersionAtLeast('6.1'));
+      const supportsTelegramHaptics = Boolean(feedback && versionSupportsHaptics);
+      let handled = false;
+      try {
+        if (supportsTelegramHaptics && kind === 'impact') { feedback.impactOccurred(value); handled = true; }
+        if (supportsTelegramHaptics && kind === 'selection') { feedback.selectionChanged(); handled = true; }
+        if (supportsTelegramHaptics && kind === 'notification') { feedback.notificationOccurred(value); handled = true; }
+      } catch (_) {}
+      if (!handled && navigator.vibrate) {
+        const pattern = kind === 'notification' ? (value === 'error' ? [18, 28, 18] : [14]) : [8];
+        navigator.vibrate(pattern);
+      }
+    }
+
+    function hapticImpact(style = 'light') { runHaptic('impact', style); }
+    function hapticSelection() { runHaptic('selection'); }
+    function hapticNotify(type = 'success') { runHaptic('notification', type); }
+
+    function enhanceInteractiveElements(root = document) {
+      const scope = root instanceof Element ? root : document;
+      const controls = [];
+      if (scope.matches?.('button, [role="button"]')) controls.push(scope);
+      controls.push(...scope.querySelectorAll('button, [role="button"]'));
+      controls.forEach(control => {
+        control.classList.add('interactive-control');
+        if (!control.getAttribute('data-haptic')) control.setAttribute('data-haptic', 'light');
+      });
+    }
+
+    function initializeInteractionFeedback() {
+      const release = (target) => {
+        const control = target?.closest?.('.interactive-control');
+        if (control) control.classList.remove('is-pressing');
+      };
+      document.addEventListener('pointerdown', (event) => {
+        const control = event.target.closest('.interactive-control');
+        if (!control || control.disabled) return;
+        control.classList.add('is-pressing');
+        const feedback = control.id === 'chat-trigger-btn' || control.closest('#chat-modal') ? 'medium' : control.dataset.haptic;
+        hapticImpact(feedback || 'light');
+      }, { passive: true });
+      document.addEventListener('pointerup', (event) => release(event.target), { passive: true });
+      document.addEventListener('pointercancel', (event) => release(event.target), { passive: true });
+      document.addEventListener('pointerleave', (event) => release(event.target), { passive: true });
+    }
+
+    function updateMentorContextLabel() {
+      const label = document.getElementById('mentor-context-label');
+      if (!label) return;
+      const taskObj = currentTaskId ? COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId) : null;
+      label.textContent = taskObj ? `Контекст: ${taskObj.title}` : 'Готов к разбору';
+    }
+
+    function askMentorPreset(type) {
+      const inputEl = document.getElementById('chat-input');
+      if (!inputEl || inputEl.disabled) return;
+      const hasTask = Boolean(currentTaskId);
+      const prompts = {
+        hint: hasTask ? 'Дай короткую подсказку по текущей задаче без готового ответа.' : 'Подскажи, с какого задания лучше начать.',
+        steps: hasTask ? 'Разбери текущую задачу пошагово и объясни логику.' : 'Объясни, как лучше готовиться к заданиям ОГЭ по информатике.',
+        check: hasTask ? 'Проверь мой ход решения и укажи, где я могу ошибиться.' : 'Проверь мой план подготовки и предложи следующий шаг.'
+      };
+      inputEl.value = prompts[type] || prompts.hint;
+      hapticSelection();
+      sendChatMessage();
     }
 
 
@@ -255,6 +519,7 @@
       `;
       }).join('');
       renderLucideIcons(list); // Локальный вызов для оптимизации
+      enhanceInteractiveElements(list);
       updateGlobalProgress();
     }
 
@@ -293,6 +558,7 @@
             else icon.classList.add('hidden');
           }
         });
+        enhanceInteractiveElements(list);
         return;
       }
 
@@ -314,6 +580,7 @@
         </button>
       `).join('');
       renderLucideIcons(list);
+      enhanceInteractiveElements(list);
       taskDOMCache[course.id] = {
         count: course.tasks.length,
         nodes: Array.from(list.childNodes)
@@ -345,6 +612,7 @@
       buttons.forEach(button => {
         button.classList.add('focus-visible:outline-none', 'focus-visible:ring-2', 'focus-visible:ring-indigo-500');
       });
+      enhanceInteractiveElements(content);
     }
 
     function regenerateTask() {
@@ -362,6 +630,7 @@
           setTimeout(() => icn.classList.remove('animate-spin-slow'), 500);
         }
       }
+      hapticSelection();
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
@@ -369,6 +638,7 @@
       applyTaskUXEnhancements(id);
       renderLucideIcons(content);
       renderLucideIcons(document.getElementById('screen-task'));
+      enhanceInteractiveElements(content);
     }
 
     function openTask(id) {
@@ -380,6 +650,7 @@
       const course = COURSES.find(c => c.id === currentCourseId);
       const taskInfo = course.tasks.find(t => t.id === id);
       document.getElementById('task-title').innerText = taskInfo.title;
+      updateMentorContextLabel();
       
       if (renderers[id].init) renderers[id].init(id);
       const content = document.getElementById('task-content');
@@ -391,10 +662,12 @@
       document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
       renderLucideIcons(content);
       renderLucideIcons(document.getElementById('screen-task'));
+      enhanceInteractiveElements(content);
     }
 
     function closeTask() {
       currentTaskId = null;
+      updateMentorContextLabel();
       document.getElementById('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       document.getElementById('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
@@ -416,14 +689,15 @@
     function showFeedback(taskId, isCorrect, msg) {
       const fb = document.getElementById(`feedback-${taskId}`);
       if (!fb) return;
-      fb.className = 'mt-6 p-4 rounded-2xl border flex items-start gap-3 text-sm font-medium transition-all duration-300';
+      fb.className = 'feedback-card mt-6 p-4 rounded-2xl border flex items-start gap-3 text-sm font-medium transition-all duration-300';
       void fb.offsetWidth; 
 
       const iconContainer = document.getElementById(`feedback-icon-${taskId}`);
       const msgContainer = document.getElementById(`feedback-msg-${taskId}`);
 
       if (isCorrect) {
-        fb.classList.add('text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20', 'animate-pop');
+        hapticNotify('success');
+        fb.classList.add('feedback-success', 'text-emerald-400', 'bg-emerald-500/10', 'border-emerald-500/20');
         iconContainer.innerHTML = '';
         const icon = document.createElement('i');
         icon.setAttribute('data-lucide', 'check-circle-2');
@@ -456,7 +730,8 @@
           }
         }
       } else {
-        fb.classList.add('text-rose-400', 'bg-rose-500/10', 'border-rose-500/20', 'animate-shake');
+        hapticNotify('error');
+        fb.classList.add('feedback-error', 'text-rose-400', 'bg-rose-500/10', 'border-rose-500/20');
         iconContainer.innerHTML = '';
         const icon = document.createElement('i');
         icon.setAttribute('data-lucide', 'alert-circle');
@@ -471,6 +746,8 @@
     // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
+      updateMentorContextLabel();
+      hapticImpact(show ? 'medium' : 'light');
       if (show) {
         modal.classList.remove('hidden-chat');
         setTimeout(() => document.getElementById('chat-input').focus(), 100);
@@ -484,7 +761,8 @@
       const inputEl = document.getElementById('chat-input');
       const sendBtn = inputEl.nextElementSibling;
       const text = inputEl.value.trim();
-      if (!text) return;
+      if (!text) { hapticImpact('light'); return; }
+      hapticImpact('medium');
       
       inputEl.value = '';
       inputEl.disabled = true;
@@ -499,7 +777,7 @@
       const userMessageWrapper = document.createElement('div');
       userMessageWrapper.className = 'flex justify-end animate-message-user';
       const userMessageBubble = document.createElement('div');
-      userMessageBubble.className = 'max-w-[90%] p-4 rounded-2xl rounded-tr-none text-sm bg-indigo-600 text-white font-light shadow-lg';
+      userMessageBubble.className = 'chat-message-bubble chat-message-user';
       userMessageBubble.textContent = text;
       userMessageWrapper.appendChild(userMessageBubble);
       messagesDiv.appendChild(userMessageWrapper);
@@ -508,10 +786,10 @@
       const typingId = 'typing-' + Date.now();
       messagesDiv.insertAdjacentHTML('beforeend', `
         <div id="${typingId}" class="flex justify-start animate-message">
-          <div class="p-4 rounded-2xl rounded-tl-none bg-white/5 border border-white/10 flex gap-1 items-center">
-            <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
-            <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
-            <div class="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+          <div class="typing-card flex gap-1.5 items-center">
+            <div class="typing-dot" style="animation-delay: 0ms"></div>
+            <div class="typing-dot" style="animation-delay: 120ms"></div>
+            <div class="typing-dot" style="animation-delay: 240ms"></div>
           </div>
         </div>
       `);
@@ -634,7 +912,7 @@
             }
             if (svgBody) {
                 visualAddon = `
-                <div class="mt-4 p-4 bg-${color}-950/40 border border-${color}-500/30 rounded-xl">
+                <div class="mentor-visual-card mt-4 p-4 bg-${color}-950/40 border border-${color}-500/30 rounded-xl">
                   <div class="text-xs text-${color}-300 font-medium mb-3 flex items-center gap-1"><i data-lucide="image" class="w-4 h-4"></i> ${title}</div>
                   <svg viewBox="0 0 200 80" class="w-full h-auto mb-2 opacity-90 drop-shadow-md">
                     <defs><marker id="arr-ai-${color}" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto"><polygon points="0 0, 6 2, 0 4" fill="currentColor"/></marker></defs>
@@ -645,11 +923,12 @@
         }
 
         const aiText = data.reply || 'Ошибка обработки на сервере.';
+        hapticSelection();
 
         const wrapper = document.createElement('div');
         wrapper.className = 'flex justify-start animate-message';
         const bubble = document.createElement('div');
-        bubble.className = 'max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-white/5 border border-white/10 text-zinc-200 font-light leading-relaxed';
+        bubble.className = 'chat-message-bubble chat-message-ai';
 
         const lines = aiText.split('\n');
         lines.forEach((line, i) => {
@@ -668,13 +947,15 @@
       } catch (err) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
-        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
+        hapticNotify('error');
+        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="chat-message-bubble border border-rose-500/25 bg-rose-500/10 text-rose-300">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
       } finally {
         clearTimeout(timeoutId);
         inputEl.disabled = false;
         sendBtn.disabled = false;
         inputEl.classList.remove('opacity-50');
         sendBtn.innerHTML = originalIcon;
+        renderLucideIcons(sendBtn);
         inputEl.focus();
       }
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -1964,6 +2245,9 @@
 
     renderCourses();
     renderLucideIcons();
+    enhanceInteractiveElements();
+    initializeInteractionFeedback();
+    updateMentorContextLabel();
   </script>
 </body>
 </html>
