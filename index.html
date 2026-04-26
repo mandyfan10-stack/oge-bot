@@ -162,6 +162,10 @@
     function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function shuffleArray(arr) { return [...arr].sort(() => Math.random() - 0.5); }
     function getRandomBool() { return Math.random() > 0.5; }
+    function renderLucideIcons(root = document) {
+      if (!window.lucide || !root || !root.querySelector('i[data-lucide]')) return;
+      lucide.createIcons({ root });
+    }
 
 
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
@@ -243,7 +247,7 @@
         </button>
       `;
       }).join('');
-      lucide.createIcons({ root: list }); // Локальный вызов для оптимизации
+      renderLucideIcons(list); // Локальный вызов для оптимизации
       updateGlobalProgress();
     }
 
@@ -302,7 +306,7 @@
           <i data-lucide="chevron-right" class="text-zinc-600 group-hover:text-zinc-300 transition-colors"></i>
         </button>
       `).join('');
-      lucide.createIcons({ root: list });
+      renderLucideIcons(list);
       taskDOMCache[course.id] = {
         count: course.tasks.length,
         nodes: Array.from(list.childNodes)
@@ -356,7 +360,8 @@
       content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderers[id].setup) renderers[id].setup(id);
       applyTaskUXEnhancements(id);
-      lucide.createIcons({ root: content });
+      renderLucideIcons(content);
+      renderLucideIcons(document.getElementById('screen-task'));
     }
 
     function openTask(id) {
@@ -377,7 +382,8 @@
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
-      lucide.createIcons({ root: content });
+      renderLucideIcons(content);
+      renderLucideIcons(document.getElementById('screen-task'));
     }
 
     function closeTask() {
@@ -451,7 +457,7 @@
         iconContainer.appendChild(icon);
         msgContainer.textContent = msg;
       }
-      lucide.createIcons({ root: iconContainer });
+      renderLucideIcons(iconContainer);
       setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
@@ -479,7 +485,7 @@
       inputEl.classList.add('opacity-50');
       const originalIcon = sendBtn.innerHTML;
       sendBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
-      lucide.createIcons({ root: sendBtn });
+      renderLucideIcons(sendBtn);
       const messagesDiv = document.getElementById('chat-messages');
       
       // 🛡️ Sentinel: Fix XSS in User Chat Message
@@ -651,7 +657,7 @@
         messagesDiv.appendChild(wrapper);
         
         // Оптимизация: сканируем только последнее добавленное сообщение
-        setTimeout(() => lucide.createIcons({ root: messagesDiv.lastElementChild }), 10);
+        setTimeout(() => renderLucideIcons(messagesDiv.lastElementChild), 10);
       } catch (err) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
@@ -1943,7 +1949,7 @@
     };
 
     renderCourses();
-    lucide.createIcons();
+    renderLucideIcons();
   </script>
 </body>
 </html>
