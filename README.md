@@ -33,3 +33,4 @@ Backend repo when needed: `C:\Users\serge\Documents\oge_backend-main`.
 - Reset/regenerate was strengthened on 2026-04-26: all task generators now use shared crypto-backed randomness, and reset retries to avoid the exact previous variant.
 - Browser verification on 2026-04-26 checked all 20 tasks on mobile and desktop: every generated task accepted its correct answer, every reset changed the generated state, and Lucide icons rendered fully.
 - Backend `server.py` currently caches allowed CORS origins once at startup and reuses that value in middleware and health checks.
+- Task 15 was expanded on 2026-04-26: robot maps now generate multiple random horizontal/vertical wall segments with passages, random start cells, reachability checks, and larger target sets so reset feels closer to a new exam variant.

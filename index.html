@@ -1853,34 +1853,150 @@
       },
       15: {
         init: (id) => { 
-          const cx = getRandomInt(6, 7);
-          const cy = getRandomInt(2, 3);
-          const start_hx = getRandomInt(1, 2);
-          const end_vy = getRandomInt(7, 8);
+          const w = 10;
+          const h = 10;
+          const key = (x, y) => `${x},${y}`;
+          const fromKey = (value) => {
+            const [x, y] = value.split(',').map(Number);
+            return { x, y };
+          };
 
-          const h_gap_start = start_hx + getRandomInt(0, cx - start_hx - 2);
-          const h_gap_len = getRandomBool() ? 2 : 1;
-          
-          const v_gap_start = cy + 1 + getRandomInt(0, end_vy - cy - 3);
-          const v_gap_len = getRandomBool() ? 2 : 1;
+          const hasWallInSet = (hWalls, vWalls, x, y, dir) => {
+            if (x < 0 || x >= w || y < 0 || y >= h) return true;
+            if (dir === 'up') return y === 0 || hWalls.has(key(x, y - 1));
+            if (dir === 'down') return y === h - 1 || hWalls.has(key(x, y));
+            if (dir === 'left') return x === 0 || vWalls.has(key(x - 1, y));
+            if (dir === 'right') return x === w - 1 || vWalls.has(key(x, y));
+            return false;
+          };
 
-          let horizontals = [];
-          let verticals = [];
-          let targetPainted = []; 
-          
-          for(let x = start_hx; x <= cx; x++) {
-              if (x >= h_gap_start && x < h_gap_start + h_gap_len) continue;
-              horizontals.push({x, y: cy});
-              if (!targetPainted.includes(`${x},${cy+1}`)) targetPainted.push(`${x},${cy+1}`);
+          const getReachability = (start, hWalls, vWalls) => {
+            const queue = [{ ...start, dist: 0 }];
+            const seen = new Map([[key(start.x, start.y), 0]]);
+            const dirs = [
+              { name: 'up', dx: 0, dy: -1 },
+              { name: 'down', dx: 0, dy: 1 },
+              { name: 'left', dx: -1, dy: 0 },
+              { name: 'right', dx: 1, dy: 0 }
+            ];
+
+            while (queue.length) {
+              const cur = queue.shift();
+              dirs.forEach(dir => {
+                if (hasWallInSet(hWalls, vWalls, cur.x, cur.y, dir.name)) return;
+                const next = { x: cur.x + dir.dx, y: cur.y + dir.dy, dist: cur.dist + 1 };
+                const nextKey = key(next.x, next.y);
+                if (seen.has(nextKey)) return;
+                seen.set(nextKey, next.dist);
+                queue.push(next);
+              });
+            }
+
+            return seen;
+          };
+
+          const addSegment = (wallSet, orientation) => {
+            const length = getRandomInt(3, 7);
+            const gapCount = length >= 5 && getRandomBool() ? 2 : 1;
+            const gaps = new Set();
+            while (gaps.size < gapCount) gaps.add(getRandomInt(1, length - 2));
+
+            if (orientation === 'horizontal') {
+              const y = getRandomInt(1, h - 2);
+              const startX = getRandomInt(0, w - length);
+              for (let offset = 0; offset < length; offset++) {
+                if (!gaps.has(offset)) wallSet.add(key(startX + offset, y));
+              }
+              return;
+            }
+
+            const x = getRandomInt(1, w - 2);
+            const startY = getRandomInt(0, h - length);
+            for (let offset = 0; offset < length; offset++) {
+              if (!gaps.has(offset)) wallSet.add(key(x, startY + offset));
+            }
+          };
+
+          for (let attempt = 0; attempt < 80; attempt++) {
+            const horizontalSet = new Set();
+            const verticalSet = new Set();
+            const horizontalSegments = getRandomInt(3, 5);
+            const verticalSegments = getRandomInt(3, 5);
+
+            for (let i = 0; i < horizontalSegments; i++) addSegment(horizontalSet, 'horizontal');
+            for (let i = 0; i < verticalSegments; i++) addSegment(verticalSet, 'vertical');
+
+            if (getRandomBool()) addSegment(horizontalSet, 'horizontal');
+            if (getRandomBool()) addSegment(verticalSet, 'vertical');
+
+            const targetSet = new Set();
+            horizontalSet.forEach(wall => {
+              const { x, y } = fromKey(wall);
+              if (y + 1 < h) targetSet.add(key(x, y + 1));
+            });
+            verticalSet.forEach(wall => {
+              const { x, y } = fromKey(wall);
+              targetSet.add(key(x, y));
+            });
+
+            if (targetSet.size < 10 || targetSet.size > 24) continue;
+
+            const allCells = [];
+            for (let y = 0; y < h; y++) {
+              for (let x = 0; x < w; x++) {
+                if (!targetSet.has(key(x, y))) allCells.push({ x, y });
+              }
+            }
+
+            const startCandidates = shuffleArray(allCells);
+            for (const start of startCandidates) {
+              const reach = getReachability(start, horizontalSet, verticalSet);
+              const targetDistances = [...targetSet].map(target => reach.get(target)).filter(Number.isFinite);
+              if (targetDistances.length !== targetSet.size) continue;
+              const maxDistance = Math.max(...targetDistances);
+              const totalDistance = targetDistances.reduce((sum, value) => sum + value, 0);
+              if (maxDistance < 7 || totalDistance < targetSet.size * 5) continue;
+
+              const horizontals = [...horizontalSet].map(fromKey).sort((a, b) => a.y - b.y || a.x - b.x);
+              const verticals = [...verticalSet].map(fromKey).sort((a, b) => a.x - b.x || a.y - b.y);
+              const targetPainted = [...targetSet].sort();
+              window.taskState[id] = {
+                w, h,
+                startX: start.x,
+                startY: start.y,
+                horizontals,
+                verticals,
+                targetPainted,
+                targetCount: targetPainted.length,
+                wallCount: horizontals.length + verticals.length
+              };
+              return;
+            }
           }
-          
-          for(let y = cy + 1; y <= end_vy; y++) {
-              if (y >= v_gap_start && y < v_gap_start + v_gap_len) continue;
-              verticals.push({x: cx, y});
-              if (!targetPainted.includes(`${cx},${y}`)) targetPainted.push(`${cx},${y}`);
-          }
 
-          window.taskState[id] = { w: 10, h: 10, startX: start_hx, startY: cy + 1, horizontals, verticals, targetPainted };
+          const horizontals = [
+            {x: 1, y: 2}, {x: 2, y: 2}, {x: 4, y: 2}, {x: 5, y: 2}, {x: 6, y: 2},
+            {x: 0, y: 5}, {x: 1, y: 5}, {x: 3, y: 5}, {x: 4, y: 5}, {x: 7, y: 6}
+          ];
+          const verticals = [
+            {x: 6, y: 1}, {x: 6, y: 2}, {x: 6, y: 4}, {x: 6, y: 5}, {x: 2, y: 6},
+            {x: 2, y: 7}, {x: 4, y: 0}, {x: 4, y: 1}, {x: 8, y: 7}, {x: 8, y: 8}
+          ];
+          const targetSet = new Set([
+            ...horizontals.map(wall => key(wall.x, wall.y + 1)),
+            ...verticals.map(wall => key(wall.x, wall.y))
+          ]);
+          const targetPainted = [...targetSet].sort();
+          window.taskState[id] = {
+            w, h,
+            startX: 0,
+            startY: 0,
+            horizontals,
+            verticals,
+            targetPainted,
+            targetCount: targetPainted.length,
+            wallCount: horizontals.length + verticals.length
+          };
         },
         html: (id) => `
           <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
