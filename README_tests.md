@@ -4,11 +4,11 @@ This project includes automated tests using Playwright.
 
 To run the tests, install the dependencies:
 ```bash
-pip install pytest pytest-playwright
-playwright install
+python -m pip install -r requirements.txt
+python -m playwright install chromium
 ```
 
 Then run the tests:
 ```bash
-python3 -m pytest tests/
+python -m pytest tests/
 ```

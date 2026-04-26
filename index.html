@@ -507,7 +507,6 @@
         const response = await fetch(BACKEND_URL, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: optimizedPrompt }), signal: controller.signal
         });
-        clearTimeout(timeoutId);
         const data = await response.json();
         
         const typingEl = document.getElementById(typingId);
@@ -642,6 +641,7 @@
         if (typingEl) typingEl.remove();
         messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="max-w-[90%] p-4 rounded-2xl rounded-tl-none text-sm bg-rose-500/10 border border-rose-500/20 text-rose-300 font-light">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
       } finally {
+        clearTimeout(timeoutId);
         inputEl.disabled = false;
         sendBtn.disabled = false;
         inputEl.classList.remove('opacity-50');
@@ -1352,11 +1352,17 @@
         `;
         },
         setup: (id) => {
-          document.getElementById('t13-editor').oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          const editor = document.getElementById('t13-editor');
+          editor.oninput = () => document.getElementById(`feedback-${id}`).classList.add('hidden');
+          editor.addEventListener('paste', (event) => {
+            const plainText = event.clipboardData?.getData('text/plain');
+            if (plainText === undefined) return;
+            event.preventDefault();
+            document.execCommand('insertText', false, plainText);
+          });
           window.check_t13 = (tid) => {
             const s = window.taskState[tid];
 
-            const editor = document.getElementById('t13-editor');
             const doc = new DOMParser().parseFromString(editor.innerHTML, 'text/html');
             const elements = doc.querySelectorAll('*');
 
