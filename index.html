@@ -1957,6 +1957,13 @@
               const totalDistance = targetDistances.reduce((sum, value) => sum + value, 0);
               if (maxDistance < 7 || totalDistance < targetSet.size * 5) continue;
 
+              const finishCandidates = [...reach.entries()]
+                .filter(([cell, distance]) => !targetSet.has(cell) && cell !== key(start.x, start.y) && distance >= Math.max(6, Math.floor(maxDistance * 0.7)))
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+              if (!finishCandidates.length) continue;
+              const finish = fromKey(getRandomElement(finishCandidates)[0]);
+
               const horizontals = [...horizontalSet].map(fromKey).sort((a, b) => a.y - b.y || a.x - b.x);
               const verticals = [...verticalSet].map(fromKey).sort((a, b) => a.x - b.x || a.y - b.y);
               const targetPainted = [...targetSet].sort();
@@ -1964,6 +1971,8 @@
                 w, h,
                 startX: start.x,
                 startY: start.y,
+                finishX: finish.x,
+                finishY: finish.y,
                 horizontals,
                 verticals,
                 targetPainted,
@@ -1987,10 +1996,14 @@
             ...verticals.map(wall => key(wall.x, wall.y))
           ]);
           const targetPainted = [...targetSet].sort();
+          const reach = getReachability({ x: 0, y: 0 }, new Set(horizontals.map(wall => key(wall.x, wall.y))), new Set(verticals.map(wall => key(wall.x, wall.y))));
+          const fallbackFinish = fromKey([...reach.entries()].filter(([cell]) => !targetSet.has(cell) && cell !== '0,0').sort((a, b) => b[1] - a[1])[0][0]);
           window.taskState[id] = {
             w, h,
             startX: 0,
             startY: 0,
+            finishX: fallbackFinish.x,
+            finishY: fallbackFinish.y,
             horizontals,
             verticals,
             targetPainted,
@@ -2003,7 +2016,7 @@
             <div>
               <h3 class="font-medium text-zinc-200 text-lg">Задание 15: Робот</h3>
               <p class="text-xs text-zinc-400 font-light mt-1">
-                Напиши алгоритм для Робота. Закрась все клетки, расположенные <span class="text-white">непосредственно ниже горизонтальной стены и левее вертикальной</span>. Проходы должны остаться незакрашенными.
+                Напиши алгоритм для Робота. Закрась все клетки, расположенные <span class="text-white">непосредственно ниже горизонтальной стены и левее вертикальной</span>. Проходы должны остаться незакрашенными. После закраски приведи Робота в зелёную клетку <span class="text-emerald-300 font-semibold">Ф</span>.
                 <br><br><span class="text-blue-300 font-medium">Структура:</span> использовать Робот, алг, нач, кон, | комментарии
                 <br><span class="text-blue-300 font-medium">Команды:</span> вверх, вниз, влево, вправо, закрасить
                 <br><span class="text-blue-300 font-medium">Ветвление:</span> если [усл] то ... иначе ... все
@@ -2127,8 +2140,14 @@
                       }
 
                       if (robot.x === x && robot.y === y) {
-                          if (!cell.hasChildNodes()) {
-                              cell.innerHTML = '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
+                          const robotMarker = '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
+                          if (cell.innerHTML !== robotMarker) {
+                              cell.innerHTML = robotMarker;
+                          }
+                      } else if (map.finishX === x && map.finishY === y) {
+                          const finishMarker = '<div class="absolute inset-[5px] rounded-sm border border-emerald-300/80 bg-emerald-400/25 flex items-center justify-center text-[9px] font-bold text-emerald-100 shadow-[0_0_12px_rgba(52,211,153,0.45)] z-0">Ф</div>';
+                          if (cell.innerHTML !== finishMarker) {
+                              cell.innerHTML = finishMarker;
                           }
                       } else {
                           if (cell.hasChildNodes()) {
@@ -2207,9 +2226,11 @@
                   let success = true;
                   if(robot.painted.size !== map.targetPainted.length) success = false;
                   for(let p of map.targetPainted) { if(!robot.painted.has(p)) success = false; }
+                  const reachedFinish = robot.x === map.finishX && robot.y === map.finishY;
+                  if (!reachedFinish) success = false;
 
-                  if (success) showFeedback(tid, true, "Идеально! Алгоритм успешно закрасил все нужные клетки.");
-                  else showFeedback(tid, false, "Алгоритм завершился, но закрашены не те клетки (или пропущены нужные). Проходы закрашивать нельзя!");
+                  if (success) showFeedback(tid, true, "Идеально! Алгоритм закрасил все нужные клетки и привёл Робота в точку Ф.");
+                  else showFeedback(tid, false, "Алгоритм завершился неверно: проверь закрашенные клетки и убедись, что Робот остановился в зелёной точке Ф. Проходы закрашивать нельзя!");
               } catch(err) { errEl.innerText = err.message; errEl.classList.remove('hidden'); }
               btn.disabled = false; btn.classList.remove('opacity-50');
           };
