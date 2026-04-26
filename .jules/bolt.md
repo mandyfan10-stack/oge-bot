@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2026-04-26 - Optimize Tight Loops over Static Configurations using Sets
+**Learning:** In interactive animations and validations relying on tight loops or nested matrix iterations (like a 10x10 grid rendering or pathfinding algorithms running in `requestAnimationFrame`), iterating over static configuration arrays with linear scans like `Array.some()` or `Array.find()` introduces unnecessary O(N) complexity that degrades performance.
+**Action:** Convert static configuration arrays into `Set` objects mapped by keys before loops start, replacing O(N) linear scans with O(1) `Set.has()` lookups.
