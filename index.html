@@ -350,10 +350,26 @@
 
   <script>
     // --- УТИЛИТЫ ---
-    function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-    function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-    function shuffleArray(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-    function getRandomBool() { return Math.random() > 0.5; }
+    const cryptoSource = window.crypto || window.msCrypto;
+    function randomUnit() {
+      if (cryptoSource?.getRandomValues) {
+        const buffer = new Uint32Array(1);
+        cryptoSource.getRandomValues(buffer);
+        return buffer[0] / 0x100000000;
+      }
+      return Math.random();
+    }
+    function getRandomInt(min, max) { return Math.floor(randomUnit() * (max - min + 1)) + min; }
+    function getRandomElement(arr) { return arr[Math.floor(randomUnit() * arr.length)]; }
+    function shuffleArray(arr) {
+      const result = [...arr];
+      for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(randomUnit() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+    function getRandomBool() { return randomUnit() > 0.5; }
     function renderLucideIcons(root = document) {
       if (!window.lucide || !root || !root.querySelector('i[data-lucide]')) return;
       lucide.createIcons({ root });
@@ -420,7 +436,7 @@
     function updateMentorContextLabel() {
       const label = document.getElementById('mentor-context-label');
       if (!label) return;
-      const taskObj = currentTaskId ? COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId) : null;
+      const taskObj = currentTaskId ? TASKS_BY_ID.get(currentTaskId) : null;
       label.textContent = taskObj ? `Контекст: ${taskObj.title}` : 'Готов к разбору';
     }
 
@@ -485,10 +501,16 @@
     ];
 
     let progress = {};
+    let solvedCount = 0;
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
     window.taskState = {}; 
+
+    const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
+    const TASKS_BY_ID = new Map(COURSES.flatMap(course => course.tasks.map(task => [task.id, task])));
+    const MAX_VARIANT_RETRIES = 8;
+    const lastTaskVariants = new Map();
 
     if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
 
@@ -525,7 +547,8 @@
 
     function openCourse(id) {
       currentCourseId = id;
-      const course = COURSES.find(c => c.id === id);
+      const course = COURSES_BY_ID.get(id);
+      if (!course) return;
       document.getElementById('course-title').innerText = course.title;
       document.getElementById('course-desc').innerText = course.desc;
       renderTasks(course);
@@ -615,6 +638,46 @@
       enhanceInteractiveElements(content);
     }
 
+    function getVariantFingerprint(id) {
+      const state = window.taskState[id];
+      if (!state) return '';
+      try {
+        return JSON.stringify(state, (key, value) => {
+          if (key === 'cells') return undefined;
+          if (typeof Element !== 'undefined' && value instanceof Element) return undefined;
+          return value;
+        });
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function initializeTaskVariant(id, forceNew = false) {
+      const renderer = renderers[id];
+      if (!renderer?.init) return;
+      const previous = lastTaskVariants.get(id);
+      let fingerprint = '';
+      const attempts = forceNew ? MAX_VARIANT_RETRIES : 1;
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        renderer.init(id);
+        fingerprint = getVariantFingerprint(id);
+        if (!forceNew || !previous || fingerprint !== previous) break;
+      }
+      if (fingerprint) lastTaskVariants.set(id, fingerprint);
+    }
+
+    function renderTaskContent(id, options = {}) {
+      const renderer = renderers[id];
+      initializeTaskVariant(id, Boolean(options.forceNew));
+      const content = document.getElementById('task-content');
+      content.innerHTML = renderer.html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      if (renderer.setup) renderer.setup(id);
+      applyTaskUXEnhancements(id);
+      renderLucideIcons(content);
+      renderLucideIcons(document.getElementById('screen-task'));
+      return content;
+    }
+
     function regenerateTask() {
       if (!currentTaskId) return;
       if (taskCloseCleanupTimer) {
@@ -631,14 +694,7 @@
         }
       }
       hapticSelection();
-      if (renderers[id].init) renderers[id].init(id);
-      const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
-      if (renderers[id].setup) renderers[id].setup(id);
-      applyTaskUXEnhancements(id);
-      renderLucideIcons(content);
-      renderLucideIcons(document.getElementById('screen-task'));
-      enhanceInteractiveElements(content);
+      renderTaskContent(id, { forceNew: true });
     }
 
     function openTask(id) {
@@ -646,23 +702,16 @@
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
       }
+      const taskInfo = TASKS_BY_ID.get(id);
+      if (!taskInfo) return;
       currentTaskId = id;
-      const course = COURSES.find(c => c.id === currentCourseId);
-      const taskInfo = course.tasks.find(t => t.id === id);
       document.getElementById('task-title').innerText = taskInfo.title;
       updateMentorContextLabel();
       
-      if (renderers[id].init) renderers[id].init(id);
-      const content = document.getElementById('task-content');
-      content.innerHTML = renderers[id].html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
-      if (renderers[id].setup) renderers[id].setup(id);
-      applyTaskUXEnhancements(id);
+      renderTaskContent(id);
       
       document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
-      renderLucideIcons(content);
-      renderLucideIcons(document.getElementById('screen-task'));
-      enhanceInteractiveElements(content);
     }
 
     function closeTask() {
@@ -682,8 +731,7 @@
     }
 
     function updateGlobalProgress() {
-      const solved = Object.values(progress).filter(Boolean).length;
-      document.getElementById('global-progress').innerText = solved;
+      document.getElementById('global-progress').innerText = solvedCount;
     }
 
     function showFeedback(taskId, isCorrect, msg) {
@@ -707,6 +755,7 @@
 
         if (!progress[taskId]) {
           progress[taskId] = true;
+          solvedCount++;
           updateGlobalProgress();
 
           // Unhide task checkmark if in task list
@@ -717,7 +766,7 @@
 
           // Update course progress directly
           if (currentCourseId) {
-            const course = COURSES.find(c => c.id === currentCourseId);
+            const course = COURSES_BY_ID.get(currentCourseId);
             if (course) {
               const solvedInCourse = course.tasks.filter(t => progress[t.id]).length;
               const total = course.tasks.length;
@@ -740,20 +789,23 @@
         msgContainer.textContent = msg;
       }
       renderLucideIcons(iconContainer);
-      setTimeout(() => { document.getElementById('task-content').scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
+      const taskContent = document.getElementById('task-content');
+      setTimeout(() => { taskContent.scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
     }
 
     // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
       const modal = document.getElementById('chat-modal');
+      const chatInput = document.getElementById('chat-input');
+      const triggerButton = document.getElementById('chat-trigger-btn');
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
         modal.classList.remove('hidden-chat');
-        setTimeout(() => document.getElementById('chat-input').focus(), 100);
+        setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        document.getElementById('chat-trigger-btn').focus();
+        triggerButton.focus();
       }
     }
 
@@ -784,7 +836,7 @@
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       const typingId = 'typing-' + Date.now();
-      messagesDiv.insertAdjacentHTML('beforeend', `
+      const typingMarkup = `
         <div id="${typingId}" class="flex justify-start animate-message">
           <div class="typing-card flex gap-1.5 items-center">
             <div class="typing-dot" style="animation-delay: 0ms"></div>
@@ -792,12 +844,13 @@
             <div class="typing-dot" style="animation-delay: 240ms"></div>
           </div>
         </div>
-      `);
+      `;
+      messagesDiv.insertAdjacentHTML('beforeend', typingMarkup);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
       let taskContext = "";
       if (currentTaskId) {
-        const taskObj = COURSES.flatMap(c => c.tasks).find(t => t.id === currentTaskId);
+        const taskObj = TASKS_BY_ID.get(currentTaskId);
         const taskTitle = taskObj ? taskObj.title : `Задание ${currentTaskId}`;
         const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
         const contentEl = document.getElementById('task-content');
@@ -1366,7 +1419,7 @@
           
           const A = getRandomInt(200, 599);
           const B = getRandomInt(200, 599);
-          const Inter = Math.floor(Math.random() * Math.min(A,B) * 0.8) + 10;
+          const Inter = Math.floor(randomUnit() * Math.min(A,B) * 0.8) + 10;
           const Union = A + B - Inter;
 
           const types = [
@@ -1548,8 +1601,8 @@
              const insertPos = getRandomInt(0, textArray.length - 1);
              let w = targetWord;
              if (getRandomBool()) w = w.charAt(0).toUpperCase() + w.slice(1);
-             if (Math.random() > 0.7) w += ',';
-             else if (Math.random() > 0.8) w += '.';
+             if (randomUnit() > 0.7) w += ',';
+             else if (randomUnit() > 0.8) w += '.';
              textArray.splice(insertPos, 0, w);
           }
           
