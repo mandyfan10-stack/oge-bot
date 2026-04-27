@@ -456,6 +456,7 @@
 
 
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
+    const CHAT_TIMEOUT_MS = 60000;
     const TOTAL_TASKS = 20;
 
     // --- СТРУКТУРА КУРСОВ ---
@@ -861,12 +862,16 @@
       const optimizedPrompt = text + taskContext;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
       try {
         const response = await fetch(BACKEND_URL, {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: optimizedPrompt }), signal: controller.signal
         });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
         const data = await response.json();
         
         const typingEl = document.getElementById(typingId);
@@ -1001,7 +1006,16 @@
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
         hapticNotify('error');
-        messagesDiv.insertAdjacentHTML('beforeend', `<div class="flex justify-start animate-message"><div class="chat-message-bubble border border-rose-500/25 bg-rose-500/10 text-rose-300">Сетевая ошибка ИИ. Проверьте соединение.</div></div>`);
+        const errorText = err.name === 'AbortError'
+          ? 'ИИ просыпается дольше обычного. Повтори запрос через несколько секунд.'
+          : 'Не удалось связаться с ИИ. Обнови страницу или попробуй позже.';
+        const errorWrapper = document.createElement('div');
+        errorWrapper.className = 'flex justify-start animate-message';
+        const errorBubble = document.createElement('div');
+        errorBubble.className = 'chat-message-bubble border border-rose-500/25 bg-rose-500/10 text-rose-300';
+        errorBubble.textContent = errorText;
+        errorWrapper.appendChild(errorBubble);
+        messagesDiv.appendChild(errorWrapper);
       } finally {
         clearTimeout(timeoutId);
         inputEl.disabled = false;
