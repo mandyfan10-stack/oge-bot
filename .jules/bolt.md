@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2024-05-26 - Optimize frequent geometric structure lookups
+**Learning:** Checking coordinate matches using `Array.some()` inside tight, nested loops or during `requestAnimationFrame` evaluation causes O(N) array traversals per cell, drastically impacting performance (as seen in the Robot 10x10 grid `hasWall` and `drawGrid` functions, up to a 3-4x slowdown).
+**Action:** Convert geometric structure arrays (like lists of walls) into `Set` objects where keys are simple strings (e.g. `${x},${y}`) before executing the loop. This converts O(N) array scans to O(1) Set lookups, significantly reducing execution time during repeated rendering or evaluation tasks.
