@@ -640,10 +640,18 @@
     }
 
     function closeCourse() {
+      const prevCourseId = currentCourseId;
       currentCourseId = null;
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      if (prevCourseId) {
+        setTimeout(() => {
+          const triggerBtn = document.querySelector(`button[onclick="openCourse('${prevCourseId}')"]`);
+          if (triggerBtn) triggerBtn.focus();
+        }, 500);
+      }
     }
 
     const taskDOMCache = {};
@@ -797,6 +805,7 @@
     }
 
     function closeTask() {
+      const prevTaskId = currentTaskId;
       currentTaskId = null;
       updateMentorContextLabel();
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
@@ -810,6 +819,13 @@
         }
         taskCloseCleanupTimer = null;
       }, 300); 
+
+      if (prevTaskId) {
+        setTimeout(() => {
+          const triggerBtn = document.querySelector(`button[onclick="openTask(${prevTaskId})"]`);
+          if (triggerBtn) triggerBtn.focus();
+        }, 500);
+      }
     }
 
     function updateGlobalProgress() {
@@ -2537,6 +2553,18 @@
         }
       }
     };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (!getEl('chat-modal').classList.contains('hidden-chat')) {
+          toggleChat(false);
+        } else if (!getEl('screen-task').classList.contains('translate-x-full')) {
+          closeTask();
+        } else if (!getEl('screen-tasks').classList.contains('translate-x-full')) {
+          closeCourse();
+        }
+      }
+    });
 
     renderCourses();
     renderLucideIcons();
