@@ -1,12 +1,24 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ОГЭ Информатика - Решебник</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./vendor/icons.js"></script>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    (function () {
+      const mobileViewport = window.matchMedia('(max-width: 760px)').matches;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const lowCores = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
+      const lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 4;
+      const telegramWebView = /Telegram/i.test(navigator.userAgent);
+      if (reducedMotion || (mobileViewport && (lowCores || lowMemory || telegramWebView))) {
+        document.documentElement.classList.add('performance-lite');
+      }
+    })();
+  </script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -25,7 +37,6 @@
     /* Оптимизация скролла для мобильных */
     .overflow-y-auto {
       -webkit-overflow-scrolling: touch;
-      will-change: scroll-position;
     }
 
     /* Защита от авто-зума на iOS при фокусе */
@@ -56,9 +67,8 @@
       -webkit-backdrop-filter: blur(12px); 
       border: 1px solid rgba(255, 255, 255, 0.05); 
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); 
-      transform: translateZ(0); /* Включает GPU рендеринг, убирая лаги */
     }
-    .glass-button { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; }
+    .glass-button { background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease; }
     
     @media (hover: hover) {
       .glass-button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: translateY(-1px); }
@@ -81,9 +91,7 @@
     .interactive-control {
       position: relative;
       overflow: hidden;
-      transform: translateZ(0);
       transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease, filter 0.18s ease;
-      will-change: transform;
     }
     .interactive-control.is-pressing { transform: translateY(1px) scale(0.985); filter: brightness(1.08); }
     .interactive-control:disabled { cursor: not-allowed; filter: grayscale(0.2); transform: none !important; }
@@ -243,11 +251,47 @@
         transition-duration: 0.001ms !important;
       }
     }
+
+    @supports (content-visibility: auto) {
+      #courses-list > button, #tasks-list > button {
+        content-visibility: auto;
+        contain-intrinsic-size: 96px;
+      }
+      #task-content > .glass-panel {
+        content-visibility: auto;
+        contain-intrinsic-size: 620px;
+      }
+    }
+
+    .performance-lite .overflow-y-auto { will-change: auto; }
+    .performance-lite .glass-panel,
+    .performance-lite .feedback-card {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+    .performance-lite #chat-container,
+    .performance-lite .interactive-control { will-change: auto; }
+    .performance-lite #chat-trigger-btn::before,
+    .performance-lite .mentor-presence,
+    .performance-lite .animate-pulse,
+    .performance-lite .group-hover\:animate-bounce {
+      animation: none !important;
+    }
+    .performance-lite .chat-message-bubble,
+    .performance-lite .typing-card,
+    .performance-lite .mentor-avatar {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+    }
+    .performance-lite .interactive-control {
+      transition-property: transform, border-color, background-color, opacity;
+    }
+    .performance-lite #ambient-glow { display: none; }
   </style>
 </head>
 <body>
   <!-- Окружающее свечение -->
-  <div class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
+  <div id="ambient-glow" class="fixed inset-0 z-[-1] pointer-events-none overflow-hidden">
     <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-indigo-600/10 blur-[100px]" style="transform: translateZ(0);"></div>
     <div class="absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-blue-600/10 blur-[120px]" style="transform: translateZ(0);"></div>
   </div>
@@ -342,7 +386,7 @@
         </div>
         <div class="chat-input-shell flex gap-2 p-1.5 rounded-xl">
           <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." maxlength="250" class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-lg text-white hover:bg-indigo-500 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
+          <button onclick="sendChatMessage()" aria-label="Отправить сообщение" title="Отправить сообщение" class="bg-indigo-600 p-3 rounded-lg text-white hover:bg-indigo-500 active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"><i data-lucide="send" class="w-4 h-4"></i></button>
         </div>
       </div>
     </div>
@@ -370,6 +414,14 @@
       return result;
     }
     function getRandomBool() { return randomUnit() > 0.5; }
+    const isPerformanceLite = () => document.documentElement.classList.contains('performance-lite');
+    const domCache = {};
+    function getEl(id) {
+      if (!domCache[id] || !document.contains(domCache[id])) {
+        domCache[id] = document.getElementById(id);
+      }
+      return domCache[id];
+    }
     function renderLucideIcons(root = document) {
       if (!window.lucide || !root || !root.querySelector('i[data-lucide]')) return;
       lucide.createIcons({ root });
@@ -411,8 +463,10 @@
       if (scope.matches?.('button, [role="button"]')) controls.push(scope);
       controls.push(...scope.querySelectorAll('button, [role="button"]'));
       controls.forEach(control => {
+        if (control.dataset.enhanced === 'true') return;
         control.classList.add('interactive-control');
         if (!control.getAttribute('data-haptic')) control.setAttribute('data-haptic', 'light');
+        control.dataset.enhanced = 'true';
       });
     }
 
@@ -434,14 +488,14 @@
     }
 
     function updateMentorContextLabel() {
-      const label = document.getElementById('mentor-context-label');
+      const label = getEl('mentor-context-label');
       if (!label) return;
       const taskObj = currentTaskId ? TASKS_BY_ID.get(currentTaskId) : null;
       label.textContent = taskObj ? `Контекст: ${taskObj.title}` : 'Готов к разбору';
     }
 
     function askMentorPreset(type) {
-      const inputEl = document.getElementById('chat-input');
+      const inputEl = getEl('chat-input');
       if (!inputEl || inputEl.disabled) return;
       const hasTask = Boolean(currentTaskId);
       const prompts = {
@@ -457,7 +511,36 @@
 
     const BACKEND_URL = "https://oge-backend.onrender.com/api/chat";
     const CHAT_TIMEOUT_MS = 60000;
+    const CHAT_MAX_MESSAGES = 28;
     const TOTAL_TASKS = 20;
+    let chatScrollFrame = 0;
+
+    function scheduleChatScroll(container = getEl('chat-messages')) {
+      if (!container) return;
+      if (chatScrollFrame) cancelAnimationFrame(chatScrollFrame);
+      chatScrollFrame = requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+        chatScrollFrame = 0;
+      });
+    }
+
+    function pruneChatMessages(container = getEl('chat-messages')) {
+      if (!container) return;
+      const limit = isPerformanceLite() ? 18 : CHAT_MAX_MESSAGES;
+      while (container.children.length > limit) {
+        container.firstElementChild?.remove();
+      }
+    }
+
+    function getChatNetworkErrorText(error) {
+      if (error?.name === 'AbortError') {
+        return 'ИИ просыпается дольше обычного. Повтори запрос через несколько секунд.';
+      }
+      if (location.protocol === 'file:') {
+        return 'Чат заблокирован браузером при запуске из локального файла. Открой опубликованную ссылку мини-аппа.';
+      }
+      return 'Не удалось связаться с ИИ. Обнови страницу или попробуй позже.';
+    }
 
     // --- СТРУКТУРА КУРСОВ ---
     const COURSES = [
@@ -516,7 +599,7 @@
     if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
 
     function renderCourses() {
-      const list = document.getElementById('courses-list');
+      const list = getEl('courses-list');
       list.innerHTML = COURSES.map(c => {
         const solvedInCourse = c.tasks.filter(t => progress[t.id]).length;
         const total = c.tasks.length;
@@ -532,7 +615,7 @@
               <p class="text-zinc-500 font-light text-sm mt-1 mb-3">${c.desc}</p>
               <div class="flex items-center gap-2">
                 <div class="flex-1 h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
-                  <div id="course-progress-bar-${c.id}" class="h-full bg-gradient-to-r ${c.color} rounded-full transition-all duration-500" style="width: ${(solvedInCourse/total)*100}%"></div>
+                  <div id="course-progress-bar-${c.id}" class="h-full bg-gradient-to-r ${c.color} rounded-full transition-colors duration-500" style="width: ${(solvedInCourse/total)*100}%"></div>
                 </div>
                 <span id="course-progress-text-${c.id}" class="text-xs font-mono text-zinc-400">${solvedInCourse}/${total}</span>
               </div>
@@ -550,24 +633,24 @@
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
-      document.getElementById('course-title').innerText = course.title;
-      document.getElementById('course-desc').innerText = course.desc;
+      getEl('course-title').innerText = course.title;
+      getEl('course-desc').innerText = course.desc;
       renderTasks(course);
-      document.getElementById('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
-      document.getElementById('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+      getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
+      getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
     }
 
     function closeCourse() {
       currentCourseId = null;
 
-      document.getElementById('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
-      document.getElementById('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+      getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
+      getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
     }
 
     const taskDOMCache = {};
 
     function renderTasks(course) {
-      const list = document.getElementById('tasks-list');
+      const list = getEl('tasks-list');
 
       if (taskDOMCache[course.id] && taskDOMCache[course.id].count !== course.tasks.length) {
         delete taskDOMCache[course.id];
@@ -612,7 +695,7 @@
     }
 
     function applyTaskUXEnhancements(taskId) {
-      const content = document.getElementById('task-content');
+      const content = getEl('task-content');
       if (!content) return;
 
       const inputs = content.querySelectorAll('input');
@@ -670,12 +753,11 @@
     function renderTaskContent(id, options = {}) {
       const renderer = renderers[id];
       initializeTaskVariant(id, Boolean(options.forceNew));
-      const content = document.getElementById('task-content');
-      content.innerHTML = renderer.html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-all duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
+      const content = getEl('task-content');
+      content.innerHTML = renderer.html(id) + `<div id="feedback-${id}" aria-live="polite" class="hidden mt-6 p-4 rounded-2xl border flex items-center text-sm font-medium transition-colors duration-300"><div id="feedback-icon-${id}"></div><div id="feedback-msg-${id}"></div></div>`;
       if (renderer.setup) renderer.setup(id);
       applyTaskUXEnhancements(id);
       renderLucideIcons(content);
-      renderLucideIcons(document.getElementById('screen-task'));
       return content;
     }
 
@@ -686,7 +768,7 @@
         taskCloseCleanupTimer = null;
       }
       const id = currentTaskId;
-      const btn = document.getElementById('btn-regenerate');
+      const btn = getEl('btn-regenerate');
       if (btn) {
         const icn = btn.querySelector('svg') || btn.querySelector('i');
         if (icn) {
@@ -706,43 +788,43 @@
       const taskInfo = TASKS_BY_ID.get(id);
       if (!taskInfo) return;
       currentTaskId = id;
-      document.getElementById('task-title').innerText = taskInfo.title;
+      getEl('task-title').innerText = taskInfo.title;
       updateMentorContextLabel();
       
       renderTaskContent(id);
       
-      document.getElementById('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
-      document.getElementById('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+      getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
+      getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
     }
 
     function closeTask() {
       currentTaskId = null;
       updateMentorContextLabel();
-      document.getElementById('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
-      document.getElementById('screen-task').classList.replace('translate-x-0', 'translate-x-full');
+      getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
+      getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
 
       taskCloseCleanupTimer = setTimeout(() => {
-        const taskScreen = document.getElementById('screen-task');
+        const taskScreen = getEl('screen-task');
         if (currentTaskId === null && taskScreen.classList.contains('translate-x-full')) {
-          document.getElementById('task-content').innerHTML = '';
+          getEl('task-content').innerHTML = '';
         }
         taskCloseCleanupTimer = null;
       }, 300); 
     }
 
     function updateGlobalProgress() {
-      document.getElementById('global-progress').innerText = solvedCount;
+      getEl('global-progress').innerText = solvedCount;
     }
 
     function showFeedback(taskId, isCorrect, msg) {
-      const fb = document.getElementById(`feedback-${taskId}`);
+      const fb = getEl(`feedback-${taskId}`);
       if (!fb) return;
-      fb.className = 'feedback-card mt-6 p-4 rounded-2xl border flex items-start gap-3 text-sm font-medium transition-all duration-300';
+      fb.className = 'feedback-card mt-6 p-4 rounded-2xl border flex items-start gap-3 text-sm font-medium transition-colors duration-300';
       void fb.offsetWidth; 
 
-      const iconContainer = document.getElementById(`feedback-icon-${taskId}`);
-      const msgContainer = document.getElementById(`feedback-msg-${taskId}`);
+      const iconContainer = getEl(`feedback-icon-${taskId}`);
+      const msgContainer = getEl(`feedback-msg-${taskId}`);
 
       if (isCorrect) {
         hapticNotify('success');
@@ -760,7 +842,7 @@
           updateGlobalProgress();
 
           // Unhide task checkmark if in task list
-          const taskCheckIcon = document.getElementById(`check-icon-${taskId}`);
+          const taskCheckIcon = getEl(`check-icon-${taskId}`);
           if (taskCheckIcon) {
             taskCheckIcon.classList.remove('hidden');
           }
@@ -771,8 +853,8 @@
             if (course) {
               const solvedInCourse = course.tasks.filter(t => progress[t.id]).length;
               const total = course.tasks.length;
-              const progressBar = document.getElementById(`course-progress-bar-${currentCourseId}`);
-              const progressText = document.getElementById(`course-progress-text-${currentCourseId}`);
+              const progressBar = getEl(`course-progress-bar-${currentCourseId}`);
+              const progressText = getEl(`course-progress-text-${currentCourseId}`);
 
               if (progressBar) progressBar.style.width = `${(solvedInCourse/total)*100}%`;
               if (progressText) progressText.innerText = `${solvedInCourse}/${total}`;
@@ -790,15 +872,15 @@
         msgContainer.textContent = msg;
       }
       renderLucideIcons(iconContainer);
-      const taskContent = document.getElementById('task-content');
-      setTimeout(() => { taskContent.scrollTo({ top: 9999, behavior: 'smooth' }); }, 50);
+      const taskContent = getEl('task-content');
+      requestAnimationFrame(() => { taskContent.scrollTo({ top: 9999, behavior: isPerformanceLite() ? 'auto' : 'smooth' }); });
     }
 
     // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
     function toggleChat(show) { 
-      const modal = document.getElementById('chat-modal');
-      const chatInput = document.getElementById('chat-input');
-      const triggerButton = document.getElementById('chat-trigger-btn');
+      const modal = getEl('chat-modal');
+      const chatInput = getEl('chat-input');
+      const triggerButton = getEl('chat-trigger-btn');
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
@@ -811,7 +893,7 @@
     }
 
     async function sendChatMessage() {
-      const inputEl = document.getElementById('chat-input');
+      const inputEl = getEl('chat-input');
       const sendBtn = inputEl.nextElementSibling;
       const text = inputEl.value.trim();
       if (!text) { hapticImpact('light'); return; }
@@ -824,7 +906,7 @@
       const originalIcon = sendBtn.innerHTML;
       sendBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
       renderLucideIcons(sendBtn);
-      const messagesDiv = document.getElementById('chat-messages');
+      const messagesDiv = getEl('chat-messages');
       
       // 🛡️ Sentinel: Fix XSS in User Chat Message
       const userMessageWrapper = document.createElement('div');
@@ -834,7 +916,8 @@
       userMessageBubble.textContent = text;
       userMessageWrapper.appendChild(userMessageBubble);
       messagesDiv.appendChild(userMessageWrapper);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      pruneChatMessages(messagesDiv);
+      scheduleChatScroll(messagesDiv);
 
       const typingId = 'typing-' + Date.now();
       const typingMarkup = `
@@ -847,14 +930,14 @@
         </div>
       `;
       messagesDiv.insertAdjacentHTML('beforeend', typingMarkup);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      scheduleChatScroll(messagesDiv);
 
       let taskContext = "";
       if (currentTaskId) {
         const taskObj = TASKS_BY_ID.get(currentTaskId);
         const taskTitle = taskObj ? taskObj.title : `Задание ${currentTaskId}`;
         const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
-        const contentEl = document.getElementById('task-content');
+        const contentEl = getEl('task-content');
         const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
         taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры: ${stateInfo}. ТВОЯ ЗАДАЧА: Разжевать решение максимально подробно по шагам (Шаг 1, Шаг 2 и т.д.). Дай четкий, последовательный алгоритм, чтобы любой ученик понял. Обязательно опирайся ТОЛЬКО на числа из этой задачи. В конце напиши правильный ответ. Если ученик спрашивает не по задаче, мягко направь его обратно.]`;
       }
@@ -999,16 +1082,15 @@
         }
         wrapper.appendChild(bubble);
         messagesDiv.appendChild(wrapper);
+        pruneChatMessages(messagesDiv);
         
         // Оптимизация: сканируем только последнее добавленное сообщение
-        setTimeout(() => renderLucideIcons(messagesDiv.lastElementChild), 10);
+        requestAnimationFrame(() => renderLucideIcons(messagesDiv.lastElementChild));
       } catch (err) {
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
         hapticNotify('error');
-        const errorText = err.name === 'AbortError'
-          ? 'ИИ просыпается дольше обычного. Повтори запрос через несколько секунд.'
-          : 'Не удалось связаться с ИИ. Обнови страницу или попробуй позже.';
+        const errorText = getChatNetworkErrorText(err);
         const errorWrapper = document.createElement('div');
         errorWrapper.className = 'flex justify-start animate-message';
         const errorBubble = document.createElement('div');
@@ -1016,6 +1098,7 @@
         errorBubble.textContent = errorText;
         errorWrapper.appendChild(errorBubble);
         messagesDiv.appendChild(errorWrapper);
+        pruneChatMessages(messagesDiv);
       } finally {
         clearTimeout(timeoutId);
         inputEl.disabled = false;
@@ -1025,7 +1108,7 @@
         renderLucideIcons(sendBtn);
         inputEl.focus();
       }
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      scheduleChatScroll(messagesDiv);
     }
 
     // ==========================================
@@ -1126,7 +1209,7 @@
               </table>
             </div>
             <div><input inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t2-ans" placeholder="Ответ буквами..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
-            <button onclick="window.check_t2(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
+            <button onclick="window.check_t2(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
           </div>
         `;
         },
@@ -1159,18 +1242,18 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 3: Логика</h3>
-              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Найдите <b>${s.findStr}</b> целое число X, для которого <b class="active:scale-95 transition-all shadow-md text-white">${s.truth}</b> высказывание:</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 3: Логика</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Найдите <b>${s.findStr}</b> целое число X, для которого <b class="text-white">${s.truth}</b> высказывание:</p>
             </div>
-            <div class="active:scale-95 transition-all shadow-md p-4 bg-pink-950/20 border border-pink-900/30 rounded-2xl font-mono text-[15px] text-center text-zinc-300">
+            <div class="p-4 bg-pink-950/20 border border-pink-900/30 rounded-2xl font-mono text-[15px] text-center text-zinc-300">
               ${s.logicStr}
             </div>
-            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4 mt-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t3-ans" placeholder="Ваш ответ (X)" class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
+            <div class="flex items-center gap-4 mt-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t3-ans" placeholder="Ваш ответ (X)" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t3(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
+            <button onclick="window.check_t3(${id})" class="w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
           </div>
         `;
         },
@@ -1231,7 +1314,7 @@
             <div class="flex items-center gap-4">
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t4(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
+            <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
           </div>
         `;
         },
@@ -1298,7 +1381,7 @@
             <div class="flex gap-3">
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t5(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
+            <button onclick="window.check_t5(${id})" class="w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `;
         },
@@ -1371,7 +1454,7 @@
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
             </div>
             
-            <button onclick="window.check_t6(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1409,10 +1492,10 @@
             </div>
             <div id="t7-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 break-all">...</div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="active:scale-95 transition-all shadow-md glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${p}</button>`).join('')}
-              <button onclick="window.t7_clear()" aria-label="Очистить" title="Очистить" class="active:scale-95 transition-all shadow-md px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="active:scale-95 transition-all shadow-md w-4 h-4"></i></button>
+              ${pieces.map(p => `<button onclick="window.t7_add('${p}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${p}</button>`).join('')}
+              <button onclick="window.t7_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
             </div>
-            <button onclick="window.check_t7(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
+            <button onclick="window.check_t7(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium hover:bg-sky-500 shadow-lg">Проверить</button>
           </div>
         `;
         },
@@ -1467,7 +1550,7 @@
             <div class="flex items-center gap-4">
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t8(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
+            <button onclick="window.check_t8(${id})" class="w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
           </div>
         `;
         },
@@ -1520,16 +1603,16 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 9: Количество путей</h3>
-              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b>${s.qText}?</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 9: Количество путей</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Сколько существует путей из города <b>A</b> в город <b>${s.targetNode}</b>${s.qText}?</p>
             </div>
-            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="active:scale-95 transition-all shadow-md w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
-            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t9-ans" placeholder="Ваш ответ..." class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
+            <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
+            <div class="flex items-center gap-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t9-ans" placeholder="Ваш ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
             </div>
-            <button onclick="window.check_t9(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
+            <button onclick="window.check_t9(${id})" class="w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
           </div>
         `;
         },
@@ -1575,22 +1658,22 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Задание 10: Системы счисления</h3>
-              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Среди приведенных ниже трех чисел, записанных в различных системах счисления, найдите <b>${s.typeStr}</b> и запишите его в ответе в десятичной системе.</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Задание 10: Системы счисления</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Среди приведенных ниже трех чисел, записанных в различных системах счисления, найдите <b>${s.typeStr}</b> и запишите его в ответе в десятичной системе.</p>
             </div>
-            <div class="active:scale-95 transition-all shadow-md flex items-center justify-around p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner text-xl text-indigo-300 font-mono tracking-widest">
-              <span>${s.n1}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">16</sub></span>
-              <span class="active:scale-95 transition-all shadow-md text-white/20">|</span>
-              <span>${s.n2}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">8</sub></span>
-              <span class="active:scale-95 transition-all shadow-md text-white/20">|</span>
-              <span>${s.n3}<sub class="active:scale-95 transition-all shadow-md text-[10px] text-zinc-500">2</sub></span>
+            <div class="flex items-center justify-around p-4 bg-[#0f111a] border border-white/5 rounded-2xl shadow-inner text-xl text-indigo-300 font-mono tracking-widest">
+              <span>${s.n1}<sub class="text-[10px] text-zinc-500">16</sub></span>
+              <span class="text-white/20">|</span>
+              <span>${s.n2}<sub class="text-[10px] text-zinc-500">8</sub></span>
+              <span class="text-white/20">|</span>
+              <span>${s.n3}<sub class="text-[10px] text-zinc-500">2</sub></span>
             </div>
-            <div class="active:scale-95 transition-all shadow-md flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t10-ans" placeholder="Ответ в 10-й системе" class="active:scale-95 transition-all shadow-md w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
+            <div class="flex items-center gap-4">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t10-ans" placeholder="Ответ в 10-й системе" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
             </div>
-            <button onclick="window.check_t10(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
+            <button onclick="window.check_t10(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1636,7 +1719,7 @@
             <div class="flex items-center gap-4">
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
             </div>
-            <button onclick="window.check_t11(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
+            <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
         `;
         },
@@ -1680,7 +1763,7 @@
             <div class="flex items-center gap-4">
               <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
             </div>
-            <button onclick="window.check_t12(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -1718,13 +1801,13 @@
             </div>
             <div class="border border-white/10 rounded-2xl overflow-hidden bg-[#0f111a] shadow-inner transition-colors duration-300" id="t13-container">
               <div class="bg-white/5 border-b border-white/10 p-2 flex gap-2">
-                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" aria-label="Жирный текст" title="Жирный текст" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ж</button>
-                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" aria-label="Курсив" title="Курсив" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">К</button>
-                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" aria-label="Подчеркнутый текст" title="Подчеркнутый текст" class="active:scale-95 transition-all shadow-md w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ч</button>
+                <button onclick="document.execCommand('bold', false, null); document.getElementById('t13-editor').focus();" aria-label="Жирный текст" title="Жирный текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ж</button>
+                <button onclick="document.execCommand('italic', false, null); document.getElementById('t13-editor').focus();" aria-label="Курсив" title="Курсив" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white italic font-serif transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">К</button>
+                <button onclick="document.execCommand('underline', false, null); document.getElementById('t13-editor').focus();" aria-label="Подчеркнутый текст" title="Подчеркнутый текст" class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 text-white underline transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">Ч</button>
               </div>
-              <div id="t13-editor" contenteditable="true" class="active:scale-95 transition-all shadow-md p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
+              <div id="t13-editor" contenteditable="true" class="p-5 text-sm text-zinc-200 outline-none min-h-[140px] leading-relaxed">${s.text}</div>
             </div>
-            <button onclick="window.check_t13(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
+            <button onclick="window.check_t13(${id})" class="w-full py-4 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-500 shadow-lg transition-colors">Проверить форматирование</button>
           </div>
         `;
         },
@@ -1840,7 +1923,7 @@
                 <input type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.50">
               </div>
             </div>
-            <button onclick="window.check_t14(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
+            <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
           </div>
         `;
         },
@@ -2047,9 +2130,9 @@
             <div id="t15-error" class="hidden mt-4 p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400"></div>
             
             <div class="flex gap-2">
-               <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="active:scale-95 transition-all shadow-md glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="active:scale-95 transition-all shadow-md w-5 h-5"></i></button>
-               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="active:scale-95 transition-all shadow-md flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
-                  <span class="active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"><i data-lucide="play" class="active:scale-95 transition-all shadow-md w-4 h-4"></i> Запустить алгоритм</span>
+               <button onclick="window.reset_t15(${id})" aria-label="Сбросить алгоритм" title="Сбросить алгоритм" class="glass-button p-4 rounded-xl text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+               <button id="t15-run-btn" onclick="window.check_t15(${id})" class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">
+                  <span class="flex items-center justify-center gap-2"><i data-lucide="play" class="w-4 h-4"></i> Запустить алгоритм</span>
                </button>
             </div>
           </div>
@@ -2112,11 +2195,28 @@
               }
               return evaluator(robot);
           };
-          const drawGrid = (robot, painted) => {
-              const gridContainer = document.getElementById('t15-grid');
-              let innerContainer = gridContainer.firstElementChild;
+          const robotMarker = '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
+          const finishMarker = '<div class="absolute inset-[5px] rounded-sm border border-emerald-300/80 bg-emerald-400/25 flex items-center justify-center text-[9px] font-bold text-emerald-100 shadow-[0_0_12px_rgba(52,211,153,0.45)] z-0">Ф</div>';
+          const cellKey = (x, y) => `${x},${y}`;
+          const updateCell = (x, y, robot, painted) => {
+              const cell = map.cells?.[y]?.[x];
+              if (!cell) return;
+              const key = cellKey(x, y);
+              const bgClass = painted.has(key) ? 'bg-blue-500/40 ' : 'bg-black/20 ';
+              const nextClass = `aspect-square ${cell.dataset.baseclass} ${bgClass}`;
+              if (cell.className !== nextClass) cell.className = nextClass;
 
-              if (!innerContainer || !innerContainer.classList.contains('grid-cols-10')) {
+              let marker = '';
+              if (robot.x === x && robot.y === y) marker = robotMarker;
+              else if (map.finishX === x && map.finishY === y) marker = finishMarker;
+              if (cell.innerHTML !== marker) cell.innerHTML = marker;
+          };
+          const drawGrid = (robot, painted) => {
+              const gridContainer = getEl('t15-grid');
+              let innerContainer = gridContainer.firstElementChild;
+              const isNewGrid = !innerContainer || !innerContainer.classList.contains('grid-cols-10');
+
+              if (isNewGrid) {
                   let html = '';
                   for(let y=0; y<map.h; y++){
                       for(let x=0; x<map.w; x++){
@@ -2125,64 +2225,53 @@
                           if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
                           if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
                           if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
-                          html += `<div id="t15-cell-${x}-${y}" data-baseclass="${classes}" class="active:scale-95 transition-all shadow-md aspect-square ${classes}"></div>`;
+                          html += `<div id="t15-cell-${x}-${y}" data-baseclass="${classes}" class="aspect-square ${classes}"></div>`;
                       }
                   }
-                  gridContainer.innerHTML = `<div class="active:scale-95 transition-all shadow-md grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
-                  innerContainer = gridContainer.firstElementChild;
-
-                  // Cache cell DOM nodes to avoid querying 100 cells on every animation frame tick
+                  gridContainer.innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
                   map.cells = [];
                   for(let y=0; y<map.h; y++){
                       map.cells[y] = [];
                       for(let x=0; x<map.w; x++){
-                          map.cells[y][x] = document.getElementById(`t15-cell-${x}-${y}`);
+                          map.cells[y][x] = getEl(`t15-cell-${x}-${y}`);
                       }
                   }
+                  map.prevPaintedKeys = new Set();
+                  map.prevRobotKey = '';
+                  map.finishKey = cellKey(map.finishX, map.finishY);
               }
 
-              for(let y=0; y<map.h; y++){
-                  for(let x=0; x<map.w; x++){
-                      const cell = map.cells[y][x];
-                      if (!cell) continue;
-
-                      let bgClass = painted.has(`${x},${y}`) ? 'bg-blue-500/40 ' : 'bg-black/20 ';
-                      const newClassName = `active:scale-95 transition-all shadow-md aspect-square ${cell.dataset.baseclass} ${bgClass}`;
-                      // Guard check to prevent redundant style recalculations
-                      if (cell.className !== newClassName) {
-                          cell.className = newClassName;
-                      }
-
-                      if (robot.x === x && robot.y === y) {
-                          const robotMarker = '<div class="active:scale-95 transition-all shadow-md absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
-                          if (cell.innerHTML !== robotMarker) {
-                              cell.innerHTML = robotMarker;
-                          }
-                      } else if (map.finishX === x && map.finishY === y) {
-                          const finishMarker = '<div class="absolute inset-[5px] rounded-sm border border-emerald-300/80 bg-emerald-400/25 flex items-center justify-center text-[9px] font-bold text-emerald-100 shadow-[0_0_12px_rgba(52,211,153,0.45)] z-0">Ф</div>';
-                          if (cell.innerHTML !== finishMarker) {
-                              cell.innerHTML = finishMarker;
-                          }
-                      } else {
-                          if (cell.hasChildNodes()) {
-                              cell.innerHTML = '';
-                          }
-                      }
+              const robotKey = cellKey(robot.x, robot.y);
+              const changed = new Set([robotKey, map.prevRobotKey, map.finishKey]);
+              painted.forEach(key => { if (!map.prevPaintedKeys?.has(key)) changed.add(key); });
+              map.prevPaintedKeys?.forEach(key => { if (!painted.has(key)) changed.add(key); });
+              if (isNewGrid) {
+                  for(let y=0; y<map.h; y++){
+                      for(let x=0; x<map.w; x++) changed.add(cellKey(x, y));
                   }
               }
+              changed.forEach(key => {
+                  if (!key) return;
+                  const [x, y] = key.split(',').map(Number);
+                  updateCell(x, y, robot, painted);
+              });
+              map.prevRobotKey = robotKey;
+              map.prevPaintedKeys = new Set(painted);
           };
 
-          window.reset_t15 = (tid) => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden'); document.getElementById('t15-grid').innerHTML = ''; drawGrid({x: map.startX, y: map.startY}, new Set()); };
+          window.reset_t15 = (tid) => { getEl('t15-error').classList.add('hidden'); getEl(`feedback-${tid}`).classList.add('hidden'); getEl('t15-grid').innerHTML = ''; drawGrid({x: map.startX, y: map.startY}, new Set()); };
           window.reset_t15(id);
-          document.getElementById('t15-code').oninput = () => { document.getElementById('t15-error').classList.add('hidden'); document.getElementById(`feedback-${id}`).classList.add('hidden'); };
+          getEl('t15-code').oninput = () => { getEl('t15-error').classList.add('hidden'); getEl(`feedback-${id}`).classList.add('hidden'); };
 
           window.check_t15 = async (tid) => {
-              const btn = document.getElementById('t15-run-btn'); const errEl = document.getElementById('t15-error');
-              btn.disabled = true; btn.classList.add('opacity-50'); errEl.classList.add('hidden'); document.getElementById(`feedback-${tid}`).classList.add('hidden');
+              const btn = getEl('t15-run-btn'); const errEl = getEl('t15-error');
+              btn.disabled = true; btn.classList.add('opacity-50'); errEl.classList.add('hidden'); getEl(`feedback-${tid}`).classList.add('hidden');
               
-              const code = document.getElementById('t15-code').value;
+              const code = getEl('t15-code').value;
               let lines = code.split('\n').map(l => l.trim().toLowerCase()).filter(l => l);
               let robot = { x: map.startX, y: map.startY, painted: new Set() };
+              const visualBatchSize = isPerformanceLite() ? 6 : 1;
+              let visualStep = 0;
               
               drawGrid(robot, robot.painted);
 
@@ -2232,10 +2321,13 @@
                       else throw new Error('Неизвестная команда: ' + cmd);
 
                       drawGrid(robot, robot.painted); 
-                      // Оптимизация анимации
-                      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 60))); 
+                      visualStep++;
+                      if (visualStep % visualBatchSize === 0) {
+                          await new Promise(r => requestAnimationFrame(() => setTimeout(r, isPerformanceLite() ? 0 : 60)));
+                      }
                       i++;
                   }
+                  drawGrid(robot, robot.painted);
 
                   let success = true;
                   if(robot.painted.size !== map.targetPainted.length) success = false;
@@ -2259,19 +2351,19 @@
         html: (id) => {
           const s = window.taskState[id];
           return `
-          <div class="active:scale-95 transition-all shadow-md glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
+          <div class="glass-panel p-6 rounded-[2rem] space-y-6 animate-fade">
             <div>
-              <h3 class="active:scale-95 transition-all shadow-md font-medium text-zinc-200 text-lg">Цикл FOR</h3>
-              <p class="active:scale-95 transition-all shadow-md text-sm text-zinc-400 font-light mt-1">Какое <b>последнее</b> число выведет эта программа?</p>
+              <h3 class="font-medium text-zinc-200 text-lg">Цикл FOR</h3>
+              <p class="text-sm text-zinc-400 font-light mt-1">Какое <b>последнее</b> число выведет эта программа?</p>
             </div>
-            <div class="active:scale-95 transition-all shadow-md bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300">
-              <span class="active:scale-95 transition-all shadow-md text-violet-400">for</span> i <span class="active:scale-95 transition-all shadow-md text-violet-400">in</span> <span class="active:scale-95 transition-all shadow-md text-blue-400">range</span>(<span class="active:scale-95 transition-all shadow-md text-orange-300">${s.start}</span>, <span class="active:scale-95 transition-all shadow-md text-orange-300">${s.stop}</span>):<br>
+            <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300">
+              <span class="text-violet-400">for</span> i <span class="text-violet-400">in</span> <span class="text-blue-400">range</span>(<span class="text-orange-300">${s.start}</span>, <span class="text-orange-300">${s.stop}</span>):<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(i)
             </div>
-            <div class="active:scale-95 transition-all shadow-md flex gap-4 items-center">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t16-ans" placeholder="Ответ..." class="active:scale-95 transition-all shadow-md flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <div class="flex gap-4 items-center">
+              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t16-ans" placeholder="Ответ..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             </div>
-            <button onclick="window.check_t16(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t16(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -2306,7 +2398,7 @@
               print(arr[<span class="text-orange-300">${s.index}</span>])
             </div>
             <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
-            <button onclick="window.check_t17(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t17(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -2343,7 +2435,7 @@
               print(calc(<span class="text-orange-300">${s.c}</span>))
             </div>
             <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
-            <button onclick="window.check_t18(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
+            <button onclick="window.check_t18(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
         },
@@ -2376,10 +2468,10 @@
             </div>
             <div id="t19-res" class="min-h-[56px] bg-black/40 border border-white/10 p-4 rounded-2xl font-mono text-sky-300 flex items-center justify-center shadow-inner text-xl tracking-widest"></div>
             <div class="flex flex-wrap gap-2.5">
-              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="active:scale-95 transition-all shadow-md glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${b}</button>`).join('')}
-              <button onclick="window.t19_clear()" aria-label="Очистить" title="Очистить" class="active:scale-95 transition-all shadow-md px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="active:scale-95 transition-all shadow-md w-4 h-4"></i></button>
+              ${pieces.map(b => `<button onclick="window.t19_add('${b}')" class="glass-button px-4 py-2.5 rounded-xl text-zinc-300 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500">${b}</button>`).join('')}
+              <button onclick="window.t19_clear()" aria-label="Очистить" title="Очистить" class="px-4 py-2.5 rounded-xl bg-rose-500/10 text-rose-400 ml-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"><i data-lucide="trash" class="w-4 h-4"></i></button>
             </div>
-            <button onclick="window.check_t19(${id})" class="active:scale-95 transition-all shadow-md w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
+            <button onclick="window.check_t19(${id})" class="w-full py-4 rounded-xl bg-sky-600 text-white font-medium shadow-lg transition-colors">Проверить IP</button>
           </div>
         `;
         },
