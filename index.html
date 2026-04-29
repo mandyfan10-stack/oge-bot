@@ -1146,7 +1146,7 @@
             <div class="p-5 bg-[#0f111a] border border-white/5 rounded-2xl font-serif text-[15px] text-zinc-200 leading-relaxed shadow-inner">«${s.text}»</div>
             <p class="text-sm text-zinc-400 font-light leading-relaxed">Ученик удалил из списка одно из названий. Заодно он вычеркнул ставшие лишними запятые и пробелы — два пробела не должны идти подряд.<br><br>При этом размер нового предложения в данной кодировке оказался на <b class="text-white font-medium">${s.diffBytes} байт</b> меньше, чем размер исходного предложения. Напишите в ответе удаленное слово.</p>
             <div class="flex items-center gap-4 mt-2">
-              <input inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
+              <input maxlength="250" inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t1-ans" placeholder="Ответ: удаленное слово" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center text-lg uppercase tracking-wider">
             </div>
             <button onclick="window.check_t1(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
@@ -1207,7 +1207,7 @@
                 <tbody class="text-zinc-300 divide-y divide-white/5">${s.htmlTable}</tbody>
               </table>
             </div>
-            <div><input inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t2-ans" placeholder="Ответ буквами..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
+            <div><input maxlength="250" inputmode="text" autocomplete="off" spellcheck="false" type="text" id="t2-ans" placeholder="Ответ буквами..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-emerald-500/50 uppercase font-medium text-center tracking-widest"></div>
             <button onclick="window.check_t2(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 transition-colors shadow-lg">Декодировать</button>
           </div>
         `;
@@ -1250,7 +1250,7 @@
               ${s.logicStr}
             </div>
             <div class="flex items-center gap-4 mt-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t3-ans" placeholder="Ваш ответ (X)" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t3-ans" placeholder="Ваш ответ (X)" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-pink-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t3(${id})" class="w-full py-4 rounded-xl bg-pink-600 text-white font-medium hover:bg-pink-500 transition-colors shadow-lg">Проверить X</button>
           </div>
@@ -1311,7 +1311,7 @@
               </table>
             </div>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t4-ans" placeholder="Длина пути" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-blue-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t4(${id})" class="w-full py-4 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg">Проверить</button>
           </div>
@@ -1378,7 +1378,7 @@
             </div>
             <p class="text-sm text-zinc-400 font-light leading-relaxed">Известно, что программа <b class="text-white tracking-widest bg-white/10 px-1 rounded">${s.seq}</b> переводит число <b class="text-white">${s.start}</b> в число <b class="text-white">${s.end}</b>. Определите значение <b class="text-white">b</b>.</p>
             <div class="flex gap-3">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t5-ans" placeholder="Ответ: значение b" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-amber-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t5(${id})" class="w-full py-4 rounded-xl bg-amber-600 text-white font-medium hover:bg-amber-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
@@ -1450,7 +1450,7 @@
             </div>
             
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t6-ans" placeholder="Ответ: кол-во запусков" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-violet-500/50 text-center font-mono text-lg">
             </div>
             
             <button onclick="window.check_t6(${id})" class="w-full py-4 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 shadow-lg transition-colors">Проверить</button>
@@ -1547,7 +1547,7 @@
               </table>
             </div>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t8-ans" placeholder="Ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-fuchsia-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t8(${id})" class="w-full py-4 rounded-xl bg-fuchsia-600 text-white font-medium hover:bg-fuchsia-500 shadow-lg">Ответить</button>
           </div>
@@ -1609,7 +1609,7 @@
             </div>
             <svg id="t9-svg-graph" viewBox="0 0 380 220" class="w-full h-auto drop-shadow-md bg-white/5 rounded-2xl border border-white/10 p-2 my-4"></svg>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t9-ans" placeholder="Ваш ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t9-ans" placeholder="Ваш ответ..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-teal-500/50 font-mono text-center text-lg">
             </div>
             <button onclick="window.check_t9(${id})" class="w-full py-4 rounded-xl bg-teal-600 text-white font-medium hover:bg-teal-500 shadow-lg transition-colors">Ответить</button>
           </div>
@@ -1670,7 +1670,7 @@
               <span>${s.n3}<sub class="text-[10px] text-zinc-500">2</sub></span>
             </div>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t10-ans" placeholder="Ответ в 10-й системе" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t10-ans" placeholder="Ответ в 10-й системе" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-indigo-500/50 text-center font-mono text-lg">
             </div>
             <button onclick="window.check_t10(${id})" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-medium shadow-lg hover:bg-indigo-500 transition-colors">Проверить</button>
           </div>
@@ -1716,7 +1716,7 @@
               ${s.text}
             </div>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t11-ans" placeholder="Количество совпадений" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-stone-500/50 text-center text-lg font-mono">
             </div>
             <button onclick="window.check_t11(${id})" class="w-full py-4 rounded-xl bg-stone-600 text-white font-medium hover:bg-stone-500 shadow-lg transition-colors">Проверить ответ</button>
           </div>
@@ -1760,7 +1760,7 @@
               ${s.files.map((f, i) => `<div>${i+1}. ${f}</div>`).join('')}
             </div>
             <div class="flex items-center gap-4">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t12-ans" placeholder="Ответ: количество" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-yellow-500/50 text-center text-lg font-mono">
             </div>
             <button onclick="window.check_t12(${id})" class="w-full py-4 rounded-xl bg-yellow-600 text-white font-medium hover:bg-yellow-500 shadow-lg transition-colors">Проверить</button>
           </div>
@@ -1915,11 +1915,11 @@
             <div class="space-y-4 text-sm">
               <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
                 <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">1.</span> Сколько учеников любят предмет <b>${s.targetSub}</b>?</p>
-                <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (целое число)">
+                <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t14-ans1" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Ответ (целое число)">
               </div>
               <div class="bg-black/20 p-4 rounded-2xl border border-white/5">
                 <p class="text-zinc-300 mb-2"><span class="text-green-400 font-medium">2.</span> Какой процент учеников <b>${s.targetGrade} класса</b> имеют оценку за любимый предмет 4 или 5? (с точностью не менее 2 знаков)</p>
-                <input type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.50">
+                <input maxlength="250" type="text" id="t14-ans2" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-green-500/50 font-mono" placeholder="Например: 12.50">
               </div>
             </div>
             <button onclick="window.check_t14(${id})" class="w-full py-4 rounded-xl bg-green-600 text-white font-medium hover:bg-green-500 shadow-lg transition-colors">Проверить ответы</button>
@@ -2122,7 +2122,7 @@
             </div>
             
             <div class="flex flex-col md:flex-row gap-4">
-              <textarea id="t15-code" class="flex-1 w-full min-h-[250px] bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-mono text-zinc-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="использовать Робот\nалг\nнач\n  нц пока не сверху свободно\n    закрасить\n    вправо\n  кц\nкон"></textarea>
+              <textarea maxlength="2000" id="t15-code" class="flex-1 w-full min-h-[250px] bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-mono text-zinc-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="использовать Робот\nалг\nнач\n  нц пока не сверху свободно\n    закрасить\n    вправо\n  кц\nкон"></textarea>
               <div class="w-full md:w-1/2 max-w-[320px] mx-auto aspect-square flex-shrink-0" id="t15-grid"></div>
             </div>
             
@@ -2360,7 +2360,7 @@
               &nbsp;&nbsp;&nbsp;&nbsp;print(i)
             </div>
             <div class="flex gap-4 items-center">
-              <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t16-ans" placeholder="Ответ..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+              <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t16-ans" placeholder="Ответ..." class="flex-1 bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             </div>
             <button onclick="window.check_t16(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
@@ -2396,7 +2396,7 @@
               arr = [${s.arr.join(', ')}]<br>
               print(arr[<span class="text-orange-300">${s.index}</span>])
             </div>
-            <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t17-ans" placeholder="Вывод программы..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             <button onclick="window.check_t17(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
@@ -2433,7 +2433,7 @@
               &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-violet-400">return</span> x * <span class="text-orange-300">${s.a}</span> ${bStr}<br><br>
               print(calc(<span class="text-orange-300">${s.c}</span>))
             </div>
-            <input inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
+            <input maxlength="250" inputmode="numeric" pattern="[0-9]*" autocomplete="off" type="text" id="t18-ans" placeholder="Результат..." class="w-full bg-black/40 border border-white/10 p-4 rounded-xl text-white outline-none font-mono text-center">
             <button onclick="window.check_t18(${id})" class="w-full py-4 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-500 shadow-lg transition-colors">Проверить</button>
           </div>
         `;
