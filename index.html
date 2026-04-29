@@ -2264,7 +2264,11 @@
 
           window.check_t15 = async (tid) => {
               const btn = getEl('t15-run-btn'); const errEl = getEl('t15-error');
-              btn.disabled = true; btn.classList.add('opacity-50'); errEl.classList.add('hidden'); getEl(`feedback-${tid}`).classList.add('hidden');
+              const originalBtnHTML = btn.innerHTML;
+              btn.disabled = true;
+              btn.innerHTML = '<span class="flex items-center justify-center gap-2"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Выполняется...</span>';
+              renderLucideIcons(btn);
+              errEl.classList.add('hidden'); getEl(`feedback-${tid}`).classList.add('hidden');
               
               const code = getEl('t15-code').value;
               let lines = code.split('\n').map(l => l.trim().toLowerCase()).filter(l => l);
@@ -2336,8 +2340,12 @@
 
                   if (success) showFeedback(tid, true, "Идеально! Алгоритм закрасил все нужные клетки и привёл Робота в точку Ф.");
                   else showFeedback(tid, false, "Алгоритм завершился неверно: проверь закрашенные клетки и убедись, что Робот остановился в зелёной точке Ф. Проходы закрашивать нельзя!");
-              } catch(err) { errEl.innerText = err.message; errEl.classList.remove('hidden'); }
-              btn.disabled = false; btn.classList.remove('opacity-50');
+              } catch(err) {
+                  errEl.innerText = err.message; errEl.classList.remove('hidden');
+              } finally {
+                  btn.disabled = false;
+                  btn.innerHTML = originalBtnHTML;
+              }
           };
         }
       },
