@@ -21,3 +21,8 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+
+## 2026-04-29 - [Missing Max Length Limits on Free-Text Inputs]
+**Vulnerability:** The application's inputs and textareas lacked a `maxlength` attribute, potentially allowing a client-side Denial-of-Service (DoS) and excessive load on backend processes by passing extremely long strings.
+**Learning:** Generic UI elements without size limits are vulnerable to memory exhaustion attacks and backend DoS via unexpectedly large payloads.
+**Prevention:** Always define permissive `maxlength` defaults (e.g. 250 for standard inputs and 2000 for textareas) for all free-text fields to mitigate DoS without causing user flow regressions.
