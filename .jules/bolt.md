@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2026-05-18 - Optimize Coordinate Lookups in Rendering/Simulation Loops
+**Learning:** In interactive simulation environments (like grid-based maps or task visualization), repeatedly checking for the existence of elements (e.g., walls or boundaries) using `Array.some()` inside tight rendering loops or recursive logic causes severe performance overhead. Scanning an array of `N` items `M` times leads to O(N*M) complexity, slowing down operations significantly when scaling map sizes.
+**Action:** Convert static configuration arrays containing coordinates into `Set` objects before starting any execution loops. Map the coordinates to unique string keys (e.g., `x,y`) and use `Set.has(key)` to replace O(N) array scans with O(1) lookups, providing massive speedup during iteration and visual updates.
