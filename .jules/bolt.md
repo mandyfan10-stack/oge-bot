@@ -20,3 +20,6 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+## 2026-04-30 - [Optimize Array Lookups in Nested Matrix Iterations]
+**Learning:** Checking for coordinates or objects in arrays using `Array.some()` inside tight nested loops (like grid rendering that runs repetitively) creates an O(N²) bottleneck, slowing down rendering and collision detection.
+**Action:** Convert static configuration arrays into `Set` objects using a stringification pattern (e.g., `cellKey(x, y)`) before loops start. Replace O(N) `Array.some()` linear scans with O(1) `Set.has()` lookups.
