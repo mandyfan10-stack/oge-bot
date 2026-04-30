@@ -588,6 +588,8 @@
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
+    let lastFocusedCourseBtn = null;
+    let lastFocusedTaskBtn = null;
     window.taskState = {}; 
 
     const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
@@ -629,6 +631,7 @@
     }
 
     function openCourse(id) {
+      lastFocusedCourseBtn = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -637,6 +640,11 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = getEl('screen-tasks').querySelector('header button');
+        if (backBtn) backBtn.focus();
+      }, 500);
     }
 
     function closeCourse() {
@@ -644,6 +652,13 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      if (lastFocusedCourseBtn) {
+        setTimeout(() => {
+          lastFocusedCourseBtn.focus();
+          lastFocusedCourseBtn = null;
+        }, 500);
+      }
     }
 
     const taskDOMCache = {};
@@ -780,6 +795,7 @@
     }
 
     function openTask(id) {
+      lastFocusedTaskBtn = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -794,6 +810,11 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const firstInputOrBtn = getEl('task-content').querySelector('input, button');
+        if (firstInputOrBtn) firstInputOrBtn.focus();
+      }, 500);
     }
 
     function closeTask() {
@@ -802,6 +823,12 @@
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
+      if (lastFocusedTaskBtn) {
+        setTimeout(() => {
+          lastFocusedTaskBtn.focus();
+          lastFocusedTaskBtn = null;
+        }, 500);
+      }
 
       taskCloseCleanupTimer = setTimeout(() => {
         const taskScreen = getEl('screen-task');
@@ -876,6 +903,7 @@
     }
 
     // --- AI ЧАТ И ГЕНЕРАЦИЯ КАРТИНОК ---
+    let lastFocusedChatBtn = null;
     function toggleChat(show) { 
       const modal = getEl('chat-modal');
       const chatInput = getEl('chat-input');
@@ -883,13 +911,37 @@
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
+        lastFocusedChatBtn = document.activeElement;
         modal.classList.remove('hidden-chat');
         setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        triggerButton.focus();
+        if (lastFocusedChatBtn) {
+          lastFocusedChatBtn.focus();
+          lastFocusedChatBtn = null;
+        } else {
+          triggerButton.focus();
+        }
       }
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const chatModal = getEl('chat-modal');
+        if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+          toggleChat(false);
+          return;
+        }
+        if (currentTaskId) {
+          closeTask();
+          return;
+        }
+        if (currentCourseId) {
+          closeCourse();
+          return;
+        }
+      }
+    });
 
     async function sendChatMessage() {
       const inputEl = getEl('chat-input');
