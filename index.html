@@ -588,6 +588,8 @@
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
+    let lastFocusBeforeCourse = null;
+    let lastFocusBeforeTask = null;
     window.taskState = {}; 
 
     const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
@@ -629,6 +631,7 @@
     }
 
     function openCourse(id) {
+      lastFocusBeforeCourse = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -637,6 +640,13 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = getEl('screen-tasks').querySelector('button');
+        if (backBtn) {
+          backBtn.focus();
+        }
+      }, 500);
     }
 
     function closeCourse() {
@@ -644,6 +654,12 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      setTimeout(() => {
+        if (lastFocusBeforeCourse && document.contains(lastFocusBeforeCourse)) {
+          lastFocusBeforeCourse.focus();
+        }
+      }, 300);
     }
 
     const taskDOMCache = {};
@@ -780,6 +796,7 @@
     }
 
     function openTask(id) {
+      lastFocusBeforeTask = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -794,6 +811,13 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const firstInput = getEl('task-content').querySelector('input, textarea');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 500);
     }
 
     function closeTask() {
@@ -802,6 +826,11 @@
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
+      setTimeout(() => {
+        if (lastFocusBeforeTask && document.contains(lastFocusBeforeTask)) {
+          lastFocusBeforeTask.focus();
+        }
+      }, 300);
 
       taskCloseCleanupTimer = setTimeout(() => {
         const taskScreen = getEl('screen-task');
@@ -2537,6 +2566,24 @@
         }
       }
     };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const chatModal = getEl('chat-modal');
+        if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+          toggleChat(false);
+          return;
+        }
+        if (currentTaskId !== null) {
+          closeTask();
+          return;
+        }
+        if (currentCourseId !== null) {
+          closeCourse();
+          return;
+        }
+      }
+    });
 
     renderCourses();
     renderLucideIcons();
