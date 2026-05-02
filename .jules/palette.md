@@ -1,0 +1,4 @@
+## 2026-05-02 - Ensure Focus Management on Overlay Transition
+
+**Learning:** For custom modals and overlay screens (like chat, task, or course views), explicit focus management is required: implement a global Escape key handler on the document to dismiss them, programmatically focus the primary input upon opening, and restore focus to the original trigger button upon closing (after a slight timeout to allow for CSS transitions) to maintain proper keyboard tab order and avoid dropping users back to the `<body>`.
+**Action:** Always maintain previous focus context and add escape handler to dismiss overlays.
