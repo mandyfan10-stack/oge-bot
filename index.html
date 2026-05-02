@@ -991,10 +991,22 @@
       if (currentTaskId) {
         const taskObj = TASKS_BY_ID.get(currentTaskId);
         const taskTitle = taskObj ? taskObj.title : `Задание ${currentTaskId}`;
-        const stateInfo = JSON.stringify(window.taskState[currentTaskId] || {});
+        const s = window.taskState[currentTaskId] || {};
+        
+        // Извлекаем правильный ответ для Chain-of-Thought подсказки ИИ
+        let correctAnswer = s.ans || s.target || s.targetWord || s.w || s.minLen || s.b || s.targetCount || s.full || s.answer || s.count || "не указан";
+        if (currentTaskId === 14) correctAnswer = `1: ${s.q1Ans}, 2: ${s.q2Ans}%`;
+        if (currentTaskId === 15) correctAnswer = "Закрасить клетки: " + (s.targetPainted ? s.targetPainted.join('; ') : "согласно условию");
+        if (currentTaskId === 16) correctAnswer = s.stop - 1;
+        if (currentTaskId === 19) correctAnswer = s.parts ? s.parts.join('.') : "не указан";
+
         const contentEl = getEl('task-content');
         const visibleText = contentEl ? contentEl.innerText.replace(/\s+/g, ' ').substring(0, 1000) : '';
-        taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры: ${stateInfo}. ТВОЯ ЗАДАЧА: Разжевать решение максимально подробно по шагам (Шаг 1, Шаг 2 и т.д.). Дай четкий, последовательный алгоритм, чтобы любой ученик понял. Обязательно опирайся ТОЛЬКО на числа из этой задачи. В конце напиши правильный ответ. Если ученик спрашивает не по задаче, мягко направь его обратно.]`;
+        
+        taskContext = `\n\n[ИНСТРУКЦИЯ ДЛЯ ТЕБЯ: Ученик решает "${taskTitle}". 
+ТЕКСТ ЗАДАЧИ: "${visibleText}". 
+ПРАВИЛЬНЫЙ ОТВЕТ (ДЛЯ ТЕБЯ): ${correctAnswer}. 
+ТВОЯ ЗАДАЧА: Быть ИИ-репетитором. НЕ давай ответ сразу. Сначала разбери логику решения ПО ШАГАМ (Шаг 1, Шаг 2...). Объясняй максимально просто, как для 9-классника. Используй числа ТОЛЬКО из текущей задачи. Если ученик попросит ответ, дай его только после объяснения.]`;
       }
 
       const optimizedPrompt = text + taskContext;
