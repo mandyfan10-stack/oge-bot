@@ -959,8 +959,6 @@
         taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры: ${stateInfo}. ТВОЯ ЗАДАЧА: Разжевать решение максимально подробно по шагам (Шаг 1, Шаг 2 и т.д.). Дай четкий, последовательный алгоритм, чтобы любой ученик понял. Обязательно опирайся ТОЛЬКО на числа из этой задачи. В конце напиши правильный ответ. Если ученик спрашивает не по задаче, мягко направь его обратно.]`;
       }
 
-      const optimizedPrompt = text + taskContext;
-
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
@@ -970,24 +968,49 @@
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ 
             text: optimizedPrompt,
-            history: chatHistory.slice(-10) // Отправляем последние 10 сообщений для контекста
+            history: chatHistory.slice(-10) 
           }), 
           signal: controller.signal
         });
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
 
-        const data = await response.json();
-        const aiText = data.reply || 'Ошибка обработки на сервере.';
+        const typingEl = document.getElementById(typingId);
+        if (typingEl) typingEl.remove();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex justify-start animate-message';
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-message-bubble chat-message-ai';
+        wrapper.appendChild(bubble);
+        messagesDiv.appendChild(wrapper);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let aiText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          aiText += chunk;
+          
+          // Рендерим текст с переносами строк
+          bubble.innerHTML = aiText.split('\n').map(line => 
+            document.createTextNode(line).textContent
+          ).join('<br>');
+          
+          scheduleChatScroll(messagesDiv);
+        }
 
         // Сохраняем в историю
         chatHistory.push({ role: 'user', content: text });
         chatHistory.push({ role: 'assistant', content: aiText });
         if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
         
-        const typingEl = document.getElementById(typingId);
-        if (typingEl) typingEl.remove();
+        hapticSelection();
         
         let visualAddon = '';
         if (currentTaskId && window.taskState[currentTaskId]) {
