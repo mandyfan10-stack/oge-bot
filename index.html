@@ -529,6 +529,8 @@
     const CHAT_MAX_MESSAGES = 28;
     const TOTAL_TASKS = 20;
     let chatScrollFrame = 0;
+    let chatHistory = []; // Хранит историю для ИИ-контекста
+
 
     function scheduleChatScroll(container = getEl('chat-messages')) {
       if (!container) return;
@@ -964,13 +966,25 @@
 
       try {
         const response = await fetch(BACKEND_URL, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: optimizedPrompt }), signal: controller.signal
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            text: optimizedPrompt,
+            history: chatHistory.slice(-10) // Отправляем последние 10 сообщений для контекста
+          }), 
+          signal: controller.signal
         });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
 
         const data = await response.json();
+        const aiText = data.reply || 'Ошибка обработки на сервере.';
+
+        // Сохраняем в историю
+        chatHistory.push({ role: 'user', content: text });
+        chatHistory.push({ role: 'assistant', content: aiText });
+        if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
         
         const typingEl = document.getElementById(typingId);
         if (typingEl) typingEl.remove();
