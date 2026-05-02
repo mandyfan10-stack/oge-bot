@@ -584,6 +584,9 @@
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
+    let lastFocusedBeforeCourse = null;
+    let lastFocusedBeforeTask = null;
+    let lastFocusedBeforeChat = null;
     window.taskState = {}; 
 
     const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
@@ -685,6 +688,7 @@
     }
 
     function openCourse(id) {
+      lastFocusedBeforeCourse = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -693,6 +697,11 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = document.querySelector('#screen-tasks button[onclick="closeCourse()"]');
+        if (backBtn) backBtn.focus();
+      }, 100);
     }
 
     function closeCourse() {
@@ -700,6 +709,10 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      setTimeout(() => {
+        if (lastFocusedBeforeCourse) lastFocusedBeforeCourse.focus();
+      }, 300);
     }
 
     const taskDOMCache = {};
@@ -836,6 +849,7 @@
     }
 
     function openTask(id) {
+      lastFocusedBeforeTask = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -850,6 +864,11 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = document.querySelector('#screen-task button[onclick="closeTask()"]');
+        if (backBtn) backBtn.focus();
+      }, 100);
     }
 
     function closeTask() {
@@ -858,6 +877,9 @@
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
+      setTimeout(() => {
+        if (lastFocusedBeforeTask) lastFocusedBeforeTask.focus();
+      }, 300);
 
       taskCloseCleanupTimer = setTimeout(() => {
         const taskScreen = getEl('screen-task');
@@ -939,11 +961,18 @@
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
+        lastFocusedBeforeChat = document.activeElement;
         modal.classList.remove('hidden-chat');
         setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        triggerButton.focus();
+        setTimeout(() => {
+          if (lastFocusedBeforeChat) {
+            lastFocusedBeforeChat.focus();
+          } else {
+            triggerButton.focus();
+          }
+        }, 300);
       }
     }
 
@@ -2677,6 +2706,24 @@
     initializeInteractionFeedback();
     updateMentorContextLabel();
     if (window.updateTelegramButtons) window.updateTelegramButtons();
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const chatModal = getEl('chat-modal');
+        if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+          toggleChat(false);
+          return;
+        }
+        if (currentTaskId !== null) {
+          closeTask();
+          return;
+        }
+        if (currentCourseId !== null) {
+          closeCourse();
+          return;
+        }
+      }
+    });
   </script>
 </body>
 </html>
