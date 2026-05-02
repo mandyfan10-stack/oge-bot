@@ -20,3 +20,7 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+
+## 2026-04-26 - Secondary Custom Controls Keyboard Accessibility
+**Learning:** Secondary custom controls, such as the filter/preset buttons (`.mentor-chip`) in the chat modal, can be overlooked during accessibility audits when focusing on primary action buttons. Keyboard users navigating through the interface require explicit focus indicators (`focus-visible:ring-*`) on all interactive elements to understand their current position.
+**Action:** When adding or modifying any interactive element, including secondary tags or preset chips, systematically ensure explicit `focus-visible` styles are included, matching the established design system ring colors.

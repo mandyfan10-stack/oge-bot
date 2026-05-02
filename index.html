@@ -379,9 +379,9 @@
       </div>
       <div class="chat-input-panel p-4 px-5 glass-panel border-t-0 space-y-3">
         <div class="flex gap-2 overflow-x-auto pb-1">
-          <button type="button" onclick="askMentorPreset('hint')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Подсказка</button>
-          <button type="button" onclick="askMentorPreset('steps')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">По шагам</button>
-          <button type="button" onclick="askMentorPreset('check')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Проверь ход</button>
+          <button type="button" onclick="askMentorPreset('hint')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Подсказка</button>
+          <button type="button" onclick="askMentorPreset('steps')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">По шагам</button>
+          <button type="button" onclick="askMentorPreset('check')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">Проверь ход</button>
         </div>
         <div class="chat-input-shell flex gap-2 p-1.5 rounded-xl">
           <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." maxlength="250" class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
