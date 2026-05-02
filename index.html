@@ -613,7 +613,67 @@
     const MAX_VARIANT_RETRIES = 8;
     const lastTaskVariants = new Map();
 
-    if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
+    if (window.Telegram && window.Telegram.WebApp) { 
+      const webApp = window.Telegram.WebApp;
+      webApp.expand(); 
+      webApp.ready();
+
+      // Настройка кнопок Telegram
+      const mainBtn = webApp.MainButton;
+      const backBtn = webApp.BackButton;
+
+      window.updateTelegramButtons = () => {
+        // Управление BackButton
+        if (currentTaskId !== null) {
+          backBtn.show();
+          backBtn.onClick(closeTask);
+        } else if (currentCourseId !== null) {
+          backBtn.show();
+          backBtn.onClick(closeCourse);
+        } else {
+          backBtn.hide();
+        }
+
+        // Управление MainButton
+        if (currentTaskId !== null) {
+          const taskObj = TASKS_BY_ID.get(currentTaskId);
+          mainBtn.setText(currentTaskId === 15 ? "ЗАПУСТИТЬ АЛГОРИТМ" : "ПРОВЕРИТЬ ОТВЕТ");
+          mainBtn.setParams({
+            is_visible: true,
+            is_active: true,
+            color: "#4f46e5",
+            text_color: "#ffffff"
+          });
+          
+          const onMainClick = () => {
+            const content = getEl('task-content');
+            const submitBtn = content.querySelector(`button[onclick*="window.check_t${currentTaskId}"]`);
+            if (submitBtn) {
+              hapticImpact('medium');
+              submitBtn.click();
+            }
+          };
+          
+          mainBtn.offClick(); // Очищаем старые обработчики
+          mainBtn.onClick(onMainClick);
+        } else {
+          mainBtn.hide();
+        }
+      };
+      
+      // Переопределяем функции навигации, чтобы они дергали обновление кнопок
+      const _openCourse = openCourse;
+      window.openCourse = (id) => { _openCourse(id); window.updateTelegramButtons(); };
+      
+      const _closeCourse = closeCourse;
+      window.closeCourse = () => { _closeCourse(); window.updateTelegramButtons(); };
+      
+      const _openTask = openTask;
+      window.openTask = (id) => { _openTask(id); window.updateTelegramButtons(); };
+      
+      const _closeTask = closeTask;
+      window.closeTask = () => { _closeTask(); window.updateTelegramButtons(); };
+    }
 
     function renderCourses() {
       const list = getEl('courses-list');
@@ -2596,6 +2656,7 @@
     enhanceInteractiveElements();
     initializeInteractionFeedback();
     updateMentorContextLabel();
+    if (window.updateTelegramButtons) window.updateTelegramButtons();
   </script>
 </body>
 </html>
