@@ -1480,33 +1480,50 @@
         init: (id) => { 
           const ops = ['or', 'and'];
           const signs = ['<', '>', '<=', '>='];
+          const variants = ['basic', 'not', 'div'];
+          const variant = getRandomElement(variants);
+          
           const op = getRandomElement(ops);
           const signS = getRandomElement(signs);
           const signT = getRandomElement(signs);
-          const A = getRandomInt(-10, 9);
-          const B = getRandomInt(-10, 9);
+          const A = getRandomInt(-5, 12);
+          const B = getRandomInt(-5, 12);
           
           const pairs = [];
           let yesCount = 0; let noCount = 0;
           for (let i = 0; i < 9; i++) {
-            const s = getRandomInt(-15, 14);
-            const t = getRandomInt(-15, 14);
+            const s = getRandomInt(-10, 20);
+            const t = getRandomInt(-10, 20);
             pairs.push(`(${s}, ${t})`);
             
-            // Безопасное вычисление без eval
+            let valS = s;
+            let valT = t;
+            if (variant === 'div') { valS = Math.floor(s / 2); valT = Math.floor(t / 2); }
+
             let condS = false;
-            if (signS === '<') condS = s < A; else if (signS === '>') condS = s > A; else if (signS === '<=') condS = s <= A; else if (signS === '>=') condS = s >= A;
+            if (signS === '<') condS = valS < A; else if (signS === '>') condS = valS > A; else if (signS === '<=') condS = valS <= A; else if (signS === '>=') condS = valS >= A;
             
             let condT = false;
-            if (signT === '<') condT = t < B; else if (signT === '>') condT = t > B; else if (signT === '<=') condT = t <= B; else if (signT === '>=') condT = t >= B;
+            if (signT === '<') condT = valT < B; else if (signT === '>') condT = valT > B; else if (signT === '<=') condT = valT <= B; else if (signT === '>=') condT = valT >= B;
 
             let isYes = op === 'or' ? (condS || condT) : (condS && condT);
+            if (variant === 'not') isYes = !isYes;
+            
             if (isYes) yesCount++; else noCount++;
           }
           const askFor = getRandomBool() ? 'YES' : 'NO';
           const targetCount = askFor === 'YES' ? yesCount : noCount;
 
-          window.taskState[id] = { op, signS, signT, A, B, pairs, askFor, targetCount };
+          let code = '';
+          if (variant === 'basic') {
+              code = `s = int(input())\nt = int(input())\n<span class="text-violet-400">if</span> s ${signS} <span class="text-orange-300">${A}</span> <span class="text-violet-400">${op}</span> t ${signT} <span class="text-orange-300">${B}</span>:`;
+          } else if (variant === 'not') {
+              code = `s = int(input())\nt = int(input())\n<span class="text-violet-400">if not</span>(s ${signS} <span class="text-orange-300">${A}</span> <span class="text-violet-400">${op}</span> t ${signT} <span class="text-orange-300">${B}</span>):`;
+          } else {
+              code = `s = int(input())\nt = int(input())\n<span class="text-violet-400">if</span> s // <span class="text-orange-300">2</span> ${signS} <span class="text-orange-300">${A}</span> <span class="text-violet-400">${op}</span> t // <span class="text-orange-300">2</span> ${signT} <span class="text-orange-300">${B}</span>:`;
+          }
+
+          window.taskState[id] = { code, pairs, askFor, targetCount };
         },
         html: (id) => {
           const s = window.taskState[id];
@@ -1518,9 +1535,7 @@
             </div>
             
             <div class="bg-[#0f111a] p-5 rounded-2xl border border-white/5 font-mono text-sm text-zinc-300 shadow-inner">
-              s = int(input())<br>
-              t = int(input())<br>
-              <span class="text-violet-400">if</span> s ${s.signS} <span class="text-orange-300">${s.A}</span> <span class="text-violet-400">${s.op}</span> t ${s.signT} <span class="text-orange-300">${s.B}</span>:<br>
+              ${s.code}<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-green-300">"YES"</span>)<br>
               <span class="text-violet-400">else</span>:<br>
               &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-rose-300">"NO"</span>)
@@ -1815,17 +1830,38 @@
       },
       12: {
         init: (id) => {
-          const names = ['doc', 'report', 'test', 'data', 'image', 'photo', 'notes', 'archive'];
-          const exts = ['pdf', 'txt', 'docx', 'jpg', 'png', 'zip'];
+          const names = ['doc', 'report', 'test', 'data', 'image', 'photo', 'notes', 'archive', 'result', 'plan'];
+          const exts = ['pdf', 'txt', 'docx', 'jpg', 'png', 'zip', 'html', 'rtf'];
           let files = [];
-          for(let i=0; i<8; i++) {
-              const prefix = getRandomBool() ? getRandomInt(0, 9) : '';
-              files.push(`${getRandomElement(names)}${prefix}.${getRandomElement(exts)}`);
+          for(let i=0; i<10; i++) {
+              const name = getRandomElement(names);
+              const ext = getRandomElement(exts);
+              const num = getRandomBool() ? getRandomInt(1, 99) : '';
+              files.push(`${name}${num}.${ext}`);
           }
-          const targetExt = files[0].split('.')[1]; 
-          const targetMask = `*.${targetExt}`;
+          
+          // Генерируем маску по образцу ОГЭ
+          const tpl = getRandomInt(0, 2);
+          let targetMask = '';
+          if (tpl === 0) {
+              const ext = files[0].split('.')[1];
+              targetMask = `*.${ext.substring(0, 2)}*`;
+          } else if (tpl === 1) {
+              const name = files[0].split('.')[0];
+              targetMask = `${name.substring(0, 1)}?*.${files[0].split('.')[1]}`;
+          } else {
+              targetMask = `*${getRandomElement(['a', 'e', 'o', 'i'])}?.*`;
+          }
+
+          const maskToRegex = (mask) => {
+              const escaped = mask.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+              const regexStr = '^' + escaped.replace(/\*/g, '.*').replace(/\?/g, '.') + '$';
+              return new RegExp(regexStr, 'i');
+          };
+
+          const regex = maskToRegex(targetMask);
           let ans = 0;
-          files.forEach(f => { if (f.endsWith(targetExt)) ans++; });
+          files.forEach(f => { if (regex.test(f)) ans++; });
           
           window.taskState[id] = { files, targetMask, ans };
         },
@@ -2198,7 +2234,7 @@
                 <br><span class="text-blue-300 font-medium">Команды:</span> вверх, вниз, влево, вправо, закрасить
                 <br><span class="text-blue-300 font-medium">Ветвление:</span> если [усл] то ... иначе ... все
                 <br><span class="text-blue-300 font-medium">Цикл:</span> <span class="font-mono bg-white/5 px-1 rounded">нц пока [усл] ... кц</span>
-                <br><span class="text-blue-300 font-medium">Условия:</span> сверху/снизу/слева/справа свободно
+                <br><span class="text-blue-300 font-medium">Условия:</span> сверху/снизу/слева/справа <span class="text-white">свободно/стена</span>
               </p>
             </div>
             
@@ -2257,6 +2293,10 @@
                                   else if (str === 'снизу свободно') result = !hasWall(r.x, r.y, 'down');
                                   else if (str === 'слева свободно') result = !hasWall(r.x, r.y, 'left');
                                   else if (str === 'справа свободно') result = !hasWall(r.x, r.y, 'right');
+                                  else if (str === 'сверху стена') result = hasWall(r.x, r.y, 'up');
+                                  else if (str === 'снизу стена') result = hasWall(r.x, r.y, 'down');
+                                  else if (str === 'слева стена') result = hasWall(r.x, r.y, 'left');
+                                  else if (str === 'справа стена') result = hasWall(r.x, r.y, 'right');
                                   else throw new Error('Некорректное условие: ' + condStr);
 
                                   if (isNot) result = !result;
