@@ -248,25 +248,6 @@
       }
     }
 
-    @supports (content-visibility: auto) {
-      #courses-list > button, #tasks-list > button {
-        content-visibility: auto;
-        contain-intrinsic-size: 96px;
-      }
-      #task-content > .glass-panel {
-        content-visibility: auto;
-        contain-intrinsic-size: 620px;
-      }
-      .chat-message-bubble {
-        content-visibility: auto;
-        contain-intrinsic-size: 60px;
-      }
-    }
-
-    .glass-panel, .glass-button, .chat-message-bubble {
-        contain: layout style;
-    }
-
     .performance-lite .overflow-y-auto { will-change: auto; }
     .performance-lite .glass-panel,
     .performance-lite .feedback-card,
@@ -1016,6 +997,8 @@
         taskContext = `\n\n[СИСТЕМНАЯ ИНФОРМАЦИЯ: Ученик решает "${taskTitle}". Текст на экране: "${visibleText}". Скрытые параметры: ${stateInfo}. ТВОЯ ЗАДАЧА: Разжевать решение максимально подробно по шагам (Шаг 1, Шаг 2 и т.д.). Дай четкий, последовательный алгоритм, чтобы любой ученик понял. Обязательно опирайся ТОЛЬКО на числа из этой задачи. В конце напиши правильный ответ. Если ученик спрашивает не по задаче, мягко направь его обратно.]`;
       }
 
+      const optimizedPrompt = text + taskContext;
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), CHAT_TIMEOUT_MS);
 
@@ -1172,19 +1155,7 @@
             }
         }
 
-        const aiText = data.reply || 'Ошибка обработки на сервере.';
         hapticSelection();
-
-        const wrapper = document.createElement('div');
-        wrapper.className = 'flex justify-start animate-message';
-        const bubble = document.createElement('div');
-        bubble.className = 'chat-message-bubble chat-message-ai';
-
-        const lines = aiText.split('\n');
-        lines.forEach((line, i) => {
-            if (i > 0) bubble.appendChild(document.createElement('br'));
-            bubble.appendChild(document.createTextNode(line));
-        });
 
         if (visualAddon) {
             bubble.insertAdjacentHTML('beforeend', visualAddon);
