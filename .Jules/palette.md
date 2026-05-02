@@ -20,3 +20,6 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+## 2026-04-27 - Async Loading States for Interactive Chips
+**Learning:** Adding `:disabled` properties via JS during async operations for custom chip components looks broken if the CSS `:hover` state (e.g. background changes) overrides the disabled opacity styling.
+**Action:** Always combine `:disabled` states (like `opacity-50` and `cursor-not-allowed`) with `:not(:disabled):hover` CSS rules for interactive UI chips to ensure correct visual feedback and prevent user confusion during server requests.
