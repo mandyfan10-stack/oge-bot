@@ -21,3 +21,8 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+
+## 2024-05-25 - [DOMParser Security Theater]
+**Vulnerability:** Overusing `DOMParser().parseFromString()` and iterating through child nodes to append HTML strings instead of using `insertAdjacentHTML` for static/trusted UI strings provides no security benefit against XSS.
+**Learning:** Using `DOMParser` to parse malicious HTML strings containing execution triggers (like `<img onerror=...>`) and appending those DOM nodes will still cause the browser to execute the payload. It adds unnecessary technical debt and verbosity without true sanitization.
+**Prevention:** Avoid blindly swapping `insertAdjacentHTML` with `DOMParser` loops. Instead, if an input is untrusted, use a true sanitizer (like DOMPurify) or construct safe text nodes natively. Only use DOM APIs intentionally for genuine security needs, avoiding security theater.
