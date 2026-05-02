@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2026-05-02 - Array.prototype.some vs Set lookups in frequent iterations
+**Learning:** Checking walls using `map.horizontals.some` during tight loop iterations in game simulation (like `hasWall` checks over grid generation and animation logic) takes `O(N)` for each lookup, scaling to `O(N^2)` overhead for loop bounds. Converting coordinates to a structured format `"${x},${y}"` string representation and storing them in a `Set` brings the complexity down to `O(1)`.
+**Action:** When working with continuous state validations over matrices (2D game arrays or similar), initialize lookup variables via Javascript native `Set` objects using a deterministic stringified key structure to accelerate queries from linear loops to instantaneous accesses.

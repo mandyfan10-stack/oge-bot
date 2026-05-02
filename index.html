@@ -2267,12 +2267,17 @@
         `,
         setup: (id) => {
           const map = window.taskState[id];
+          const cellKey = (x, y) => `${x},${y}`;
+          // Performance optimization: convert arrays to Sets for O(1) lookups
+          const hSet = new Set(map.horizontals.map(w => cellKey(w.x, w.y)));
+          const vSet = new Set(map.verticals.map(w => cellKey(w.x, w.y)));
+
           const hasWall = (x, y, dir) => {
               if (x < 0 || x >= map.w || y < 0 || y >= map.h) return true;
-              if (dir === 'up') return map.horizontals.some(w => w.x === x && w.y === y - 1);
-              if (dir === 'down') return map.horizontals.some(w => w.x === x && w.y === y);
-              if (dir === 'left') return map.verticals.some(w => w.x === x - 1 && w.y === y);
-              if (dir === 'right') return map.verticals.some(w => w.x === x && w.y === y);
+              if (dir === 'up') return hSet.has(cellKey(x, y - 1));
+              if (dir === 'down') return hSet.has(cellKey(x, y));
+              if (dir === 'left') return vSet.has(cellKey(x - 1, y));
+              if (dir === 'right') return vSet.has(cellKey(x, y));
               return false;
           };
           const conditionCache = new Map();
@@ -2329,7 +2334,6 @@
           };
           const robotMarker = '<div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10">Р</div>';
           const finishMarker = '<div class="absolute inset-[5px] rounded-sm border border-emerald-300/80 bg-emerald-400/25 flex items-center justify-center text-[9px] font-bold text-emerald-100 shadow-[0_0_12px_rgba(52,211,153,0.45)] z-0">Ф</div>';
-          const cellKey = (x, y) => `${x},${y}`;
           const updateCell = (x, y, robot, painted) => {
               const cell = map.cells?.[y]?.[x];
               if (!cell) return;
@@ -2353,10 +2357,10 @@
                   for(let y=0; y<map.h; y++){
                       for(let x=0; x<map.w; x++){
                           let classes = 'relative border-white/[0.03] transition-colors duration-150 border ';
-                          if(map.horizontals.some(w => w.x===x && w.y===y-1)) classes += '!border-t-[3px] !border-t-orange-400 ';
-                          if(map.horizontals.some(w => w.x===x && w.y===y)) classes += '!border-b-[3px] !border-b-orange-400 ';
-                          if(map.verticals.some(w => w.x===x-1 && w.y===y)) classes += '!border-l-[3px] !border-l-orange-400 ';
-                          if(map.verticals.some(w => w.x===x && w.y===y)) classes += '!border-r-[3px] !border-r-orange-400 ';
+                          if(hSet.has(cellKey(x, y-1))) classes += '!border-t-[3px] !border-t-orange-400 ';
+                          if(hSet.has(cellKey(x, y))) classes += '!border-b-[3px] !border-b-orange-400 ';
+                          if(vSet.has(cellKey(x-1, y))) classes += '!border-l-[3px] !border-l-orange-400 ';
+                          if(vSet.has(cellKey(x, y))) classes += '!border-r-[3px] !border-r-orange-400 ';
                           html += `<div id="t15-cell-${x}-${y}" data-baseclass="${classes}" class="aspect-square ${classes}"></div>`;
                       }
                   }
