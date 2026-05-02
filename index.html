@@ -9,12 +9,12 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     (function () {
-      const mobileViewport = window.matchMedia('(max-width: 760px)').matches;
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.matchMedia('(max-width: 760px)').matches;
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const lowCores = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4;
-      const lowMemory = navigator.deviceMemory && navigator.deviceMemory <= 4;
       const telegramWebView = /Telegram/i.test(navigator.userAgent);
-      if (reducedMotion || (mobileViewport && (lowCores || lowMemory || telegramWebView))) {
+      
+      // На мобилках и в Telegram всегда включаем оптимизированный режим для плавности
+      if (reducedMotion || isMobile || telegramWebView) {
         document.documentElement.classList.add('performance-lite');
       }
     })();
@@ -260,17 +260,31 @@
         content-visibility: auto;
         contain-intrinsic-size: 620px;
       }
+      .chat-message-bubble {
+        content-visibility: auto;
+        contain-intrinsic-size: 60px;
+      }
+    }
+
+    .glass-panel, .glass-button, .chat-message-bubble {
+        contain: layout style;
     }
 
     .performance-lite .overflow-y-auto { will-change: auto; }
     .performance-lite .glass-panel,
-    .performance-lite .feedback-card {
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    .performance-lite .feedback-card,
+    .performance-lite .glass-button,
+    .performance-lite [class*="backdrop-blur"] {
+      backdrop-filter: blur(2px) !important;
+      -webkit-backdrop-filter: blur(2px) !important;
+      background-color: rgba(18, 18, 23, 0.9) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
     }
-    .performance-lite #chat-container,
-    .performance-lite .interactive-control { will-change: auto; }
+    .performance-lite #chat-container {
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+      background-color: rgba(9, 9, 11, 0.98) !important;
+    }
     .performance-lite #chat-trigger-btn::before,
     .performance-lite .mentor-presence,
     .performance-lite .animate-pulse,
@@ -280,10 +294,12 @@
     .performance-lite .chat-message-bubble,
     .performance-lite .typing-card,
     .performance-lite .mentor-avatar {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
     }
-    .performance-lite .interactive-control {
-      transition-property: transform, border-color, background-color, opacity;
+    .performance-lite .animate-slide-up,
+    .performance-lite .animate-pop,
+    .performance-lite .animate-message {
+      animation-duration: 0.25s !important;
     }
     .performance-lite #ambient-glow { display: none; }
   </style>
@@ -2227,7 +2243,7 @@
                           html += `<div id="t15-cell-${x}-${y}" data-baseclass="${classes}" class="aspect-square ${classes}"></div>`;
                       }
                   }
-                  gridContainer.innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner">${html}</div>`;
+                  gridContainer.innerHTML = `<div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-white/5 rounded-xl border border-white/10 shadow-inner" style="transform: translateZ(0); contain: strict;">${html}</div>`;
                   map.cells = [];
                   for(let y=0; y<map.h; y++){
                       map.cells[y] = [];
