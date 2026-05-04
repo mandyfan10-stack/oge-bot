@@ -21,3 +21,8 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+
+## 2024-05-25 - [Security Anti-pattern: textContent does not escape HTML]
+**Vulnerability:** XSS vulnerability in AI chat response rendering.
+**Learning:** The application attempted to escape HTML from the AI response by using `document.createTextNode(line).textContent` before joining strings and setting `.innerHTML`. This is a security anti-pattern because `.textContent` simply returns the unescaped raw string. When setting `.innerHTML`, the browser still evaluates it as HTML.
+**Prevention:** Never use `.textContent` to construct strings for `.innerHTML`. Instead, securely append DOM nodes using `appendChild(document.createTextNode())` and `appendChild(document.createElement())`.
