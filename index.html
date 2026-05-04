@@ -1049,10 +1049,12 @@
           const chunk = decoder.decode(value, { stream: true });
           aiText += chunk;
           
-          // Рендерим текст с переносами строк
-          bubble.innerHTML = aiText.split('\n').map(line => 
-            document.createTextNode(line).textContent
-          ).join('<br>');
+          // Рендерим текст с переносами строк (безопасно)
+          bubble.innerHTML = '';
+          aiText.split('\n').forEach((line, i) => {
+            if (i > 0) bubble.appendChild(document.createElement('br'));
+            bubble.appendChild(document.createTextNode(line));
+          });
           
           scheduleChatScroll(messagesDiv);
         }
