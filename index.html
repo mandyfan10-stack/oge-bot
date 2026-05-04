@@ -693,13 +693,24 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = getEl('screen-tasks').querySelector('button[onclick="closeCourse()"]');
+        if (backBtn) backBtn.focus();
+      }, 100);
     }
 
     function closeCourse() {
+      const previousCourseId = currentCourseId;
       currentCourseId = null;
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      setTimeout(() => {
+        const btn = document.querySelector(`button[onclick="openCourse('${previousCourseId}')"]`);
+        if (btn) btn.focus();
+      }, 300);
     }
 
     const taskDOMCache = {};
@@ -850,14 +861,24 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+
+      setTimeout(() => {
+        const backBtn = getEl('screen-task').querySelector('button[onclick="closeTask()"]');
+        if (backBtn) backBtn.focus();
+      }, 100);
     }
 
     function closeTask() {
+      const previousTaskId = currentTaskId;
       currentTaskId = null;
       updateMentorContextLabel();
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
+      setTimeout(() => {
+        const btn = document.querySelector(`button[onclick="openTask(${previousTaskId})"]`);
+        if (btn) btn.focus();
+      }, 300);
 
       taskCloseCleanupTimer = setTimeout(() => {
         const taskScreen = getEl('screen-task');
@@ -2671,10 +2692,26 @@
       }
     };
 
+    function initializeKeyboardNavigation() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const chatModal = getEl('chat-modal');
+          if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+            toggleChat(false);
+          } else if (currentTaskId !== null) {
+            closeTask();
+          } else if (currentCourseId !== null) {
+            closeCourse();
+          }
+        }
+      });
+    }
+
     renderCourses();
     renderLucideIcons();
     enhanceInteractiveElements();
     initializeInteractionFeedback();
+    initializeKeyboardNavigation();
     updateMentorContextLabel();
     if (window.updateTelegramButtons) window.updateTelegramButtons();
   </script>
