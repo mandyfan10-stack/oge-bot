@@ -20,3 +20,6 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+## 2024-05-19 - Escape key dismissal and focus restoration for overlays
+**Learning:** For custom modals and overlay screens (like chat, task, or course views), explicit focus management is required: implement a global Escape key handler on the document to dismiss them, programmatically focus the primary input upon opening, and restore focus to the original trigger button upon closing (after a slight timeout to allow for CSS transitions) to maintain proper keyboard tab order and avoid dropping users back to the `<body>`.
+**Action:** When creating or modifying overlays and modals, always ensure there's an Escape key listener and logic to cache and restore the previously focused element. Consider CSS transition times when returning focus to prevent stealing.
