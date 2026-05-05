@@ -478,6 +478,22 @@
       document.addEventListener('pointerup', (event) => release(event.target), { passive: true });
       document.addEventListener('pointercancel', (event) => release(event.target), { passive: true });
       document.addEventListener('pointerleave', (event) => release(event.target), { passive: true });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          const chatModal = getEl('chat-modal');
+          const screenTask = getEl('screen-task');
+          const screenTasks = getEl('screen-tasks');
+
+          if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+            toggleChat(false);
+          } else if (screenTask && screenTask.classList.contains('translate-x-0')) {
+            closeTask();
+          } else if (screenTasks && screenTasks.classList.contains('translate-x-0')) {
+            closeCourse();
+          }
+        }
+      });
     }
 
     function updateMentorContextLabel() {
@@ -584,6 +600,9 @@
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
+    let lastCourseBtn = null;
+    let lastTaskBtn = null;
+    let lastChatBtn = null;
     window.taskState = {}; 
 
     const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
@@ -685,6 +704,7 @@
     }
 
     function openCourse(id) {
+      lastCourseBtn = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -693,6 +713,8 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+      const backBtn = document.querySelector('#screen-tasks header button');
+      if (backBtn) setTimeout(() => backBtn.focus(), 100);
     }
 
     function closeCourse() {
@@ -700,6 +722,12 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+
+      if (lastCourseBtn) {
+        setTimeout(() => {
+          lastCourseBtn.focus();
+        }, 300);
+      }
     }
 
     const taskDOMCache = {};
@@ -836,6 +864,7 @@
     }
 
     function openTask(id) {
+      lastTaskBtn = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -850,6 +879,8 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+      const backBtn = document.querySelector('#screen-task header button');
+      if (backBtn) setTimeout(() => backBtn.focus(), 100);
     }
 
     function closeTask() {
@@ -858,6 +889,11 @@
       getEl('screen-tasks').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-task').classList.replace('translate-x-0', 'translate-x-full');
       
+      if (lastTaskBtn) {
+        setTimeout(() => {
+          lastTaskBtn.focus();
+        }, 300);
+      }
 
       taskCloseCleanupTimer = setTimeout(() => {
         const taskScreen = getEl('screen-task');
@@ -939,11 +975,15 @@
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
+        lastChatBtn = document.activeElement;
         modal.classList.remove('hidden-chat');
         setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        triggerButton.focus();
+        const elementToFocus = lastChatBtn || triggerButton;
+        setTimeout(() => {
+          elementToFocus.focus();
+        }, 300);
       }
     }
 
