@@ -1050,9 +1050,13 @@
           aiText += chunk;
           
           // Рендерим текст с переносами строк
-          bubble.innerHTML = aiText.split('\n').map(line => 
-            document.createTextNode(line).textContent
-          ).join('<br>');
+          bubble.innerHTML = '';
+          aiText.split('\n').forEach((line, index, array) => {
+            bubble.appendChild(document.createTextNode(line));
+            if (index < array.length - 1) {
+              bubble.appendChild(document.createElement('br'));
+            }
+          });
           
           scheduleChatScroll(messagesDiv);
         }
