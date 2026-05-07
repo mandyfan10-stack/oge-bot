@@ -21,3 +21,8 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+
+## 2024-05-24 - [Fix DOM XSS using createTextNode anti-pattern]
+**Vulnerability:** DOM-based XSS when assigning `document.createTextNode(str).textContent` to `innerHTML`.
+**Learning:** Calling `.textContent` on a text node just returns the original, unescaped string. When assigned to `innerHTML`, it is evaluated as HTML, allowing script injection. This is a common anti-pattern known as "security theater".
+**Prevention:** Instead of trying to sanitize a string to assign to `innerHTML`, always construct DOM structures securely by creating elements with `document.createElement()` and appending them with `appendChild()`, using `createTextNode()` for raw text.
