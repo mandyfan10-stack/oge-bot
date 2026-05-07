@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2024-05-26 - Convert O(N) array scans to O(1) Set lookups in frequent logic
+**Learning:** Functions executed in tight nested loops (like the `drawGrid` rendering function and `hasWall` collision detection used heavily in simulation) are primary performance bottlenecks. They are optimized by pre-calculating wall `Set` objects (using the standard `cellKey` pattern) during the task's `setup` phase to avoid O(N) array searches.
+**Action:** When converting 2D coordinate arrays into Sets for fast O(1) lookups (e.g., wall collision detection), use the codebase's existing stringification pattern (e.g., `cellKey(x, y)` or `${x},${y}`) as Set keys rather than introducing novel math-based hashing techniques to maintain consistency.
