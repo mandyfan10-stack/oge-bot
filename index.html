@@ -373,9 +373,9 @@
       </div>
       <div class="chat-input-panel p-4 px-5 glass-panel border-t-0 space-y-3">
         <div class="flex gap-2 overflow-x-auto pb-1">
-          <button type="button" onclick="askMentorPreset('hint')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Подсказка</button>
-          <button type="button" onclick="askMentorPreset('steps')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">По шагам</button>
-          <button type="button" onclick="askMentorPreset('check')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors">Проверь ход</button>
+          <button type="button" onclick="askMentorPreset('hint')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">Подсказка</button>
+          <button type="button" onclick="askMentorPreset('steps')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">По шагам</button>
+          <button type="button" onclick="askMentorPreset('check')" class="mentor-chip shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">Проверь ход</button>
         </div>
         <div class="chat-input-shell flex gap-2 p-1.5 rounded-xl">
           <input type="text" id="chat-input" aria-label="Сообщение для ИИ" placeholder="Задай вопрос..." maxlength="250" class="flex-1 bg-transparent px-4 py-2 outline-none text-white text-base font-light" onkeypress="if(event.key === 'Enter') sendChatMessage()">
@@ -685,6 +685,7 @@
     }
 
     function openCourse(id) {
+      window.lastCourseTrigger = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -693,6 +694,7 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+      setTimeout(() => { const backBtn = document.querySelector('#screen-tasks header button'); if (backBtn) backBtn.focus(); }, 100);
     }
 
     function closeCourse() {
@@ -700,6 +702,7 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+      setTimeout(() => { if (window.lastCourseTrigger) window.lastCourseTrigger.focus(); }, 300);
     }
 
     const taskDOMCache = {};
@@ -836,6 +839,7 @@
     }
 
     function openTask(id) {
+      window.lastTaskTrigger = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -850,6 +854,7 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+      setTimeout(() => { const backBtn = document.querySelector('#screen-task header button'); if (backBtn) backBtn.focus(); }, 100);
     }
 
     function closeTask() {
@@ -866,6 +871,7 @@
         }
         taskCloseCleanupTimer = null;
       }, 300); 
+      setTimeout(() => { if (window.lastTaskTrigger) window.lastTaskTrigger.focus(); }, 300);
     }
 
     function updateGlobalProgress() {
@@ -939,11 +945,12 @@
       updateMentorContextLabel();
       hapticImpact(show ? 'medium' : 'light');
       if (show) {
+        window.lastChatTrigger = document.activeElement;
         modal.classList.remove('hidden-chat');
         setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        triggerButton.focus();
+        setTimeout(() => { if (window.lastChatTrigger) window.lastChatTrigger.focus(); else triggerButton.focus(); }, 300);
       }
     }
 
@@ -2670,6 +2677,21 @@
         }
       }
     };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const chatModal = getEl('chat-modal');
+        const screenTask = getEl('screen-task');
+        const screenTasks = getEl('screen-tasks');
+        if (chatModal && !chatModal.classList.contains('hidden-chat')) {
+          toggleChat(false);
+        } else if (screenTask && !screenTask.classList.contains('translate-x-full')) {
+          closeTask();
+        } else if (screenTasks && !screenTasks.classList.contains('translate-x-full')) {
+          closeCourse();
+        }
+      }
+    });
 
     renderCourses();
     renderLucideIcons();
