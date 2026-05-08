@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2025-01-20 - Optimize Grid Simulation Checks
+**Learning:** In the robot simulator, tight nested loops (like the `drawGrid` rendering function and `hasWall` collision detection used heavily in simulation) are primary performance bottlenecks because they repeatedly perform O(N) linear array scans (`Array.some()`) to check for walls at specific coordinates. This is particularly inefficient during fast simulations.
+**Action:** Optimize these lookups by pre-calculating wall `Set` objects during the task's `setup` phase. Use a consistent stringification pattern (e.g., the existing `cellKey(x, y)` function) to convert 2D coordinates into string keys. This replaces O(N) array searches with O(1) `Set.has()` lookups, significantly improving performance in tight execution and rendering loops.
