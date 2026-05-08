@@ -21,3 +21,7 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+## 2026-05-08 - [Fix DOM XSS in AI Response Streaming]
+**Vulnerability:** DOM-based XSS via `innerHTML` during streaming of AI text responses.
+**Learning:** The previous implementation attempted to mitigate XSS by using `document.createTextNode(line).textContent` and assigning the result to `innerHTML`. This is a security anti-pattern because `textContent` merely returns the unescaped string, which is then parsed as HTML by `innerHTML`, exposing the app to XSS if the AI text is malicious.
+**Prevention:** When streaming or appending text to the DOM, use strictly `document.createTextNode()` and `document.createElement()` combined with `appendChild()`, avoiding `innerHTML` assignments entirely.
