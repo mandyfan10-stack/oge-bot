@@ -584,6 +584,8 @@
     let currentCourseId = null;
     let currentTaskId = null;
     let taskCloseCleanupTimer = null;
+    let triggerCourseElement = null;
+    let triggerTaskElement = null;
     window.taskState = {}; 
 
     const COURSES_BY_ID = new Map(COURSES.map(course => [course.id, course]));
@@ -685,6 +687,7 @@
     }
 
     function openCourse(id) {
+      triggerCourseElement = document.activeElement;
       currentCourseId = id;
       const course = COURSES_BY_ID.get(id);
       if (!course) return;
@@ -693,6 +696,7 @@
       renderTasks(course);
       getEl('screen-courses').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-tasks').classList.replace('translate-x-full', 'translate-x-0');
+      setTimeout(() => document.querySelector('#screen-tasks header button').focus(), 100);
     }
 
     function closeCourse() {
@@ -700,6 +704,7 @@
 
       getEl('screen-courses').classList.replace('-translate-x-full', 'translate-x-0');
       getEl('screen-tasks').classList.replace('translate-x-0', 'translate-x-full');
+      setTimeout(() => { if (triggerCourseElement) triggerCourseElement.focus(); }, 300);
     }
 
     const taskDOMCache = {};
@@ -836,6 +841,7 @@
     }
 
     function openTask(id) {
+      triggerTaskElement = document.activeElement;
       if (taskCloseCleanupTimer) {
         clearTimeout(taskCloseCleanupTimer);
         taskCloseCleanupTimer = null;
@@ -850,6 +856,7 @@
       
       getEl('screen-tasks').classList.replace('translate-x-0', '-translate-x-full');
       getEl('screen-task').classList.replace('translate-x-full', 'translate-x-0');
+      setTimeout(() => document.querySelector('#screen-task header button').focus(), 100);
     }
 
     function closeTask() {
@@ -866,6 +873,7 @@
         }
         taskCloseCleanupTimer = null;
       }, 300); 
+      setTimeout(() => { if (triggerTaskElement) triggerTaskElement.focus(); }, 300);
     }
 
     function updateGlobalProgress() {
@@ -943,9 +951,22 @@
         setTimeout(() => chatInput.focus(), 100);
       } else {
         modal.classList.add('hidden-chat');
-        triggerButton.focus();
+        setTimeout(() => triggerButton.focus(), 300);
       }
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = getEl('chat-modal');
+        if (modal && !modal.classList.contains('hidden-chat')) {
+          toggleChat(false);
+        } else if (currentTaskId !== null) {
+          closeTask();
+        } else if (currentCourseId !== null) {
+          closeCourse();
+        }
+      }
+    });
 
     async function sendChatMessage() {
       const inputEl = getEl('chat-input');
