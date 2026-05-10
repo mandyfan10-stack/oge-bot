@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>OGE Bot</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        console.error('JS Error:', msg, 'at', url, ':', line, ':', col);
+        document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>Runtime Error</h1><pre>' + msg + '\n' + url + ':' + line + '</pre></div>';
+        return false;
+      };
+    </script>
+    <script type="module" crossorigin src="./assets/index-DhV9d-zi.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CW1CU6pB.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
