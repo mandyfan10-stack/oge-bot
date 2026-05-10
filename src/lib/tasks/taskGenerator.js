@@ -439,7 +439,7 @@ export const renderers = {
       <div class="space-y-6 animate-fade">
         <h3 class="font-medium text-zinc-800 text-lg">Задание 15: Робот</h3>
         <p class="text-sm text-zinc-500 font-light">Напишите алгоритм для перемещения Робота из (0,0) в (4,4).</p>
-        <textarea id="t15-code" class="w-full h-[150px] bg-slate-800 text-emerald-400 font-mono text-sm p-4 rounded-2xl outline-none" placeholder="вправо\nвниз\n..."></textarea>
+        <textarea id="t15-code" maxlength="2000" class="w-full h-[150px] bg-slate-800 text-emerald-400 font-mono text-sm p-4 rounded-2xl outline-none" placeholder="вправо\nвниз\n..."></textarea>
       </div>
     `,
     check: (answer, vars) => {
