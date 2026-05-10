@@ -1,7 +1,6 @@
 <script>
     import { currentTask, taskVariables, correctAnswer } from '../stores/taskStore.js';
     import { tick } from 'svelte';
-    import { fly, fade } from 'svelte/transition';
 
     let inputMessage = "";
     let chatHistory = [];
@@ -50,7 +49,7 @@
                 scrollToBottom();
             }
         } catch (err) {
-            chatHistory = [...chatHistory, { role: "assistant", content: "⚠️ Ошибка связи с сервером. Проверь интернет или попробуй позже." }];
+            chatHistory = [...chatHistory, { role: "assistant", content: "⚠️ Ошибка связи с сервером. Попробуй позже." }];
         } finally {
             isTyping = false;
             scrollToBottom();
@@ -58,25 +57,32 @@
     }
 </script>
 
-<div class="glass-card rounded-[2rem] flex flex-col overflow-hidden border border-white/5 shadow-2xl">
+<div class="flex flex-col h-[calc(100vh-100px)]">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-tg-bg sticky top-0 z-10">
+        <h2 class="text-lg font-bold text-tg-text">AI Наставник</h2>
+        <p class="text-xs text-tg-hint">Поможет с задачей {$currentTask}</p>
+    </div>
+
     <!-- Chat Messages -->
-    <div class="h-[400px] overflow-y-auto p-6 space-y-4 chat-scroll bg-slate-950/20">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-tg-secondaryBg">
         {#if chatHistory.length === 0}
-            <div class="h-full flex flex-col items-center justify-center text-center p-8" in:fade>
-                <div class="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
-                    <span class="text-2xl text-indigo-400">🤖</span>
+            <div class="flex flex-col items-center justify-center h-full text-center p-4">
+                <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
+                    <span class="text-2xl">🤖</span>
                 </div>
-                <h4 class="text-white font-bold mb-2">Привет! Я твой наставник.</h4>
-                <p class="text-xs text-slate-500 max-w-[200px]">Не понимаешь задачу? Просто спроси меня, и я помогу разобраться.</p>
+                <h4 class="text-tg-text font-semibold mb-1">Привет! Я твой наставник.</h4>
+                <p class="text-sm text-tg-hint">Если не понимаешь решение задачи, напиши мне.</p>
             </div>
         {/if}
 
-        {#each chatHistory as msg, i}
-            <div 
-                in:fly={{ y: 10, duration: 300 }}
-                class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}"
-            >
-                <div class="max-w-[85%] px-5 py-3 rounded-2xl text-sm leading-relaxed {msg.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-none shadow-lg shadow-indigo-600/10' : 'bg-white/5 text-slate-200 border border-white/5 rounded-tl-none'}">
+        {#each chatHistory as msg}
+            <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                <div class="max-w-[85%] px-4 py-2.5 text-[15px] leading-snug {
+                    msg.role === 'user' 
+                    ? 'bg-tg-button text-tg-buttonText rounded-2xl rounded-br-sm' 
+                    : 'bg-tg-bg text-tg-text rounded-2xl rounded-bl-sm border border-gray-200 dark:border-gray-800'
+                }">
                     {msg.content}
                 </div>
             </div>
@@ -84,10 +90,10 @@
         
         {#if isTyping && !chatHistory[chatHistory.length-1]?.content}
             <div class="flex justify-start">
-                <div class="bg-white/5 px-5 py-3 rounded-2xl rounded-tl-none flex gap-1">
-                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
-                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                    <div class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                <div class="bg-tg-bg px-4 py-3 rounded-2xl rounded-bl-sm border border-gray-200 dark:border-gray-800 flex gap-1 items-center">
+                    <div class="w-1.5 h-1.5 bg-tg-hint rounded-full animate-bounce"></div>
+                    <div class="w-1.5 h-1.5 bg-tg-hint rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                    <div class="w-1.5 h-1.5 bg-tg-hint rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
                 </div>
             </div>
         {/if}
@@ -95,21 +101,23 @@
     </div>
 
     <!-- Input Area -->
-    <form 
-        on:submit|preventDefault={sendMessage}
-        class="p-4 bg-slate-900/50 border-t border-white/5 flex gap-2"
-    >
-        <input 
-            bind:value={inputMessage}
-            placeholder="Спроси наставника..."
-            class="flex-1 bg-slate-950/50 border border-white/10 px-4 py-3 rounded-xl text-sm text-white placeholder:text-slate-600 outline-none focus:border-indigo-500/50 transition-all"
-        />
-        <button 
-            type="submit"
-            disabled={isTyping || !inputMessage.trim()}
-            class="bg-indigo-600 text-white w-12 h-11 rounded-xl flex items-center justify-center hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 transition-all shadow-lg shadow-indigo-600/10 active:scale-95"
+    <div class="p-3 bg-tg-bg border-t border-gray-200 dark:border-gray-800">
+        <form 
+            on:submit|preventDefault={sendMessage}
+            class="flex items-end gap-2 max-w-2xl mx-auto"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        </button>
-    </form>
+            <input 
+                bind:value={inputMessage}
+                placeholder="Сообщение..."
+                class="flex-1 bg-tg-secondaryBg border-none px-4 py-3 rounded-2xl text-[15px] text-tg-text placeholder:text-tg-hint outline-none"
+            />
+            <button 
+                type="submit"
+                disabled={isTyping || !inputMessage.trim()}
+                class="bg-tg-button text-tg-buttonText w-11 h-11 rounded-full flex flex-shrink-0 items-center justify-center disabled:opacity-50 transition-opacity active:opacity-70"
+            >
+                <svg class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </form>
+    </div>
 </div>
