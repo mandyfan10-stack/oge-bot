@@ -3,39 +3,47 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --canvas-bg: var(--tg-theme-bg-color, #ffffff);
+    --canvas-text: var(--tg-theme-text-color, #1a1a1a);
+    --canvas-hint: var(--tg-theme-hint-color, #707579);
+    --canvas-accent: var(--tg-theme-button-color, #007aff);
+    --canvas-secondary: var(--tg-theme-secondary-bg-color, #f4f4f7);
+  }
+
   body {
-    background-color: var(--tg-theme-bg-color, #ffffff);
-    color: var(--tg-theme-text-color, #000000);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--canvas-bg);
+    color: var(--canvas-text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", sans-serif;
     -webkit-font-smoothing: antialiased;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+    letter-spacing: -0.011em;
+    line-height: 1.5;
   }
 }
 
 @layer components {
-  .tg-button {
-    background-color: var(--tg-theme-button-color, #2481cc);
-    color: var(--tg-theme-button-text-color, #ffffff);
-    @apply font-semibold py-3 px-4 rounded-xl text-center transition-opacity active:opacity-70 disabled:opacity-50;
+  .canvas-pill {
+    @apply transition-all duration-200 ease-out active:scale-95;
   }
 
-  .tg-input {
-    background-color: var(--tg-theme-bg-color, #ffffff);
-    color: var(--tg-theme-text-color, #000000);
-    @apply border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500 w-full;
+  .canvas-input {
+    @apply w-full bg-transparent border-none py-4 text-lg outline-none placeholder:text-gray-400 font-light;
   }
 
-  .tg-card {
-    background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
-    @apply rounded-2xl p-4;
+  .canvas-card {
+    @apply rounded-[32px] p-8 transition-all duration-300;
   }
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Minimalist fade-in */
+.fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
