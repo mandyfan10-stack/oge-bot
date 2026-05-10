@@ -16,8 +16,12 @@ const mentorColors = [
   'slate',
 ];
 
-module.exports = {
-  content: ['./index.html'],
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{svelte,js,ts,jsx,tsx}",
+  ],
   safelist: mentorColors.flatMap((color) => [
     `bg-${color}-950/40`,
     `border-${color}-500/30`,
@@ -27,4 +31,4 @@ module.exports = {
     extend: {},
   },
   plugins: [],
-};
+}
