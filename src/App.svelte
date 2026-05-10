@@ -128,7 +128,8 @@
                                 <input 
                                     type="text" 
                                     bind:value={userInput}
-                                    placeholder="Введите ответ" 
+                                    placeholder="Введите ответ"
+                                    aria-label="Введите ответ"
                                     class="canvas-input !rounded-[24px] !bg-white/[0.03] !border-white/10 focus:!border-blue-500/50"
                                     on:keydown={(e) => e.key === 'Enter' && checkAnswer()}
                                 />
@@ -136,7 +137,7 @@
                             
                             <div class="flex items-center justify-between">
                                 <button 
-                                    class="mono-accent text-[11px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all hover:tracking-[0.3em]"
+                                    class="mono-accent text-[11px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all hover:tracking-[0.3em] focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-blue-500 rounded px-1"
                                     on:click={checkAnswer}
                                 >
                                     Verify Input //
@@ -145,6 +146,7 @@
                                 {#if feedback.message}
                                     <span 
                                         transition:fade
+                                        aria-live="polite"
                                         class="text-[10px] font-black uppercase tracking-widest {feedback.type === 'success' ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]' : 'text-red-400'}"
                                     >
                                         {feedback.message}
