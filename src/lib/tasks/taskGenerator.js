@@ -546,7 +546,8 @@ export const renderers = {
 
 export function loadTask(id) {
     if(renderers[id]) {
-        renderers[id].init(id);
+        const vars = renderers[id].init(id);
+        taskVariables.set({ ...vars, _taskId: id });
         currentTask.set(id);
     }
 }
