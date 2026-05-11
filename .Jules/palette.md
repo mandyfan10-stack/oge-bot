@@ -20,3 +20,6 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+## 2024-05-11 - Add proper accessibility labels and visual feedback for interactive elements
+**Learning:** Icon-only buttons and inputs lacking labels fail to announce context properly for screen readers, while missing focus-visible styling hinders keyboard navigation visibility.
+**Action:** Always include semantic attributes (`aria-label`, `title`) on buttons and inputs lacking visual labels, wrap dynamically updated text like toast feedback inside an `aria-live` element, and provide distinct hover, focus (`focus-visible:ring-2`), and conditional loading states for asynchronous inputs to improve inclusive UX design.
