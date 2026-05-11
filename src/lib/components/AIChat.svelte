@@ -68,19 +68,21 @@
                 const { done, value } = await reader.read();
                 if (done) break;
                 aiMsg.content += decoder.decode(value, { stream: true });
-                chatHistory = [...chatHistory]; 
+                // Use self-assignment to trigger Svelte reactivity instead of [...chatHistory]
+                // This avoids O(N) memory allocation and GC thrashing during high-frequency SSE streaming
+                chatHistory = chatHistory;
                 scrollToBottom();
             }
             
             const finalChunk = decoder.decode();
             if (finalChunk) {
                 aiMsg.content += finalChunk;
-                chatHistory = [...chatHistory];
+                chatHistory = chatHistory;
                 scrollToBottom();
             }
         } catch (err) {
             aiMsg.content = err.message || "Ошибка связи.";
-            chatHistory = [...chatHistory];
+            chatHistory = chatHistory;
         } finally {
             isTyping = false;
             scrollToBottom();
