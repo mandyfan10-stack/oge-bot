@@ -68,14 +68,15 @@
                 const { done, value } = await reader.read();
                 if (done) break;
                 aiMsg.content += decoder.decode(value, { stream: true });
-                chatHistory = [...chatHistory]; 
+                // ⚡ Bolt: Trigger Svelte reactivity without O(N) array allocation overhead per chunk
+                chatHistory = chatHistory;
                 scrollToBottom();
             }
             
             const finalChunk = decoder.decode();
             if (finalChunk) {
                 aiMsg.content += finalChunk;
-                chatHistory = [...chatHistory];
+                chatHistory = chatHistory;
                 scrollToBottom();
             }
         } catch (err) {
