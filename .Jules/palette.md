@@ -20,3 +20,6 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+## 2024-05-18 - Improve Dynamic Feedback and Custom Element Accessibility
+**Learning:** Dynamically injected feedback strings (like task verification messages) must use `aria-live` to be reliably announced by screen readers. Furthermore, custom interactive elements (like the "Verify Input" button and "Send Message" icon-only buttons) require explicit `focus-visible` styling (e.g., `focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-blue-500`) to ensure they remain keyboard accessible without negatively impacting mouse/touch interactions.
+**Action:** Always include `aria-live="polite"` or `aria-live="assertive"` on wrapper elements used for dynamic UI feedback, ensure ARIA labels exist on icon-only buttons, and use Tailwind's `focus-visible:` utilities to preserve keyboard-only focus indicators across custom UI elements.
