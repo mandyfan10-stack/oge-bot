@@ -2,11 +2,12 @@ import { currentTask, taskVariables, correctAnswer } from '../stores/taskStore.j
 
 // --- UTILS ---
 const cryptoSource = (typeof window !== 'undefined' && (window.crypto || window.msCrypto)) || null;
+// ⚡ Bolt: Cache Uint32Array outside function to prevent memory allocation and GC thrashing on every randomUnit call
+const sharedRandomBuffer = new Uint32Array(1);
 function randomUnit() {
   if (cryptoSource?.getRandomValues) {
-    const buffer = new Uint32Array(1);
-    cryptoSource.getRandomValues(buffer);
-    return buffer[0] / 0x100000000;
+    cryptoSource.getRandomValues(sharedRandomBuffer);
+    return sharedRandomBuffer[0] / 0x100000000;
   }
   return Math.random();
 }

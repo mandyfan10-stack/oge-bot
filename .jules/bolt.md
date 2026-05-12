@@ -20,3 +20,7 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+
+## 2024-05-27 - Prevent Memory Allocation in Tight Utility Functions
+**Learning:** Instantiating objects like `new Uint32Array(1)` inside frequently called utility functions (like `randomUnit()` used for task generation loops) causes unnecessary garbage collection pressure and CPU overhead.
+**Action:** Extract the object instantiation to the module scope (`const sharedRandomBuffer = new Uint32Array(1);`) and reuse it within the function to prevent GC thrashing.
