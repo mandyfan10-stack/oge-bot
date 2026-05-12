@@ -129,6 +129,7 @@
                                     type="text" 
                                     bind:value={userInput}
                                     placeholder="Введите ответ" 
+                                    maxlength="250"
                                     class="canvas-input !rounded-[24px] !bg-white/[0.03] !border-white/10 focus:!border-blue-500/50"
                                     on:keydown={(e) => e.key === 'Enter' && checkAnswer()}
                                 />
