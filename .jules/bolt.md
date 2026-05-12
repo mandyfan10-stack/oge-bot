@@ -20,3 +20,6 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+## 2026-05-18 - Avoid O(N) array allocation during chunk streaming in Svelte
+**Learning:** In Svelte, inside a `while (true)` loop that processes streaming fetch chunks (like an AI chat), updating the UI by spreading the array (`chatHistory = [...chatHistory]`) causes significant memory allocation and O(N) overhead on every single micro-chunk received.
+**Action:** Since `aiMsg.content` (the object inside the array) is being mutated directly, simply trigger Svelte's reactivity by re-assigning the array to itself (`chatHistory = chatHistory;`). This avoids full array duplication on each chunk while still updating the UI properly, significantly improving UI smoothness and lowering GC overhead during fast streaming.
