@@ -21,3 +21,7 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+## 2024-05-24 - [Fix DOM XSS and Info Leakage in Error Handler]
+**Vulnerability:** DOM-based Cross-Site Scripting (XSS) and Information Leakage via `innerHTML` in the global `window.onerror` handler.
+**Learning:** The application was directly injecting raw error messages and URLs into the DOM using `innerHTML`. This could allow execution of arbitrary HTML and JavaScript payloads if an attacker controlled the error message or URL, and it leaked internal application details to users.
+**Prevention:** Always use safe DOM APIs like `document.createElement` and `textContent` when rendering error messages or user-supplied data, and provide generic error messages to users rather than raw internals.

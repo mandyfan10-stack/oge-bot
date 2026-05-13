@@ -8,7 +8,17 @@
     <script>
       window.onerror = function(msg, url, line, col, error) {
         console.error('JS Error:', msg, 'at', url, ':', line, ':', col);
-        document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>Runtime Error</h1><pre>' + msg + '\n' + url + ':' + line + '</pre></div>';
+        var container = document.createElement('div');
+        container.style.padding = '20px';
+        container.style.color = 'red';
+        var heading = document.createElement('h1');
+        heading.textContent = 'Application Error';
+        var message = document.createElement('p');
+        message.textContent = 'An unexpected error occurred.';
+        container.appendChild(heading);
+        container.appendChild(message);
+        document.body.innerHTML = '';
+        document.body.appendChild(container);
         return false;
       };
     </script>
