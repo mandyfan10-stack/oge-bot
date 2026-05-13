@@ -20,3 +20,7 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+
+## 2024-05-13 - Add ARIA Labels to Dynamic Inputs and Icon Buttons
+**Learning:** Dynamically rendered inputs that are not wrapped in standard `<form>` tags and lack `<label>` elements are invisible to screen readers without fallback attributes. Also, providing visual loading states on async action buttons improves UX but needs ARIA context.
+**Action:** Always add `aria-label` fallbacks to standalone interactive inputs and ensure icon-only buttons have an `aria-label` and `title`. Implement visual feedback (e.g., spinning icon) during async execution to indicate processing state.
