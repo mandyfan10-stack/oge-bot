@@ -171,5 +171,3 @@
     :global(.prose th) { text-align: left; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #555; padding: 0 1rem 0.5rem; }
     :global(.prose code) { @apply bg-white/5 px-2 py-1 rounded text-sm font-mono text-blue-300; }
 </style>
-ont-mono text-blue-300; }
-</style>
