@@ -20,3 +20,6 @@
 ## 2024-05-25 - Avoid querying DOM and unneeded property mutations in requestAnimationFrame
 **Learning:** In interactive tasks using `requestAnimationFrame` (like the Robot 10x10 grid), doing `document.getElementById` and unconditional `element.className =` assignments inside tight loops (like 100x100 grid cells) causes severe layout thrashing and performance degradation.
 **Action:** Cache the DOM node references once in an array/map and reuse them. Also, add equality guards (e.g. `if (element.className !== newClassName) element.className = newClassName`) to prevent unnecessary style recalculations.
+## 2026-05-14 - Optimize Svelte Reactivity in Streaming Loops
+**Learning:** Using spread syntax (`arr = [...arr]`) inside high-frequency loops (like reading SSE chunks) triggers O(N) array allocation overhead and severe DOM thrashing.
+**Action:** Use self-assignment (`arr = arr`) in Svelte to trigger reactivity without recreating the array on every chunk.
