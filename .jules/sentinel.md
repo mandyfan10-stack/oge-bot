@@ -21,3 +21,7 @@
 **Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input also lacked `maxlength`, risking DoS on backend/parsing.
 **Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
 **Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.
+## 2026-05-14 - [Add fetch timeout and input maxlengths]
+**Vulnerability:** External fetch to `oge-backend.onrender.com/api/chat` lacked timeout controls, which could lock UI if external API hung. The chat input and task inputs also lacked `maxlength`, risking DoS on backend/parsing.
+**Learning:** External API interactions should always be wrapped with timeouts, especially if they block user inputs. Also, user inputs sent to backends need basic client-side limits.
+**Prevention:** Always use `AbortController` alongside `fetch()` with `setTimeout()`. Add `maxlength` attributes to any free-text inputs.

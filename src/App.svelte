@@ -131,6 +131,7 @@
                                     placeholder="Введите ответ" 
                                     class="canvas-input !rounded-[24px] !bg-white/[0.03] !border-white/10 focus:!border-blue-500/50"
                                     on:keydown={(e) => e.key === 'Enter' && checkAnswer()}
+                                    maxlength="250"
                                 />
                             </div>
                             
@@ -170,6 +171,4 @@
     :global(.prose td) { padding: 1.25rem 1rem; background: rgba(255,255,255,0.02); border-bottom: 1px solid rgba(255,255,255,0.05); font-family: 'SF Mono', monospace; font-size: 0.85rem; }
     :global(.prose th) { text-align: left; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; color: #555; padding: 0 1rem 0.5rem; }
     :global(.prose code) { @apply bg-white/5 px-2 py-1 rounded text-sm font-mono text-blue-300; }
-</style>
-ont-mono text-blue-300; }
 </style>
