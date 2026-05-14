@@ -37,6 +37,9 @@
         isTyping = true;
         scrollToBottom();
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         try {
             const response = await fetch("https://oge-backend.onrender.com/api/chat", {
                 method: "POST",
@@ -47,7 +50,8 @@
                 body: JSON.stringify({
                     history: [{ role: "system", content: systemContext }, ...contextHistory],
                     text: userMsg
-                })
+                }),
+                signal: controller.signal
             });
 
             if (!response.ok) {
@@ -79,9 +83,14 @@
                 scrollToBottom();
             }
         } catch (err) {
-            aiMsg.content = err.message || "Ошибка связи.";
+            if (err.name === 'AbortError') {
+                aiMsg.content = "Ошибка связи: превышено время ожидания ответа.";
+            } else {
+                aiMsg.content = err.message || "Ошибка связи.";
+            }
             chatHistory = [...chatHistory];
         } finally {
+            clearTimeout(timeoutId);
             isTyping = false;
             scrollToBottom();
         }
@@ -156,6 +165,7 @@
                 placeholder="Type your question..."
                 class="relative w-full bg-white/[0.03] border border-white/10 rounded-[28px] pl-6 pr-16 py-4 text-base font-light outline-none focus:bg-white/[0.05] focus:border-blue-500/40 transition-all placeholder:text-white/10"
                 disabled={isTyping}
+                maxlength="250"
             />
             <button 
                 type="submit"
