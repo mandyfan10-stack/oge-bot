@@ -154,17 +154,26 @@
                 bind:this={inputRef}
                 bind:value={inputMessage}
                 placeholder="Type your question..."
+                aria-label="Type your question..."
                 class="relative w-full bg-white/[0.03] border border-white/10 rounded-[28px] pl-6 pr-16 py-4 text-base font-light outline-none focus:bg-white/[0.05] focus:border-blue-500/40 transition-all placeholder:text-white/10"
                 disabled={isTyping}
             />
             <button 
                 type="submit"
                 disabled={isTyping || !inputMessage.trim()}
-                class="absolute right-2 p-3 bg-white text-black rounded-full disabled:opacity-10 transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+                aria-label="Send message"
+                title="Send message"
+                class="absolute right-2 p-3 bg-white text-black rounded-full transition-all hover:scale-105 active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 {isTyping ? 'opacity-80 cursor-wait' : (!inputMessage.trim() ? 'opacity-10' : '')}"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 19V5m0 0l-7 7m7-7l7 7" />
-                </svg>
+                {#if isTyping}
+                    <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                {:else}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 19V5m0 0l-7 7m7-7l7 7" />
+                    </svg>
+                {/if}
             </button>
         </form>
     </div>
