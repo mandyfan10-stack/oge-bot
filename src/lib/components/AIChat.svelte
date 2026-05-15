@@ -159,12 +159,20 @@
             />
             <button 
                 type="submit"
+                aria-label="Send message"
+                title="Send message"
                 disabled={isTyping || !inputMessage.trim()}
-                class="absolute right-2 p-3 bg-white text-black rounded-full disabled:opacity-10 transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+                class="absolute right-2 p-3 bg-white text-black rounded-full disabled:opacity-50 transition-all hover:scale-105 active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
             >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 19V5m0 0l-7 7m7-7l7 7" />
-                </svg>
+                {#if isTyping}
+                    <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v2m0 12v2m8-8h-2M6 12H4m15.36-5.64l-1.42 1.42M7.05 16.95l-1.41 1.42M16.95 16.95l1.42 1.42M7.05 7.05L5.64 5.64" />
+                    </svg>
+                {:else}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 19V5m0 0l-7 7m7-7l7 7" />
+                    </svg>
+                {/if}
             </button>
         </form>
     </div>

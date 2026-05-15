@@ -20,3 +20,6 @@
 ## 2024-04-24 - Modal Focus Management
 **Learning:** Custom modals (like the chat feature in this app) do not inherently manage focus, which breaks keyboard navigation for screen reader and keyboard-only users. Focus gets lost or remains underneath the modal backdrop.
 **Action:** Always implement focus management for custom modals: programmatically focus the main input when opening (sometimes requiring a small timeout for animation), and restore focus to the trigger button when closing to maintain logical tab order.
+## 2024-05-24 - Dynamic Form and Async Button Accessibility in Svelte
+**Learning:** Even when migrating to modern frameworks like Svelte, the core principles of accessibility learned from Vanilla JS still apply. Dynamic inputs without labels still require `aria-label`, feedback messages still require `aria-live="polite"`, and custom interactive elements still require `focus-visible` styles. Furthermore, async buttons (like the AI chat submit) must visually indicate loading state (e.g. via an `animate-spin` SVG) rather than just disabling/dimming, to prevent users from thinking the UI froze.
+**Action:** Consistently apply `aria-label`, `aria-live`, and `focus-visible` attributes to custom Svelte components, and implement explicit visual loading states for async actions.
