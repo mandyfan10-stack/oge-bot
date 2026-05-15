@@ -12,6 +12,9 @@
   let robot = { x: 0, y: 0, painted: new Set() };
   let visualStep = 0;
 
+  $: horizontalSet = vars ? new Set(vars.horizontals.map(w => `${w.x},${w.y}`)) : new Set();
+  $: verticalSet = vars ? new Set(vars.verticals.map(w => `${w.x},${w.y}`)) : new Set();
+
   onMount(() => {
     const w = 10;
     const h = 10;
@@ -186,10 +189,10 @@
 
   const hasWall = (x, y, dir) => {
       if (x < 0 || x >= vars.w || y < 0 || y >= vars.h) return true;
-      if (dir === 'up') return vars.horizontals.some(w => w.x === x && w.y === y - 1);
-      if (dir === 'down') return vars.horizontals.some(w => w.x === x && w.y === y);
-      if (dir === 'left') return vars.verticals.some(w => w.x === x - 1 && w.y === y);
-      if (dir === 'right') return vars.verticals.some(w => w.x === x && w.y === y);
+      if (dir === 'up') return horizontalSet.has(`${x},${y - 1}`);
+      if (dir === 'down') return horizontalSet.has(`${x},${y}`);
+      if (dir === 'left') return verticalSet.has(`${x - 1},${y}`);
+      if (dir === 'right') return verticalSet.has(`${x},${y}`);
       return false;
   };
 
@@ -347,10 +350,10 @@
         {#each Array(vars.h) as _, y}
           {#each Array(vars.w) as _, x}
             {@const isPainted = robot.painted.has(`${x},${y}`)}
-            {@const hasTop = vars.horizontals.some(w => w.x === x && w.y === y - 1)}
-            {@const hasBottom = vars.horizontals.some(w => w.x === x && w.y === y)}
-            {@const hasLeft = vars.verticals.some(w => w.x === x - 1 && w.y === y)}
-            {@const hasRight = vars.verticals.some(w => w.x === x && w.y === y)}
+            {@const hasTop = horizontalSet.has(`${x},${y - 1}`)}
+            {@const hasBottom = horizontalSet.has(`${x},${y}`)}
+            {@const hasLeft = verticalSet.has(`${x - 1},${y}`)}
+            {@const hasRight = verticalSet.has(`${x},${y}`)}
             {@const isRobot = robot.x === x && robot.y === y}
             {@const isFinish = vars.finishX === x && vars.finishY === y}
             
