@@ -1,33 +1,69 @@
 <script>
     import AIChat from './lib/components/AIChat.svelte';
-    import { loadTask, renderers } from './lib/tasks/taskGenerator.js';
-    import { currentTask, taskVariables } from './lib/stores/taskStore.js';
-    import { onMount } from 'svelte';
+    import { currentTask, taskVariables, correctAnswer } from './lib/stores/taskStore.js';
+    import { onMount, tick, afterUpdate } from 'svelte';
     import { fade, slide } from 'svelte/transition';
+
+    import Task1 from './lib/tasks/components/Task1.svelte';
+    import Task2 from './lib/tasks/components/Task2.svelte';
+    import Task3 from './lib/tasks/components/Task3.svelte';
+    import Task4 from './lib/tasks/components/Task4.svelte';
+    import Task5 from './lib/tasks/components/Task5.svelte';
+    import Task6 from './lib/tasks/components/Task6.svelte';
+    import Task7 from './lib/tasks/components/Task7.svelte';
+    import Task8 from './lib/tasks/components/Task8.svelte';
+    import Task9 from './lib/tasks/components/Task9.svelte';
+    import Task10 from './lib/tasks/components/Task10.svelte';
+    import Task11 from './lib/tasks/components/Task11.svelte';
+    import Task12 from './lib/tasks/components/Task12.svelte';
+    import Task13 from './lib/tasks/components/Task13.svelte';
+    import Task14 from './lib/tasks/components/Task14.svelte';
+    import Task15 from './lib/tasks/components/Task15.svelte';
+    import Task16 from './lib/tasks/components/Task16.svelte';
+    import Task17 from './lib/tasks/components/Task17.svelte';
+    import Task18 from './lib/tasks/components/Task18.svelte';
+    import Task19 from './lib/tasks/components/Task19.svelte';
+    import Task20 from './lib/tasks/components/Task20.svelte';
+
+    const components = {
+        "1": Task1, "2": Task2, "3": Task3, "4": Task4, "5": Task5,
+        "6": Task6, "7": Task7, "8": Task8, "9": Task9, "10": Task10,
+        "11": Task11, "12": Task12, "13": Task13, "14": Task14, "15": Task15,
+        "16": Task16, "17": Task17, "18": Task18, "19": Task19, "20": Task20
+    };
+
+    const taskIds = Object.keys(components);
 
     let userInput = "";
     let feedback = { message: "", type: "" };
     let currentTab = "tasks"; 
+    let taskComponentRef;
 
     onMount(() => {
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.ready();
         }
-        loadTask(1);
+        currentTask.set("1");
     });
 
-    function selectTask(id) {
+    afterUpdate(() => {
+        if (window.lucide?.createIcons) {
+            window.lucide.createIcons();
+        }
+    });
+
+    async function selectTask(id) {
         userInput = "";
         feedback = { message: "", type: "" };
-        loadTask(id);
+        currentTask.set(id.toString());
+        await tick();
     }
 
     function checkAnswer() {
-        const renderer = renderers[$currentTask];
-        if (!renderer) return;
+        if (!taskComponentRef || typeof taskComponentRef.check !== 'function') return;
 
-        const isCorrect = renderer.check(userInput, $taskVariables);
+        const isCorrect = taskComponentRef.check(userInput);
         if (isCorrect) {
             feedback = { message: "Верно", type: "success" };
             if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -67,10 +103,10 @@
         {#if currentTab === 'tasks'}
             <!-- Minimal Task Scroller -->
             <div class="flex gap-4 overflow-x-auto pb-8 scrollbar-hide">
-                {#each Object.keys(renderers) as id}
+                {#each taskIds as id}
                     <button 
                         class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all {
-                            $currentTask == id 
+                            $currentTask === id 
                             ? 'bg-black text-white dark:bg-white dark:text-black scale-110' 
                             : 'bg-gray-50 text-gray-400 dark:bg-gray-900'
                         }"
@@ -81,7 +117,7 @@
                 {/each}
             </div>
 
-            {#if $currentTask && renderers[$currentTask]}
+            {#if $currentTask && components[$currentTask]}
                 <div in:fade={{ duration: 300 }} class="space-y-12">
                     <!-- Task Meta -->
                     <div class="flex items-center gap-4">
@@ -91,7 +127,7 @@
 
                     <!-- Content -->
                     <div class="task-content prose prose-zinc max-w-none text-xl leading-relaxed font-light text-gray-800 dark:text-gray-200">
-                        {@html renderers[$currentTask].html($taskVariables)}
+                        <svelte:component this={components[$currentTask]} bind:this={taskComponentRef} />
                     </div>
                     
                     <!-- Input -->
