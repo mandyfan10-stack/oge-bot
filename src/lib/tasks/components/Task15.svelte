@@ -340,7 +340,7 @@
   </div>
   
   <div class="flex flex-col md:flex-row gap-4">
-    <textarea bind:value={robotCode} on:input={() => { errorMsg = ''; successMsg = ''; }} class="flex-1 w-full min-h-[250px] bg-slate-950/50 border border-slate-700 rounded-2xl p-4 text-sm font-mono text-slate-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="использовать Робот\nалг\nнач\n  нц пока не сверху свободно\n    закрасить\n    вправо\n  кц\nкон"></textarea>
+    <textarea bind:value={robotCode} on:input={() => { errorMsg = ''; successMsg = ''; }} class="flex-1 w-full min-h-[250px] bg-slate-950/50 border border-slate-700 rounded-2xl p-4 text-sm font-mono text-slate-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="использовать Робот\nалг\nнач\n  нц пока не сверху свободно\n    закрасить\n    вправо\n  кц\nкон" maxlength="2000"></textarea>
     
     <div class="w-full md:w-1/2 max-w-[320px] mx-auto aspect-square flex-shrink-0 relative">
       <div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-slate-800 rounded-xl border border-slate-700 shadow-inner">
