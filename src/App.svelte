@@ -151,6 +151,7 @@
                                     type="text" 
                                     bind:value={userInput}
                                     placeholder="Введите ответ" 
+                                    aria-label="Ваш ответ на задачу"
                                     class="canvas-input !rounded-[24px] !bg-white/[0.03] !border-white/10 focus:!border-blue-500/50"
                                     on:keydown={(e) => e.key === 'Enter' && checkAnswer()}
                                 />
@@ -167,6 +168,7 @@
                                 {#if feedback.message}
                                     <span 
                                         transition:fade
+                                        aria-live="polite"
                                         class="text-[10px] font-black uppercase tracking-widest {feedback.type === 'success' ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]' : 'text-red-400'}"
                                     >
                                         {feedback.message}
