@@ -5,40 +5,33 @@
     import { quintOut } from 'svelte/easing';
     import { fade, fly, slide } from 'svelte/transition';
 
-    import Task1 from './lib/tasks/components/Task1.svelte';
-    import Task2 from './lib/tasks/components/Task2.svelte';
-    import Task3 from './lib/tasks/components/Task3.svelte';
-    import Task4 from './lib/tasks/components/Task4.svelte';
-    import Task5 from './lib/tasks/components/Task5.svelte';
-    import Task6 from './lib/tasks/components/Task6.svelte';
-    import Task7 from './lib/tasks/components/Task7.svelte';
-    import Task8 from './lib/tasks/components/Task8.svelte';
-    import Task9 from './lib/tasks/components/Task9.svelte';
-    import Task10 from './lib/tasks/components/Task10.svelte';
-    import Task11 from './lib/tasks/components/Task11.svelte';
-    import Task12 from './lib/tasks/components/Task12.svelte';
-    import Task13 from './lib/tasks/components/Task13.svelte';
-    import Task14 from './lib/tasks/components/Task14.svelte';
-    import Task15 from './lib/tasks/components/Task15.svelte';
-    import Task16 from './lib/tasks/components/Task16.svelte';
-    import Task17 from './lib/tasks/components/Task17.svelte';
-    import Task18 from './lib/tasks/components/Task18.svelte';
-    import Task19 from './lib/tasks/components/Task19.svelte';
-    import Task20 from './lib/tasks/components/Task20.svelte';
+    // Vite динамически собирает все пути к задачам.
+    // Это разделяет бандл на мелкие части (Code Splitting).
+    const taskModules = import.meta.glob('./lib/tasks/components/Task*.svelte');
+    
+    // Массив от "1" до "20" для рендера кнопок
+    const taskIds = Array.from({ length: 20 }, (_, i) => String(i + 1));
 
-    const components = {
-        "1": Task1, "2": Task2, "3": Task3, "4": Task4, "5": Task5,
-        "6": Task6, "7": Task7, "8": Task8, "9": Task9, "10": Task10,
-        "11": Task11, "12": Task12, "13": Task13, "14": Task14, "15": Task15,
-        "16": Task16, "17": Task17, "18": Task18, "19": Task19, "20": Task20
-    };
-
-    const taskIds = Object.keys(components);
-
+    let TaskComponent = null;
     let userInput = "";
     let feedback = { message: "", type: "" };
     let currentTab = "tasks"; 
     let taskComponentRef;
+
+    // Реактивно подгружаем компонент, когда изменяется $currentTask
+    $: loadTaskComponent($currentTask);
+
+    async function loadTaskComponent(id) {
+        if (!id) return;
+        const path = `./lib/tasks/components/Task${id}.svelte`;
+        if (taskModules[path]) {
+            const module = await taskModules[path]();
+            TaskComponent = module.default;
+        } else {
+            TaskComponent = null;
+            console.error(`Компонент для задачи ${id} не найден.`);
+        }
+    }
 
     onMount(() => {
         if (window.Telegram?.WebApp) {
@@ -65,7 +58,6 @@
 
     function checkAnswer() {
         if (!taskComponentRef || typeof taskComponentRef.check !== 'function') return;
-
         const isCorrect = taskComponentRef.check(userInput);
         if (isCorrect) {
             feedback = { message: "Верно", type: "success" };
@@ -95,11 +87,9 @@
 </script>
 
 <div class="relative min-h-screen flex flex-col max-w-2xl mx-auto selection:bg-blue-500/30">
-    <!-- Ethereal Glows -->
     <div class="ethereal-glow -top-[50vw] -left-[25vw]" style="background: radial-gradient(circle, rgba(0, 122, 255, 0.2) 0%, transparent 70%);"></div>
     <div class="ethereal-glow top-[30vh] -right-[50vw]" style="background: radial-gradient(circle, rgba(94, 92, 230, 0.15) 0%, transparent 70%);"></div>
 
-    <!-- Premium Header -->
     <header class="px-8 pt-16 pb-12 shrink-0">
         <div class="flex justify-between items-center">
             <div class="space-y-1">
@@ -126,7 +116,6 @@
     <main class="flex-1 px-8 pb-32 overflow-y-auto scrollbar-hide">
         {#if currentTab === 'tasks'}
             <div class="space-y-12">
-                <!-- Task Hub Scroller -->
                 <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide py-2">
                     {#each taskIds as id}
                         <button 
@@ -142,23 +131,20 @@
                     {/each}
                 </div>
 
-                {#if $currentTask && components[$currentTask]}
+                {#if $currentTask && TaskComponent}
                     <div in:premiumFly class="space-y-10">
-                        <!-- Task Header -->
                         <div class="flex items-center gap-6">
                             <span class="mono-accent text-[10px] font-black uppercase tracking-[0.4em] text-blue-500/80">Segment {$currentTask}</span>
                             <div class="h-[1px] flex-1 bg-gradient-to-r from-blue-500/30 to-transparent"></div>
                         </div>
 
-                        <!-- Content Console -->
                         <div class="premium-glass p-8 rounded-[32px] border-white/10 shadow-3xl relative group">
                             <div class="absolute -inset-0.5 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-[32px] blur opacity-0 group-hover:opacity-100 transition duration-1000"></div>
                             <div class="relative task-content prose prose-invert max-w-none text-xl leading-relaxed font-light">
-                                <svelte:component this={components[$currentTask]} bind:this={taskComponentRef} />
+                                <svelte:component this={TaskComponent} bind:this={taskComponentRef} />
                             </div>
                         </div>
                         
-                        <!-- Input Console -->
                         <div class="space-y-6 pt-6">
                             <div class="relative">
                                 <input 
