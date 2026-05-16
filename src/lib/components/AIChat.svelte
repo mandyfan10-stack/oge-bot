@@ -40,6 +40,9 @@
         isTyping = true;
         scrollToBottom();
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         try {
             const response = await fetch(`${API_URL}/api/chat`, {
                 method: "POST",
@@ -51,8 +54,10 @@
                     history: contextHistory.slice(0, -1), // Исключаем пустой aiMsg, который только что добавили
                     text: userMsg,
                     task_context: taskContextStr // Передаем контекст отдельным полем для бэкенда!
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
             if (!response.ok) {
                 let errorMessage = "Ошибка связи.";
@@ -86,7 +91,11 @@
                 scrollToBottom();
             }
         } catch (err) {
-            aiMsg.content = err.message || "Ошибка связи.";
+            if (err.name === 'AbortError') {
+                aiMsg.content = "Превышено время ожидания ответа сервера.";
+            } else {
+                aiMsg.content = err.message || "Ошибка связи.";
+            }
             chatHistory = chatHistory;
         } finally {
             isTyping = false;
@@ -161,6 +170,7 @@
                 placeholder="Type your question..."
                 class="relative w-full bg-white/[0.03] border border-white/10 rounded-[28px] pl-6 pr-16 py-4 text-base font-light outline-none focus:bg-white/[0.05] focus:border-blue-500/40 transition-all placeholder:text-white/10"
                 disabled={isTyping}
+                maxlength="250"
             />
             <button 
                 type="submit"
