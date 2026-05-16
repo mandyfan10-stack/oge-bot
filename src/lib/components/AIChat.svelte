@@ -9,6 +9,8 @@
     let chatEnd;
     let inputRef;
 
+    const API_URL = import.meta.env.VITE_API_URL || "https://oge-backend.onrender.com";
+
     async function scrollToBottom() {
         await tick();
         chatEnd?.scrollIntoView({ behavior: 'smooth' });
@@ -22,13 +24,14 @@
 
     async function sendMessage() {
         if (!inputMessage.trim() || isTyping) return;
-        
         const userMsg = inputMessage;
         inputMessage = "";
         
-        let systemContext = `Task: ${$currentTask}|Vars: ${JSON.stringify($taskVariables)}|CorrectAns: ${$correctAnswer}`;
+        // Маскируем слово "CorrectAnswer", передаем как абстрактный стейт
+        let taskContextStr = `Task ID: ${$currentTask} | Evaluated state: ${$correctAnswer} | Variables: ${JSON.stringify($taskVariables)}`;
         
         chatHistory = [...chatHistory, { role: "user", content: userMsg }];
+        // Берем только диалог (user и assistant)
         const contextHistory = chatHistory.slice(-15);
         
         let aiMsg = { role: "assistant", content: "" };
@@ -38,15 +41,16 @@
         scrollToBottom();
 
         try {
-            const response = await fetch("https://oge-backend.onrender.com/api/chat", {
+            const response = await fetch(`${API_URL}/api/chat`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",
                     "X-Telegram-Init-Data": window.Telegram?.WebApp?.initData || ""
                 },
                 body: JSON.stringify({
-                    history: [{ role: "system", content: systemContext }, ...contextHistory],
-                    text: userMsg
+                    history: contextHistory.slice(0, -1), // Исключаем пустой aiMsg, который только что добавили
+                    text: userMsg,
+                    task_context: taskContextStr // Передаем контекст отдельным полем для бэкенда!
                 })
             });
 
@@ -67,20 +71,23 @@
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+                
                 aiMsg.content += decoder.decode(value, { stream: true });
-                chatHistory = [...chatHistory]; 
+                // ОПТИМИЗАЦИЯ ПАМЯТИ: Не создаем новый массив на каждый токен, 
+                // просто триггерим реактивность Svelte
+                chatHistory = chatHistory; 
                 scrollToBottom();
             }
             
             const finalChunk = decoder.decode();
             if (finalChunk) {
                 aiMsg.content += finalChunk;
-                chatHistory = [...chatHistory];
+                chatHistory = chatHistory;
                 scrollToBottom();
             }
         } catch (err) {
             aiMsg.content = err.message || "Ошибка связи.";
-            chatHistory = [...chatHistory];
+            chatHistory = chatHistory;
         } finally {
             isTyping = false;
             scrollToBottom();
@@ -89,7 +96,6 @@
 </script>
 
 <div class="flex flex-col h-[calc(100vh-200px)] w-full relative">
-    <!-- Neural Console Header -->
     <header class="flex items-center justify-between pb-4 mb-2 shrink-0 border-b border-white/5">
         <div class="flex items-center gap-3">
             <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
@@ -105,7 +111,6 @@
         {/if}
     </header>
 
-    <!-- Unified Feed -->
     <main class="flex-1 overflow-y-auto space-y-8 py-6 px-1 scrollbar-hide">
         {#if chatHistory.length === 0}
             <div class="h-full flex flex-col items-center justify-center opacity-20" in:fade>
@@ -128,6 +133,7 @@
                 }">
                     {msg.content}
                 </div>
+            
                 <span class="mono-accent text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mt-3 px-2">
                     {msg.role === 'user' ? '// User_Query' : '// Mentor_Response'}
                 </span>
@@ -135,7 +141,7 @@
         {/each}
         
         {#if isTyping && !chatHistory[chatHistory.length-1]?.content}
-            <div class="flex items-start" in:fade>
+             <div class="flex items-start" in:fade>
                 <div class="premium-glass px-6 py-4 rounded-[24px] flex items-center gap-2">
                     <div class="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                     <div class="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
@@ -146,7 +152,6 @@
         <div bind:this={chatEnd}></div>
     </main>
 
-    <!-- Query Input Console -->
     <div class="pt-6 pb-2 shrink-0">
         <form on:submit|preventDefault={sendMessage} class="relative flex items-center group">
             <div class="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[32px] blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
