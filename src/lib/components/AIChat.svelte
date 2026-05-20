@@ -22,16 +22,40 @@
         inputRef?.focus();
     }
 
+    /**
+     * Safely renders a small subset of Markdown to HTML.
+     * Escapes all HTML first to prevent XSS, then applies transforms:
+     *   **bold** → <strong>bold</strong>
+     *   \n      → <br>
+     *
+     * TODO(SECURITY): CRITICAL ARCHITECTURAL VULNERABILITY — ANSWER LEAK
+     * The `task_context` string sent to the backend currently embeds `$correctAnswer`
+     * directly (see the `taskContextStr` variable below). Any user can read the correct
+     * answer by inspecting network requests in browser DevTools.
+     * FIX: Stop sending `$correctAnswer` from the client entirely. Instead, send only a
+     * `task_id` to the backend and let the server look up the correct answer server-side.
+     * The client must never have access to or transmit the correct answer to the chat endpoint.
+     */
+    function renderMarkdown(text) {
+        const escaped = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        return escaped
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+    }
+
     async function sendMessage() {
         if (!inputMessage.trim() || isTyping) return;
         const userMsg = inputMessage;
         inputMessage = "";
         
-        // Маскируем слово "CorrectAnswer", передаем как абстрактный стейт
+        // TODO(SECURITY): `$correctAnswer` must NOT be sent from the client — see renderMarkdown docblock.
         let taskContextStr = `Task ID: ${$currentTask} | Evaluated state: ${$correctAnswer} | Variables: ${JSON.stringify($taskVariables)}`;
         
         chatHistory = [...chatHistory, { role: "user", content: userMsg }];
-        // Берем только диалог (user и assistant)
         const contextHistory = chatHistory.slice(-15);
         
         let aiMsg = { role: "assistant", content: "" };
@@ -48,9 +72,9 @@
                     "X-Telegram-Init-Data": window.Telegram?.WebApp?.initData || ""
                 },
                 body: JSON.stringify({
-                    history: contextHistory.slice(0, -1), // Исключаем пустой aiMsg, который только что добавили
+                    history: contextHistory.slice(0, -1),
                     text: userMsg,
-                    task_context: taskContextStr // Передаем контекст отдельным полем для бэкенда!
+                    task_context: taskContextStr
                 })
             });
 
@@ -73,8 +97,6 @@
                 if (done) break;
                 
                 aiMsg.content += decoder.decode(value, { stream: true });
-                // ОПТИМИЗАЦИЯ ПАМЯТИ: Не создаем новый массив на каждый токен, 
-                // просто триггерим реактивность Svelte
                 chatHistory = chatHistory; 
                 scrollToBottom();
             }
@@ -131,7 +153,11 @@
                         ? 'premium-glass-saturated !bg-blue-600/20 !border-blue-500/30 text-white rounded-[28px] rounded-br-none shadow-[0_10px_30px_rgba(0,122,255,0.1)]' 
                         : 'premium-glass !border-white/5 text-white/90 rounded-[28px] rounded-bl-none'
                 }">
-                    {msg.content}
+                    {#if msg.role === 'assistant'}
+                        {@html renderMarkdown(msg.content)}
+                    {:else}
+                        {msg.content}
+                    {/if}
                 </div>
             
                 <span class="mono-accent text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mt-3 px-2">
@@ -159,6 +185,7 @@
                 bind:this={inputRef}
                 bind:value={inputMessage}
                 placeholder="Type your question..."
+                maxlength="2000"
                 class="relative w-full bg-white/[0.03] border border-white/10 rounded-[28px] pl-6 pr-16 py-4 text-base font-light outline-none focus:bg-white/[0.05] focus:border-blue-500/40 transition-all placeholder:text-white/10"
                 disabled={isTyping}
             />
