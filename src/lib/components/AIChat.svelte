@@ -1,6 +1,6 @@
 <script>
   import { tick } from 'svelte';
-  import { currentTask, taskVariables, correctAnswer } from '../stores/taskStore.js';
+  import { currentTask, taskVariables } from '../stores/taskStore.js';
   import { chat } from '../stores/chatStore.js';
   import { sendChatMessage, ChatError } from '../api/chatClient.js';
   import { renderMarkdown } from '../util/markdown.js';
@@ -11,17 +11,20 @@
   let isTyping = false;
   let listEl;
   let inputRef;
+  let pendingText = '';
+  let lastError = '';
 
-  /**
-   * ⚠️ SECURITY — ANSWER LEAK
-   * The string below embeds $correctAnswer and is sent to the backend in
-   * `task_context`. Any user can read it via DevTools → Network. This is
-   * tracked in the SECURITY TODOs in server.py / chatClient.js. Until
-   * the backend exposes a task_id lookup, taskContext MUST be rebuilt
-   * at send time (here) and MUST NOT be persisted to localStorage.
-   */
+  let lastScrollTime = 0;
+  function throttledScroll() {
+    const now = Date.now();
+    if (now - lastScrollTime > 200) {
+      lastScrollTime = now;
+      scrollToBottom();
+    }
+  }
+
   function buildTaskContext() {
-    return `Task ID: ${$currentTask} | Evaluated state: ${$correctAnswer} | Variables: ${JSON.stringify($taskVariables)}`;
+    return `Задание №${$currentTask} | Переменные: ${JSON.stringify($taskVariables)}`;
   }
 
   function formatTime(ts) {
@@ -43,10 +46,12 @@
     inputRef?.focus();
   }
 
-  async function sendMessage() {
-    const text = inputMessage.trim();
+  async function sendMessage(retryText) {
+    const text = (retryText ?? inputMessage).trim();
     if (!text || isTyping) return;
 
+    lastError = '';
+    pendingText = text;
     inputMessage = '';
     chat.pushUser(text);
     chat.startAssistant();
@@ -54,15 +59,15 @@
     scrollToBottom();
 
     const history = chat.recent(15).slice(0, -1); // exclude the empty assistant placeholder
-    const taskContext = buildTaskContext();
+    const taskDescription = buildTaskContext();
 
     try {
-      const stream = sendChatMessage({ text, history, taskContext });
+      const stream = sendChatMessage({ text, history, taskDescription });
       let receivedAny = false;
       for await (const chunk of stream) {
         receivedAny = true;
         chat.appendAssistantChunk(chunk);
-        scrollToBottom();
+        throttledScroll();
       }
       if (!receivedAny) {
         chat.setLastAssistant('(пустой ответ от сервера)');
@@ -73,6 +78,7 @@
           ? err.userMessage
           : err?.message || 'Ошибка связи с сервером.';
       chat.setLastAssistant(msg);
+      lastError = msg;
     } finally {
       isTyping = false;
       scrollToBottom();
@@ -120,7 +126,13 @@
     {/if}
   </div>
 
-  <form on:submit|preventDefault={sendMessage} style="margin-top: 8px; display: flex; gap: 6px;">
+  {#if lastError}
+    <div style="margin-top: 6px;">
+      <VKButton on:click={() => sendMessage(pendingText)}>Повторить</VKButton>
+    </div>
+  {/if}
+
+  <form on:submit|preventDefault={() => sendMessage()} style="margin-top: 8px; display: flex; gap: 6px;">
     <input
       bind:this={inputRef}
       bind:value={inputMessage}

@@ -2,6 +2,7 @@
   import { currentTask } from '../stores/taskStore.js';
   import { currentSection } from '../stores/uiStore.js';
   import { TASK_LIST, filterTasks } from '../tasks/taskMetadata.js';
+  import { progress } from '../stores/progressStore.js';
   import VKPanel from './VKPanel.svelte';
 
   let query = '';
@@ -44,6 +45,9 @@
             <div class="vk-row-title">Задание {task.number}. {task.title}</div>
             <div class="vk-row-sub">{task.topic}</div>
           </div>
+          {#if $progress[task.id]?.correct}
+            <span class="vk-solved-badge">✓</span>
+          {/if}
         </div>
       {/each}
     </div>
@@ -53,3 +57,13 @@
     Показано {visibleTasks.length} из {TASK_LIST.length}
   </div>
 </VKPanel>
+
+<style>
+.vk-solved-badge {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 13px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+</style>

@@ -32,3 +32,32 @@ export function hapticError() {
   try { tg()?.HapticFeedback?.notificationOccurred('error'); }
   catch (err) { console.debug('[telegram] haptic error failed:', err); }
 }
+
+export function getTelegramTheme() {
+  const wa = tg();
+  return {
+    colorScheme: wa?.colorScheme ?? 'light',
+    themeParams: wa?.themeParams ?? {},
+  };
+}
+
+export function getUserId() {
+  try {
+    const initData = tg()?.initData ?? '';
+    if (!initData) return null;
+    const params = new URLSearchParams(initData);
+    const user = JSON.parse(params.get('user') ?? 'null');
+    return user?.id ? String(user.id) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function onThemeChanged(callback) {
+  try {
+    tg()?.onEvent?.('themeChanged', callback);
+    return () => tg()?.offEvent?.('themeChanged', callback);
+  } catch {
+    return () => {};
+  }
+}

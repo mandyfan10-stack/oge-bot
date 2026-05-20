@@ -33,19 +33,14 @@ async function extractErrorMessage(response) {
 /**
  * Stream tokens from POST /api/chat.
  *
- * ⚠️ SECURITY: `taskContext` currently contains $correctAnswer — this is a
- * known architectural vulnerability tracked in AIChat.svelte / server.py.
- * Until the backend exposes a task_id lookup, do NOT persist taskContext
- * anywhere (localStorage etc.).
- *
  * @param {Object} params
  * @param {string} params.text
  * @param {ReadonlyArray<ChatMessage>} params.history
- * @param {string|null} params.taskContext
+ * @param {string|null} params.taskDescription
  * @param {AbortSignal} [params.signal]
  * @returns {AsyncGenerator<string, void, void>}
  */
-export async function* sendChatMessage({ text, history, taskContext, signal }) {
+export async function* sendChatMessage({ text, history, taskDescription, signal }) {
   let response;
   try {
     response = await fetch(`${API_URL}/api/chat`, {
@@ -57,7 +52,7 @@ export async function* sendChatMessage({ text, history, taskContext, signal }) {
       body: JSON.stringify({
         history,
         text,
-        task_context: taskContext,
+        task_description: taskDescription,
       }),
       signal,
     });
