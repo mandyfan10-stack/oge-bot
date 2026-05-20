@@ -56,6 +56,13 @@
   100% { background-position: -200% 0; }
 }
 
+.vk-solved-badge {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
 html, body, #app {
   height: 100%;
 }
