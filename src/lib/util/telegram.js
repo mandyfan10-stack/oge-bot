@@ -13,14 +13,10 @@ function tg() {
 export function initTelegram({ headerColor, backgroundColor } = {}) {
   const wa = tg();
   if (!wa) return;
-  try {
-    wa.ready?.();
-    wa.expand?.();
-    if (headerColor)     wa.headerColor     = headerColor;
-    if (backgroundColor) wa.backgroundColor = backgroundColor;
-  } catch (err) {
-    console.debug('[telegram] init failed:', err);
-  }
+  try { wa.ready?.(); } catch (err) { console.debug('[telegram] ready failed:', err); }
+  try { wa.expand?.(); } catch (err) { console.debug('[telegram] expand failed:', err); }
+  try { if (headerColor)     wa.headerColor     = headerColor; }     catch (err) { console.debug('[telegram] headerColor failed:', err); }
+  try { if (backgroundColor) wa.backgroundColor = backgroundColor; } catch (err) { console.debug('[telegram] backgroundColor failed:', err); }
 }
 
 export function getInitData() {
