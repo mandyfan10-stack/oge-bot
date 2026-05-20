@@ -6,17 +6,25 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Tahoma', 'Arial', 'sans-serif'],
+      },
       colors: {
-        tg: {
-          bg: 'var(--tg-theme-bg-color, #ffffff)',
-          text: 'var(--tg-theme-text-color, #000000)',
-          hint: 'var(--tg-theme-hint-color, #999999)',
-          link: 'var(--tg-theme-link-color, #2481cc)',
-          button: 'var(--tg-theme-button-color, #2481cc)',
-          buttonText: 'var(--tg-theme-button-text-color, #ffffff)',
-          secondaryBg: 'var(--tg-theme-secondary-bg-color, #f0f0f0)',
-        }
-      }
+        vk: {
+          header:   '#517396',
+          header2:  '#4a6f96',
+          bg:       '#edeef0',
+          panel:    '#ffffff',
+          border:   '#e7e8ec',
+          text:     '#000000',
+          text2:    '#333333',
+          muted:    '#777777',
+          link:     '#2b587a',
+          btn:      '#5b88bd',
+          btnHover: '#6d97c4',
+          rowHover: '#f0f3f7',
+        },
+      },
     },
   },
   plugins: [],

@@ -1,203 +1,138 @@
 <script>
-    import { currentTask, taskVariables, correctAnswer } from '../stores/taskStore.js';
-    import { tick } from 'svelte';
-    import { fly, fade } from 'svelte/transition';
+  import { tick } from 'svelte';
+  import { currentTask, taskVariables, correctAnswer } from '../stores/taskStore.js';
+  import { chat } from '../stores/chatStore.js';
+  import { sendChatMessage, ChatError } from '../api/chatClient.js';
+  import { renderMarkdown } from '../util/markdown.js';
+  import VKPanel from './VKPanel.svelte';
+  import VKButton from './VKButton.svelte';
 
-    let inputMessage = "";
-    let chatHistory = [];
-    let isTyping = false;
-    let chatEnd;
-    let inputRef;
+  let inputMessage = '';
+  let isTyping = false;
+  let listEl;
+  let inputRef;
 
-    const API_URL = import.meta.env.VITE_API_URL || "https://oge-backend.onrender.com";
+  /**
+   * ⚠️ SECURITY — ANSWER LEAK
+   * The string below embeds $correctAnswer and is sent to the backend in
+   * `task_context`. Any user can read it via DevTools → Network. This is
+   * tracked in the SECURITY TODOs in server.py / chatClient.js. Until
+   * the backend exposes a task_id lookup, taskContext MUST be rebuilt
+   * at send time (here) and MUST NOT be persisted to localStorage.
+   */
+  function buildTaskContext() {
+    return `Task ID: ${$currentTask} | Evaluated state: ${$correctAnswer} | Variables: ${JSON.stringify($taskVariables)}`;
+  }
 
-    async function scrollToBottom() {
-        await tick();
-        chatEnd?.scrollIntoView({ behavior: 'smooth' });
-    }
+  function formatTime(ts) {
+    if (!ts) return '';
+    const d = new Date(ts);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
 
-    function clearChat() {
-        chatHistory = [];
-        inputMessage = "";
-        inputRef?.focus();
-    }
+  async function scrollToBottom() {
+    await tick();
+    listEl?.scrollTo({ top: listEl.scrollHeight, behavior: 'smooth' });
+  }
 
-    /**
-     * Safely renders a small subset of Markdown to HTML.
-     * Escapes all HTML first to prevent XSS, then applies transforms:
-     *   **bold** → <strong>bold</strong>
-     *   \n      → <br>
-     *
-     * TODO(SECURITY): CRITICAL ARCHITECTURAL VULNERABILITY — ANSWER LEAK
-     * The `task_context` string sent to the backend currently embeds `$correctAnswer`
-     * directly (see the `taskContextStr` variable below). Any user can read the correct
-     * answer by inspecting network requests in browser DevTools.
-     * FIX: Stop sending `$correctAnswer` from the client entirely. Instead, send only a
-     * `task_id` to the backend and let the server look up the correct answer server-side.
-     * The client must never have access to or transmit the correct answer to the chat endpoint.
-     */
-    function renderMarkdown(text) {
-        const escaped = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-        return escaped
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
-    }
+  function clearChat() {
+    chat.clear();
+    inputMessage = '';
+    inputRef?.focus();
+  }
 
-    async function sendMessage() {
-        if (!inputMessage.trim() || isTyping) return;
-        const userMsg = inputMessage;
-        inputMessage = "";
-        
-        // TODO(SECURITY): `$correctAnswer` must NOT be sent from the client — see renderMarkdown docblock.
-        let taskContextStr = `Task ID: ${$currentTask} | Evaluated state: ${$correctAnswer} | Variables: ${JSON.stringify($taskVariables)}`;
-        
-        chatHistory = [...chatHistory, { role: "user", content: userMsg }];
-        const contextHistory = chatHistory.slice(-15);
-        
-        let aiMsg = { role: "assistant", content: "" };
-        chatHistory = [...chatHistory, aiMsg];
-        
-        isTyping = true;
+  async function sendMessage() {
+    const text = inputMessage.trim();
+    if (!text || isTyping) return;
+
+    inputMessage = '';
+    chat.pushUser(text);
+    chat.startAssistant();
+    isTyping = true;
+    scrollToBottom();
+
+    const history = chat.recent(15).slice(0, -1); // exclude the empty assistant placeholder
+    const taskContext = buildTaskContext();
+
+    try {
+      const stream = sendChatMessage({ text, history, taskContext });
+      let receivedAny = false;
+      for await (const chunk of stream) {
+        receivedAny = true;
+        chat.appendAssistantChunk(chunk);
         scrollToBottom();
-
-        try {
-            const response = await fetch(`${API_URL}/api/chat`, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "X-Telegram-Init-Data": window.Telegram?.WebApp?.initData || ""
-                },
-                body: JSON.stringify({
-                    history: contextHistory.slice(0, -1),
-                    text: userMsg,
-                    task_context: taskContextStr
-                })
-            });
-
-            if (!response.ok) {
-                let errorMessage = "Ошибка связи.";
-                if (response.status === 429 || response.status === 503 || response.status >= 400) {
-                    try {
-                        const errorData = await response.json();
-                        errorMessage = errorData.reply || errorData.message || errorData.error || errorMessage;
-                    } catch (e) {}
-                }
-                throw new Error(errorMessage);
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder("utf-8");
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                aiMsg.content += decoder.decode(value, { stream: true });
-                chatHistory = chatHistory; 
-                scrollToBottom();
-            }
-            
-            const finalChunk = decoder.decode();
-            if (finalChunk) {
-                aiMsg.content += finalChunk;
-                chatHistory = chatHistory;
-                scrollToBottom();
-            }
-        } catch (err) {
-            aiMsg.content = err.message || "Ошибка связи.";
-            chatHistory = chatHistory;
-        } finally {
-            isTyping = false;
-            scrollToBottom();
-        }
+      }
+      if (!receivedAny) {
+        chat.setLastAssistant('(пустой ответ от сервера)');
+      }
+    } catch (err) {
+      const msg =
+        err instanceof ChatError
+          ? err.userMessage
+          : err?.message || 'Ошибка связи с сервером.';
+      chat.setLastAssistant(msg);
+    } finally {
+      isTyping = false;
+      scrollToBottom();
     }
+  }
 </script>
 
-<div class="flex flex-col h-[calc(100vh-200px)] w-full relative">
-    <header class="flex items-center justify-between pb-4 mb-2 shrink-0 border-b border-white/5">
-        <div class="flex items-center gap-3">
-            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-            <h2 class="mono-accent text-[9px] font-black uppercase tracking-[0.3em] text-white/40">Neural Mentor v2.6</h2>
+<VKPanel title="Сообщения">
+  <svelte:fragment slot="actions">
+    {#if $chat.length > 0}
+      <button class="vk-link-button" on:click={clearChat}>Очистить</button>
+    {/if}
+  </svelte:fragment>
+
+  <div bind:this={listEl} class="vk-chat-list" style="max-height: 60vh; overflow-y: auto;">
+    {#if $chat.length === 0}
+      <div class="vk-chat-empty">Задайте вопрос ИИ-репетитору</div>
+    {:else}
+      {#each $chat as msg (msg.ts + ':' + msg.role)}
+        <div class="vk-chat-row">
+          <span class="vk-avatar" class:is-user={msg.role === 'user'} class:is-mentor={msg.role === 'assistant'}>
+            {msg.role === 'user' ? 'Я' : 'ИИ'}
+          </span>
+          <div class="vk-chat-body">
+            <div class="vk-chat-meta">
+              <span class="vk-chat-name">{msg.role === 'user' ? 'Вы' : 'ИИ-репетитор'}</span>
+              <span class="vk-chat-time">{formatTime(msg.ts)}</span>
+            </div>
+            {#if msg.role === 'assistant'}
+              {#if msg.content}
+                <div class="vk-chat-text">{@html renderMarkdown(msg.content)}</div>
+              {:else if isTyping}
+                <div class="vk-typing" aria-label="печатает">
+                  <span class="vk-typing-dot"></span>
+                  <span class="vk-typing-dot"></span>
+                  <span class="vk-typing-dot"></span>
+                </div>
+              {/if}
+            {:else}
+              <div class="vk-chat-text">{msg.content}</div>
+            {/if}
+          </div>
         </div>
-        {#if chatHistory.length > 0}
-            <button 
-                on:click={clearChat}
-                class="text-[9px] font-black uppercase tracking-widest text-white/20 hover:text-red-400 transition-colors"
-            >
-                [ Clear Buffer ]
-            </button>
-        {/if}
-    </header>
+      {/each}
+    {/if}
+  </div>
 
-    <main class="flex-1 overflow-y-auto space-y-8 py-6 px-1 scrollbar-hide">
-        {#if chatHistory.length === 0}
-            <div class="h-full flex flex-col items-center justify-center opacity-20" in:fade>
-                <div class="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center mb-4">
-                    <div class="w-2 h-2 bg-white rounded-full animate-ping"></div>
-                </div>
-                <p class="mono-accent text-[9px] font-black uppercase tracking-[0.5em]">Waiting for query</p>
-            </div>
-        {/if}
-
-        {#each chatHistory as msg}
-            <div 
-                in:fly={{ y: 20, duration: 500, opacity: 0 }}
-                class="flex flex-col w-full {msg.role === 'user' ? 'items-end' : 'items-start'}"
-            >
-                <div class="max-w-[90%] text-lg font-light leading-relaxed px-6 py-4 relative {
-                    msg.role === 'user' 
-                        ? 'premium-glass-saturated !bg-blue-600/20 !border-blue-500/30 text-white rounded-[28px] rounded-br-none shadow-[0_10px_30px_rgba(0,122,255,0.1)]' 
-                        : 'premium-glass !border-white/5 text-white/90 rounded-[28px] rounded-bl-none'
-                }">
-                    {#if msg.role === 'assistant'}
-                        {@html renderMarkdown(msg.content)}
-                    {:else}
-                        {msg.content}
-                    {/if}
-                </div>
-            
-                <span class="mono-accent text-[8px] font-black uppercase tracking-[0.2em] text-white/20 mt-3 px-2">
-                    {msg.role === 'user' ? '// User_Query' : '// Mentor_Response'}
-                </span>
-            </div>
-        {/each}
-        
-        {#if isTyping && !chatHistory[chatHistory.length-1]?.content}
-             <div class="flex items-start" in:fade>
-                <div class="premium-glass px-6 py-4 rounded-[24px] flex items-center gap-2">
-                    <div class="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div class="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div class="w-1 h-1 bg-white/40 rounded-full animate-bounce"></div>
-                </div>
-            </div>
-        {/if}
-        <div bind:this={chatEnd}></div>
-    </main>
-
-    <div class="pt-6 pb-2 shrink-0">
-        <form on:submit|preventDefault={sendMessage} class="relative flex items-center group">
-            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-[32px] blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
-            <input 
-                bind:this={inputRef}
-                bind:value={inputMessage}
-                placeholder="Type your question..."
-                maxlength="2000"
-                class="relative w-full bg-white/[0.03] border border-white/10 rounded-[28px] pl-6 pr-16 py-4 text-base font-light outline-none focus:bg-white/[0.05] focus:border-blue-500/40 transition-all placeholder:text-white/10"
-                disabled={isTyping}
-            />
-            <button 
-                type="submit"
-                disabled={isTyping || !inputMessage.trim()}
-                class="absolute right-2 p-3 bg-white text-black rounded-full disabled:opacity-10 transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 19V5m0 0l-7 7m7-7l7 7" />
-                </svg>
-            </button>
-        </form>
-    </div>
-</div>
+  <form on:submit|preventDefault={sendMessage} style="margin-top: 8px; display: flex; gap: 6px;">
+    <input
+      bind:this={inputRef}
+      bind:value={inputMessage}
+      class="vk-input"
+      type="text"
+      placeholder="Введите сообщение…"
+      maxlength="2000"
+      disabled={isTyping}
+      style="flex: 1;"
+    />
+    <VKButton type="submit" disabled={isTyping || !inputMessage.trim()}>
+      Отправить
+    </VKButton>
+  </form>
+</VKPanel>
