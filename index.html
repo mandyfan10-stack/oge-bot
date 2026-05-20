@@ -4,14 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>ОГЭ-Бот</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-      window.onerror = function(msg, url, line) {
-        console.error('JS Error:', msg, 'at', url, ':', line);
+      function _showErr(msg) {
+        document.body.style.cssText = 'margin:0;padding:16px;font:14px monospace;background:#fff;color:#c00;white-space:pre-wrap;';
+        document.body.textContent = 'Ошибка запуска:\n' + msg;
+      }
+      window.onerror = function(msg, url, line, col, err) {
+        _showErr((err ? err.stack : '') || (msg + ' ' + url + ':' + line));
         return false;
       };
+      window.addEventListener('unhandledrejection', function(e) {
+        _showErr(e.reason?.stack || String(e.reason));
+      });
     </script>
-    <script type="module" crossorigin src="/oge-bot/assets/index-B3pR5xDz.js"></script>
+    <script type="module" crossorigin src="/oge-bot/assets/index-DL2uFala.js"></script>
     <link rel="stylesheet" crossorigin href="/oge-bot/assets/index-CBNKgChg.css">
   </head>
   <body>
