@@ -1,4 +1,5 @@
 import { writable, get } from 'svelte/store';
+import { getUserId } from '../util/telegram.js';
 
 /**
  * @typedef {Object} ChatMessage
@@ -7,13 +8,16 @@ import { writable, get } from 'svelte/store';
  * @property {number} ts  Epoch ms when the message was created.
  */
 
-const STORAGE_KEY = 'oge-bot:chat-history:v1';
+function getStorageKey() {
+  const uid = getUserId();
+  return uid ? `uid:${uid}:oge-bot:chat-history:v1` : 'oge-bot:chat-history:v1';
+}
 const MAX_PERSIST = 50;
 
 function loadInitial() {
   if (typeof localStorage === 'undefined') return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(getStorageKey());
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -32,7 +36,7 @@ function persist(messages) {
     const safe = messages
       .slice(-MAX_PERSIST)
       .map((m) => ({ role: m.role, content: m.content, ts: m.ts ?? Date.now() }));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+    localStorage.setItem(getStorageKey(), JSON.stringify(safe));
   } catch (err) {
     console.debug('[chatStore] localStorage write failed:', err);
   }

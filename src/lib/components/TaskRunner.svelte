@@ -3,6 +3,7 @@
   import { currentTask } from '../stores/taskStore.js';
   import { TASK_INDEX } from '../tasks/taskMetadata.js';
   import { hapticSuccess, hapticError } from '../util/telegram.js';
+  import { progress } from '../stores/progressStore.js';
   import VKPanel from './VKPanel.svelte';
   import VKButton from './VKButton.svelte';
 
@@ -13,6 +14,7 @@
   let userInput = '';
   let feedback = { message: '', type: '' };
   let taskComponentRef;
+  let inputEl;
 
   $: loadTaskComponent($currentTask);
   $: meta = $currentTask ? TASK_INDEX.get($currentTask) : null;
@@ -57,6 +59,8 @@
       feedback = { message: 'Попробуйте ещё раз', type: 'error' };
       hapticError();
     }
+    progress.recordAttempt($currentTask, ok);
+    inputEl?.focus();
   }
 </script>
 
@@ -87,6 +91,7 @@
         id="answer-input"
         class="vk-input"
         type="text"
+        bind:this={inputEl}
         bind:value={userInput}
         placeholder="Введите ответ"
         maxlength="200"
@@ -105,8 +110,13 @@
           {feedback.message}
         </span>
       {/if}
+      {#if $progress[$currentTask]?.attempts > 0}<span class="vk-row-sub">Попыток: {$progress[$currentTask].attempts}</span>{/if}
     </div>
   {:else}
-    <p class="vk-row-sub">Загрузка задания…</p>
+    <div class="vk-skeleton">
+      <div class="vk-skeleton-bar"></div>
+      <div class="vk-skeleton-bar"></div>
+      <div class="vk-skeleton-bar"></div>
+    </div>
   {/if}
 </VKPanel>
