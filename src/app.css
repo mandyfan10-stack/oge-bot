@@ -6,47 +6,51 @@
    ВКонтакте 2015 — design tokens (single source of truth)
    ===================================================================== */
 :root {
-  --vk-header:   #517396;
-  --vk-header-2: #4a6f96;
-  --vk-bg:       #edeef0;
-  --vk-panel:    #ffffff;
-  --vk-border:   #e7e8ec;
-  --vk-text:     #000000;
-  --vk-text-2:   #333333;
-  --vk-muted:    #777777;
-  --vk-link:     #2b587a;
-  --vk-btn:      #5b88bd;
-  --vk-btn-h:    #6d97c4;
-  --vk-row-h:    #f0f3f7;
-  --vk-input-b:  #c0cad5;
-  --vk-error:    #c8324d;
-  --vk-success:  #4a8a3f;
+  --vk-header:    #5181b8;   /* authentic VK top-bar blue 2015 */
+  --vk-header-2:  #4a76a8;   /* darker shade — button border, gradient bottom */
+  --vk-btn-top:   #6a90be;   /* button gradient top */
+  --vk-bg:        #edeef0;
+  --vk-panel:     #ffffff;
+  --vk-border:    #dae1e8;
+  --vk-text:      #000000;
+  --vk-text-2:    #2d2d2d;
+  --vk-muted:     #828b97;
+  --vk-link:      #2a5885;   /* authentic VK link color */
+  --vk-btn:       #5b88bd;
+  --vk-btn-h:     #6d8fb9;
+  --vk-row-h:     #ecf2f7;
+  --vk-input-b:   #c0cad5;
+  --vk-error:     #c8324d;
+  --vk-success:   #4a8a3f;
 }
 
 [data-theme="dark"] {
-  --vk-header:  #3a5a7a;
-  --vk-header-2: #324f6a;
-  --vk-bg:      #1a1b1e;
-  --vk-panel:   #242527;
-  --vk-border:  #3a3b3e;
-  --vk-text:    #e8e9ec;
-  --vk-text-2:  #c0c2c8;
-  --vk-muted:   #888a90;
-  --vk-link:    #7bafd4;
-  --vk-btn:     #3a6e9e;
-  --vk-btn-h:   #4a7eae;
-  --vk-row-h:   #2a2b2e;
+  --vk-header:    #3a5a8a;
+  --vk-header-2:  #324f7a;
+  --vk-btn-top:   #4a6e9e;
+  --vk-bg:        #1a1b1e;
+  --vk-panel:     #242527;
+  --vk-border:    #3a3b3e;
+  --vk-text:      #e8e9ec;
+  --vk-text-2:    #c0c2c8;
+  --vk-muted:     #888a90;
+  --vk-link:      #7bafd4;
+  --vk-btn:       #3a6e9e;
+  --vk-btn-h:     #4a7eae;
+  --vk-row-h:     #2a2b2e;
+  --vk-input-b:   #4a4b50;
 }
 
-.vk-skeleton {
-  padding: 8px 0;
-}
+/* =====================================================================
+   Skeleton loader
+   ===================================================================== */
+.vk-skeleton { padding: 8px 0; }
 .vk-skeleton-bar {
-  height: 12px;
+  height: 13px;
   background: linear-gradient(90deg, var(--vk-border) 25%, var(--vk-row-h) 50%, var(--vk-border) 75%);
   background-size: 200% 100%;
   border-radius: 2px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   animation: vk-shimmer 1.4s infinite;
 }
 .vk-skeleton-bar:nth-child(2) { width: 75%; }
@@ -56,23 +60,30 @@
   100% { background-position: -200% 0; }
 }
 
+/* =====================================================================
+   Solved badge
+   ===================================================================== */
 .vk-solved-badge {
   color: #4caf50;
-  font-weight: bold;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 14px;
   flex-shrink: 0;
 }
 
-html, body, #app {
-  height: 100%;
-}
+/* =====================================================================
+   Base
+   ===================================================================== */
+html, body, #app { height: 100%; }
 
 body {
   margin: 0;
-  font: 12px/1.4 Tahoma, Arial, sans-serif;
+  font-family: 'PT Sans', Tahoma, Verdana, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--vk-text);
   background: var(--vk-bg);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -82,7 +93,7 @@ a {
 a:hover { text-decoration: underline; }
 
 /* =====================================================================
-   Layout — header + sidebar + content
+   Layout — header + body (sidebar + content)
    ===================================================================== */
 .vk-shell {
   min-height: 100vh;
@@ -90,9 +101,14 @@ a:hover { text-decoration: underline; }
   flex-direction: column;
 }
 
+/* =====================================================================
+   Header — authentic VK 2015 gradient chrome
+   ===================================================================== */
 .vk-header {
-  height: 42px;
-  background: var(--vk-header);
+  height: 44px;
+  background: linear-gradient(to bottom, #5d8ec4 0%, var(--vk-header-2) 100%);
+  border-bottom: 1px solid #3b6595;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 1px 2px rgba(0,0,0,0.18);
   color: #fff;
   display: flex;
   align-items: center;
@@ -110,24 +126,29 @@ a:hover { text-decoration: underline; }
 }
 
 .vk-header-title {
-  font-size: 13px;
-  font-weight: bold;
+  font-size: 15px;
+  font-weight: 700;
   color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  letter-spacing: 0.01em;
 }
 
 .vk-header-sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
 }
 
+/* =====================================================================
+   Body grid
+   ===================================================================== */
 .vk-body {
   flex: 1;
   width: 100%;
   max-width: 940px;
   margin: 0 auto;
-  padding: 12px;
+  padding: 14px 12px;
   display: grid;
-  grid-template-columns: 170px 1fr;
+  grid-template-columns: 172px 1fr;
   gap: 12px;
   align-items: start;
 }
@@ -135,8 +156,9 @@ a:hover { text-decoration: underline; }
 @media (max-width: 640px) {
   .vk-body {
     grid-template-columns: 1fr;
+    padding: 8px;
   }
-  .vk-sidebar { display: flex; flex-direction: row; gap: 4px; }
+  .vk-sidebar { display: flex; flex-direction: row; gap: 0; }
   .vk-sidebar .vk-nav-item { flex: 1; text-align: center; }
 }
 
@@ -153,18 +175,28 @@ a:hover { text-decoration: underline; }
   text-align: left;
   background: transparent;
   border: 0;
-  padding: 6px 10px;
-  font: 12px Tahoma, Arial, sans-serif;
+  border-left: 3px solid transparent;
+  padding: 8px 10px 8px 9px;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 13px;
   color: var(--vk-link);
   cursor: pointer;
-  border-radius: 0;
+  line-height: 1.3;
+  box-sizing: border-box;
 }
-.vk-nav-item:hover { background: var(--vk-row-h); }
+.vk-nav-item:hover {
+  background: var(--vk-row-h);
+  color: var(--vk-link);
+}
 .vk-nav-item.is-active {
   background: var(--vk-panel);
   color: var(--vk-text);
-  font-weight: bold;
-  border: 1px solid var(--vk-border);
+  font-weight: 700;
+  border-left-color: var(--vk-header);
+  border-top: 1px solid var(--vk-border);
+  border-right: 1px solid var(--vk-border);
+  border-bottom: 1px solid var(--vk-border);
+  padding-left: 8px;
 }
 
 /* =====================================================================
@@ -173,18 +205,19 @@ a:hover { text-decoration: underline; }
 .vk-panel {
   background: var(--vk-panel);
   border: 1px solid var(--vk-border);
-  border-radius: 3px;
-  padding: 12px;
+  border-radius: 2px;
+  padding: 16px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
 }
 
 .vk-panel + .vk-panel { margin-top: 8px; }
 
 .vk-panel-header {
-  font-size: 13px;
-  font-weight: bold;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--vk-text);
-  padding-bottom: 8px;
-  margin-bottom: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--vk-border);
   display: flex;
   align-items: center;
@@ -192,6 +225,7 @@ a:hover { text-decoration: underline; }
 }
 
 .vk-section-label {
+  display: block;
   font-size: 11px;
   color: var(--vk-muted);
   text-transform: uppercase;
@@ -200,39 +234,61 @@ a:hover { text-decoration: underline; }
 }
 
 /* =====================================================================
-   Buttons
+   Buttons — VK 2015 vertical gradient style
    ===================================================================== */
 .vk-button {
-  background: var(--vk-btn);
+  background: linear-gradient(to bottom, var(--vk-btn-top) 0%, var(--vk-header-2) 100%);
   color: #fff;
-  border: 1px solid var(--vk-header-2);
+  border: 1px solid #3b6595;
   border-radius: 2px;
-  padding: 4px 12px;
-  font: 12px Tahoma, Arial, sans-serif;
+  padding: 5px 14px;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+  line-height: 1.4;
+  white-space: nowrap;
 }
-.vk-button:hover:not(:disabled) { background: var(--vk-btn-h); }
-.vk-button:active:not(:disabled) { background: var(--vk-header-2); }
-.vk-button:disabled { opacity: 0.55; cursor: default; }
+.vk-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #7ba4cd 0%, #5a80b0 100%);
+  border-color: #35608e;
+}
+.vk-button:active:not(:disabled) {
+  background: linear-gradient(to bottom, var(--vk-header-2) 0%, var(--vk-btn) 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.18);
+}
+.vk-button:disabled { opacity: 0.52; cursor: default; }
 
 .vk-button-secondary {
-  background: #e3e8ed;
+  background: linear-gradient(to bottom, #f5f6f8 0%, #e3e8ed 100%);
   color: var(--vk-text-2);
   border: 1px solid #c0cad5;
   border-radius: 2px;
-  padding: 4px 10px;
-  font: 12px Tahoma, Arial, sans-serif;
+  padding: 5px 12px;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 13px;
   cursor: pointer;
+  line-height: 1.4;
+  white-space: nowrap;
 }
-.vk-button-secondary:hover:not(:disabled) { background: #d4dbe2; }
-.vk-button-secondary:disabled { opacity: 0.55; cursor: default; }
+.vk-button-secondary:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #eef0f3 0%, #d4dbe2 100%);
+  border-color: #aab5c0;
+}
+.vk-button-secondary:active:not(:disabled) {
+  background: linear-gradient(to bottom, #d4dbe2 0%, #e3e8ed 100%);
+}
+.vk-button-secondary:disabled { opacity: 0.52; cursor: default; }
 
 .vk-link-button {
   background: transparent;
   border: 0;
   color: var(--vk-link);
   cursor: pointer;
-  font: 11px Tahoma, Arial, sans-serif;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 12px;
   padding: 0;
 }
 .vk-link-button:hover { text-decoration: underline; }
@@ -243,17 +299,22 @@ a:hover { text-decoration: underline; }
 .vk-input,
 .vk-textarea {
   width: 100%;
-  font: 12px Tahoma, Arial, sans-serif;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 13px;
   color: var(--vk-text);
   background: #fff;
   border: 1px solid var(--vk-input-b);
   border-radius: 2px;
-  padding: 4px 6px;
+  padding: 6px 8px;
   outline: none;
   box-sizing: border-box;
+  line-height: 1.4;
 }
 .vk-input:focus,
-.vk-textarea:focus { border-color: var(--vk-header); }
+.vk-textarea:focus {
+  border-color: var(--vk-header);
+  box-shadow: inset 0 1px 0 rgba(0,0,0,0.03);
+}
 .vk-input:disabled { background: #f5f6f8; color: var(--vk-muted); }
 
 /* =====================================================================
@@ -262,30 +323,32 @@ a:hover { text-decoration: underline; }
 .vk-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
+  gap: 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--vk-border);
   cursor: pointer;
-  background: #fff;
+  background: var(--vk-panel);
 }
 .vk-row:last-child { border-bottom: 0; }
 .vk-row:hover { background: var(--vk-row-h); }
 .vk-row.is-active { background: var(--vk-row-h); }
 
 .vk-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 3px;
-  background: #d8e1ea;
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  background: #d0dcea;
   color: var(--vk-link);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font: bold 12px Tahoma, Arial, sans-serif;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
   flex-shrink: 0;
 }
 .vk-avatar.is-mentor {
-  background: #c9d6e3;
+  background: #c3d4e6;
   color: var(--vk-header-2);
 }
 .vk-avatar.is-user {
@@ -294,23 +357,27 @@ a:hover { text-decoration: underline; }
 }
 
 .vk-row-title {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--vk-link);
+  line-height: 1.3;
 }
 .vk-row-sub {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--vk-muted);
-  margin-top: 1px;
+  margin-top: 2px;
+  line-height: 1.3;
 }
 
 /* =====================================================================
    Feedback toast (small inline)
    ===================================================================== */
 .vk-feedback {
-  font-size: 11px;
-  padding: 3px 6px;
+  font-size: 12px;
+  padding: 4px 8px;
   border-radius: 2px;
   display: inline-block;
+  line-height: 1.3;
 }
 .vk-feedback.is-success { color: var(--vk-success); background: #e9f3e6; border: 1px solid #bcd9b3; }
 .vk-feedback.is-error   { color: var(--vk-error);   background: #f9e3e7; border: 1px solid #e9b9c2; }
@@ -324,8 +391,8 @@ a:hover { text-decoration: underline; }
 }
 .vk-chat-row {
   display: flex;
-  gap: 10px;
-  padding: 8px 4px;
+  gap: 12px;
+  padding: 12px 4px;
   border-bottom: 1px solid var(--vk-border);
 }
 .vk-chat-row:last-child { border-bottom: 0; }
@@ -334,30 +401,38 @@ a:hover { text-decoration: underline; }
   display: flex;
   align-items: baseline;
   gap: 8px;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 .vk-chat-name {
-  font-weight: bold;
-  font-size: 12px;
+  font-weight: 700;
+  font-size: 13px;
   color: var(--vk-link);
 }
 .vk-chat-time {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--vk-muted);
 }
 .vk-chat-text {
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
   color: var(--vk-text-2);
   white-space: pre-wrap;
   word-wrap: break-word;
 }
-.vk-chat-text strong { font-weight: bold; }
+.vk-chat-text strong { font-weight: 700; }
+.vk-chat-text code {
+  background: #f5f6f8;
+  border: 1px solid var(--vk-border);
+  border-radius: 2px;
+  padding: 1px 5px;
+  font: 13px 'PT Mono', 'Lucida Console', 'Courier New', monospace;
+}
 
 .vk-chat-empty {
   text-align: center;
   padding: 40px 12px;
   color: var(--vk-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .vk-typing {
@@ -367,7 +442,7 @@ a:hover { text-decoration: underline; }
   margin-top: 4px;
 }
 .vk-typing-dot {
-  width: 4px; height: 4px; border-radius: 50%;
+  width: 5px; height: 5px; border-radius: 50%;
   background: var(--vk-muted);
   animation: vk-typing-bounce 1.2s infinite ease-in-out;
 }
@@ -379,32 +454,46 @@ a:hover { text-decoration: underline; }
 }
 
 /* =====================================================================
-   Task content — neutralize zinc/slate from individual Task[N].svelte
-   so they read well on the white VK panel.
+   Task content — neutralize Tailwind utility classes from Task[N].svelte
    ===================================================================== */
-.task-content h3 { font-size: 14px; font-weight: bold; margin: 0 0 8px; color: var(--vk-text); }
-.task-content p  { font-size: 13px; color: var(--vk-text-2); line-height: 1.5; margin: 0 0 8px; }
-.task-content b  { font-weight: bold; color: var(--vk-text); }
-.task-content table { border-collapse: collapse; margin: 8px 0; }
+.task-content h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 10px;
+  color: var(--vk-text);
+  line-height: 1.3;
+}
+.task-content p {
+  font-size: 14px;
+  color: var(--vk-text-2);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+.task-content b { font-weight: 700; color: var(--vk-text); }
+.task-content table { border-collapse: collapse; margin: 10px 0; }
 .task-content td, .task-content th {
   border: 1px solid var(--vk-border);
-  padding: 4px 8px;
-  font-size: 12px;
-  font-family: 'Courier New', Courier, monospace;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-family: 'PT Mono', 'Lucida Console', 'Courier New', monospace;
 }
-.task-content th { background: var(--vk-row-h); }
+.task-content th {
+  background: var(--vk-row-h);
+  font-weight: 700;
+  font-family: 'PT Sans', Tahoma, Arial, sans-serif;
+}
 .task-content code {
   background: #f5f6f8;
   border: 1px solid var(--vk-border);
   border-radius: 2px;
-  padding: 1px 4px;
-  font: 12px 'Courier New', Courier, monospace;
+  padding: 1px 5px;
+  font: 13px 'PT Mono', 'Lucida Console', 'Courier New', monospace;
 }
 .task-content pre {
   background: #f5f6f8;
   border: 1px solid var(--vk-border);
   border-radius: 2px;
-  padding: 8px;
-  font: 12px 'Courier New', Courier, monospace;
+  padding: 10px 12px;
+  font: 13px/1.5 'PT Mono', 'Lucida Console', 'Courier New', monospace;
   overflow-x: auto;
 }
