@@ -5,6 +5,7 @@
     { id: 'profile',  label: 'Моя страница' },
     { id: 'tasks',    label: 'Задания' },
     { id: 'messages', label: 'Сообщения' },
+    { id: 'settings', label: 'Настройки' },
   ];
 </script>
 

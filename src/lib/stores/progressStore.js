@@ -49,4 +49,7 @@ export const progress = {
     const data = get(_store);
     return data[taskId] ?? { attempts: 0, correct: false, lastTs: 0 };
   },
+  reset() {
+    _store.set({});
+  },
 };

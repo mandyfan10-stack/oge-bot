@@ -14,6 +14,7 @@
   import TaskRunner from './lib/components/TaskRunner.svelte';
   import TaskList from './lib/components/TaskList.svelte';
   import AIChat from './lib/components/AIChat.svelte';
+  import SettingsPanel from './lib/components/SettingsPanel.svelte';
 
   let offTheme;
   onMount(() => {
@@ -38,6 +39,8 @@
         <TaskList />
       {:else if $currentSection === 'messages'}
         <AIChat />
+      {:else if $currentSection === 'settings'}
+        <SettingsPanel />
       {/if}
     </main>
   </div>
