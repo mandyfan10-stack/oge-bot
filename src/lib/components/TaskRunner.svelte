@@ -1,6 +1,6 @@
 <script>
   import { tick, afterUpdate } from 'svelte';
-  import { currentTask } from '../stores/taskStore.js';
+  import { currentTask, taskSolution } from '../stores/taskStore.js';
   import { TASK_INDEX } from '../tasks/taskMetadata.js';
   import { hapticSuccess, hapticError } from '../util/telegram.js';
   import { progress } from '../stores/progressStore.js';
@@ -24,6 +24,7 @@
     loadError = '';
     userInput = '';
     feedback = { message: '', type: '' };
+    taskSolution.set('');
     const path = `../tasks/components/Task${id}.svelte`;
     const loader = taskModules[path];
     if (!loader) {
@@ -99,8 +100,9 @@
       />
     </div>
 
-    <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center;">
+    <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <VKButton on:click={checkAnswer}>Проверить</VKButton>
+      <VKButton variant="secondary" on:click={() => loadTaskComponent($currentTask)}>Новый вариант</VKButton>
       {#if feedback.message}
         <span
           class="vk-feedback"
@@ -112,6 +114,13 @@
       {/if}
       {#if $progress[$currentTask]?.attempts > 0}<span class="vk-row-sub">Попыток: {$progress[$currentTask].attempts}</span>{/if}
     </div>
+
+    {#if feedback.type === 'success' && $taskSolution}
+      <div style="margin-top: 10px; padding: 8px 12px; background: var(--vk-bg); border-left: 3px solid var(--vk-success); font-size: 12px;">
+        <strong class="vk-section-label">Решение:</strong>
+        <p class="vk-row-sub" style="margin-top: 4px;">{@html $taskSolution}</p>
+      </div>
+    {/if}
   {:else}
     <div class="vk-skeleton">
       <div class="vk-skeleton-bar"></div>

@@ -1,36 +1,38 @@
 <script>
-  import { onMount } from 'svelte';
-  import { taskVariables, correctAnswer } from '../../stores/taskStore.js';
+  import { setupTask } from '../taskSetup.js';
   import { shuffleArray } from '../utils.js';
 
-  let vars = null;
   let options = [];
   let selectedAnswer = null;
+  let correctAns = '';
 
-  onMount(() => {
+  const vars = setupTask(() => {
     const q = { q: 'Мозг компьютера (вычисления)', a: 'Процессор' };
-    vars = q;
+    correctAns = q.a;
     options = shuffleArray(['Процессор', 'ОЗУ', 'Блок питания', 'Кулер']);
-    taskVariables.set(q);
-    correctAnswer.set(q.a);
+    selectedAnswer = null;
+    return {
+      vars: q,
+      answer: q.a,
+      solution: `Центральный процессор (ЦП) — основной вычислительный компонент. Ответ: <b>${q.a}</b>.`,
+    };
   });
 
   export function check() {
-    return selectedAnswer === vars.a;
+    return selectedAnswer === correctAns;
   }
 </script>
 
-{#if vars}
-<div class="space-y-6 animate-fade">
-  <h3 class="font-medium text-zinc-800 text-lg">Задание 20: Устройство ПК</h3>
-  <p class="text-sm text-zinc-500 font-light">Какое устройство отвечает за: <b>{vars.q}</b>?</p>
-  <div class="grid grid-cols-2 gap-2">
+{#if $vars}
+<div>
+  <p class="vk-row-sub" style="margin-bottom: 8px;">Какое устройство отвечает за: <b>{$vars.q}</b>?</p>
+  <div class="vk-task-options">
     {#each options as opt}
-      <button 
-        on:click={() => selectedAnswer = opt} 
-        class="p-3 border rounded text-xs transition-colors {selectedAnswer === opt ? 'bg-indigo-100 border-indigo-300' : 'bg-white hover:bg-slate-50'}">
-        {opt}
-      </button>
+      <button
+        class="vk-task-option"
+        class:is-selected={selectedAnswer === opt}
+        on:click={() => selectedAnswer = opt}
+      >{opt}</button>
     {/each}
   </div>
 </div>

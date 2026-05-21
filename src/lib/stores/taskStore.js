@@ -37,3 +37,7 @@ export const taskVariables = writable({});
  *  Never persist this to localStorage.
  *  @type {import('svelte/store').Writable<unknown>} */
 export const correctAnswer = writable(null);
+
+/** Worked solution string shown after a correct answer.
+ *  @type {import('svelte/store').Writable<string>} */
+export const taskSolution = writable('');

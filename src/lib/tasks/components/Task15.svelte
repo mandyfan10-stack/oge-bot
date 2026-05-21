@@ -326,24 +326,26 @@
 </script>
 
 {#if vars}
-<div class="p-6 rounded-[2rem] space-y-6 bg-slate-900 border border-slate-700 shadow-xl animate-fade">
-  <div>
-    <h3 class="font-medium text-slate-100 text-lg">Задание 15: Робот</h3>
-    <p class="text-xs text-slate-400 font-light mt-1">
-      Напиши алгоритм для Робота. Закрась все клетки, расположенные <span class="text-white">непосредственно ниже горизонтальной стены и левее вертикальной</span>. Проходы должны остаться незакрашенными. После закраски приведи Робота в зелёную клетку <span class="text-emerald-400 font-semibold">Ф</span>.
-      <br><br><span class="text-blue-400 font-medium">Структура:</span> использовать Робот, алг, нач, кон, | комментарии
-      <br><span class="text-blue-400 font-medium">Команды:</span> вверх, вниз, влево, вправо, закрасить
-      <br><span class="text-blue-400 font-medium">Ветвление:</span> если [усл] то ... иначе ... все
-      <br><span class="text-blue-400 font-medium">Цикл:</span> <span class="font-mono bg-white/10 px-1 rounded text-slate-300">нц пока [усл] ... кц</span>
-      <br><span class="text-blue-400 font-medium">Условия:</span> сверху/снизу/слева/справа <span class="text-white">свободно/стена</span>
-    </p>
-  </div>
-  
-  <div class="flex flex-col md:flex-row gap-4">
-    <textarea bind:value={robotCode} on:input={() => { errorMsg = ''; successMsg = ''; }} class="flex-1 w-full min-h-[250px] bg-slate-950/50 border border-slate-700 rounded-2xl p-4 text-sm font-mono text-slate-300 outline-none focus:border-blue-500/50 resize-y leading-relaxed" spellcheck="false" placeholder="использовать Робот\nалг\nнач\n  нц пока не сверху свободно\n    закрасить\n    вправо\n  кц\nкон"></textarea>
-    
-    <div class="w-full md:w-1/2 max-w-[320px] mx-auto aspect-square flex-shrink-0 relative">
-      <div class="grid grid-cols-10 gap-0 w-full h-full p-2 bg-slate-800 rounded-xl border border-slate-700 shadow-inner">
+<div class="vk-robot-panel">
+  <p style="font-size: 11px; color: #718096; line-height: 1.55; margin-bottom: 10px;">
+    Напиши алгоритм для Робота. Закрась клетки <span style="color:#fff;">ниже горизонтальной стены и левее вертикальной</span>. Проходы не закрашивай. Приведи Робота в клетку <span style="color:#68d391; font-weight:700;">Ф</span>.<br><br>
+    <span style="color:#63b3ed;">Структура:</span> использовать Робот, алг, нач, кон<br>
+    <span style="color:#63b3ed;">Команды:</span> вверх, вниз, влево, вправо, закрасить<br>
+    <span style="color:#63b3ed;">Цикл:</span> <code style="background:rgba(255,255,255,0.08);padding:1px 4px;font-size:11px;">нц пока [усл] ... кц</code><br>
+    <span style="color:#63b3ed;">Условия:</span> сверху/снизу/слева/справа свободно/стена
+  </p>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <textarea
+      bind:value={robotCode}
+      on:input={() => { errorMsg = ''; successMsg = ''; }}
+      class="vk-robot-code"
+      spellcheck="false"
+      placeholder="использовать Робот&#10;алг&#10;нач&#10;  нц пока не сверху свободно&#10;    закрасить&#10;    вправо&#10;  кц&#10;кон"
+    ></textarea>
+
+    <div style="max-width: 300px; width: 100%;">
+      <div class="vk-robot-grid">
         {#each Array(vars.h) as _, y}
           {#each Array(vars.w) as _, x}
             {@const isPainted = robot.painted.has(`${x},${y}`)}
@@ -353,17 +355,20 @@
             {@const hasRight = vars.verticals.some(w => w.x === x && w.y === y)}
             {@const isRobot = robot.x === x && robot.y === y}
             {@const isFinish = vars.finishX === x && vars.finishY === y}
-            
-            <div class="relative border-slate-700/50 transition-colors duration-150 border aspect-square {isPainted ? 'bg-blue-500/40' : 'bg-black/20'}
-              {hasTop ? '!border-t-[3px] !border-t-orange-400' : ''}
-              {hasBottom ? '!border-b-[3px] !border-b-orange-400' : ''}
-              {hasLeft ? '!border-l-[3px] !border-l-orange-400' : ''}
-              {hasRight ? '!border-r-[3px] !border-r-orange-400' : ''}
-            ">
+            <div
+              class="vk-robot-cell"
+              class:painted={isPainted}
+              style="
+                {hasTop ? 'border-top: 3px solid #f6ad55;' : ''}
+                {hasBottom ? 'border-bottom: 3px solid #f6ad55;' : ''}
+                {hasLeft ? 'border-left: 3px solid #f6ad55;' : ''}
+                {hasRight ? 'border-right: 3px solid #f6ad55;' : ''}
+              "
+            >
               {#if isRobot}
-                <div class="absolute inset-[2px] bg-blue-400 rounded-sm flex items-center justify-center text-[10px] shadow-[0_0_10px_rgba(96,165,250,0.8)] z-10 font-bold text-white">Р</div>
+                <div style="position:absolute;inset:2px;background:#63b3ed;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;z-index:2;">Р</div>
               {:else if isFinish}
-                <div class="absolute inset-[5px] rounded-sm border border-emerald-400/80 bg-emerald-500/25 flex items-center justify-center text-[9px] font-bold text-emerald-200 shadow-[0_0_12px_rgba(52,211,153,0.45)] z-0">Ф</div>
+                <div style="position:absolute;inset:4px;border:1px solid rgba(104,211,145,0.7);background:rgba(104,211,145,0.15);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#68d391;">Ф</div>
               {/if}
             </div>
           {/each}
@@ -371,21 +376,13 @@
       </div>
     </div>
   </div>
-  
-  {#if errorMsg}
-    <div class="p-4 rounded-2xl border bg-rose-500/10 border-rose-500/20 text-sm font-medium text-rose-400">{errorMsg}</div>
-  {/if}
-  {#if successMsg}
-    <div class="p-4 rounded-2xl border bg-emerald-500/10 border-emerald-500/20 text-sm font-medium text-emerald-400">{successMsg}</div>
-  {/if}
-  
-  <div class="flex gap-2">
-      <button on:click={resetRobot} class="p-4 rounded-xl text-slate-400 hover:bg-slate-800 transition-colors border border-slate-700">
-        Сбросить
-      </button>
-      <button on:click={runRobot} disabled={isRunning} class="flex-1 py-4 rounded-xl bg-blue-600 text-white font-medium shadow-lg hover:bg-blue-500 transition-colors disabled:opacity-50">
-        Запустить алгоритм
-      </button>
+
+  {#if errorMsg}<div class="vk-robot-msg-err">{errorMsg}</div>{/if}
+  {#if successMsg}<div class="vk-robot-msg-ok">{successMsg}</div>{/if}
+
+  <div style="display: flex; gap: 8px; margin-top: 8px;">
+    <button class="vk-robot-reset" on:click={resetRobot}>Сбросить</button>
+    <button class="vk-robot-run" on:click={runRobot} disabled={isRunning}>Запустить алгоритм</button>
   </div>
 </div>
 {/if}
