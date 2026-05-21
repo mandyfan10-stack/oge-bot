@@ -1,38 +1,45 @@
 <script>
-  import { onMount } from 'svelte';
-  import { taskVariables, correctAnswer } from '../../stores/taskStore.js';
+  import { setupTask } from '../taskSetup.js';
   import { getRandomInt, shuffleArray } from '../utils.js';
 
-  let vars = null;
+  let localFull = '';
   let pieces = [];
-  let assembled = "";
+  let assembled = '';
 
-  onMount(() => {
+  const vars = setupTask(() => {
     const p = [getRandomInt(10, 200), getRandomInt(10, 200), getRandomInt(10, 200), getRandomInt(10, 200)];
-    vars = { p, full: p.join('.') };
-    pieces = shuffleArray([p[0]+'.', p[1].toString(), '.'+p[2], '.'+p[3]]);
-    taskVariables.set(vars);
-    correctAnswer.set(vars.full);
+    localFull = p.join('.');
+    pieces = shuffleArray([p[0] + '.', p[1].toString(), '.' + p[2], '.' + p[3]]);
+    assembled = '';
+    return {
+      vars: { p, full: localFull },
+      answer: localFull,
+      solution: `IP-адрес состоит из 4 октетов через точку. Собираем: <b>${localFull}</b>.`,
+    };
   });
 
   function addPiece(p) {
     assembled += p;
   }
 
+  function reset() {
+    assembled = '';
+  }
+
   export function check() {
-    return assembled === vars.full;
+    return assembled === localFull;
   }
 </script>
 
-{#if vars}
-<div class="space-y-6 animate-fade">
-  <h3 class="font-medium text-zinc-800 text-lg">Задание 19: IP-адреса</h3>
-  <p class="text-sm text-zinc-500 font-light">Соберите адрес: <span class="font-mono text-indigo-600 font-bold">{vars.full}</span></p>
-  <div class="p-4 bg-slate-100 rounded-xl font-mono text-center text-lg">{assembled || '...'}</div>
-  <div class="flex gap-2 justify-center">
+{#if $vars}
+<div>
+  <p class="vk-row-sub" style="margin-bottom: 8px;">Соберите IP-адрес: <code style="color: var(--vk-link); font-weight: 700;">{$vars.full}</code></p>
+  <div class="vk-task-display">{assembled || '...'}</div>
+  <div class="vk-task-chips">
     {#each pieces as b}
-      <button on:click={() => addPiece(b)} class="px-3 py-2 border rounded bg-white text-sm hover:bg-slate-50">{b}</button>
+      <button class="vk-task-chip" on:click={() => addPiece(b)}>{b}</button>
     {/each}
+    <button class="vk-task-chip" style="color: var(--vk-error); border-color: var(--vk-error);" on:click={reset}>Сброс</button>
   </div>
 </div>
 {/if}

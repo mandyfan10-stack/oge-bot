@@ -1,28 +1,29 @@
 <script>
-  import { onMount } from 'svelte';
-  import { taskVariables, correctAnswer } from '../../stores/taskStore.js';
+  import { setupTask } from '../taskSetup.js';
   import { getRandomInt } from '../utils.js';
 
-  let vars = null;
-
-  onMount(() => {
-    const a = getRandomInt(2, 5); const b = getRandomInt(1, 10); const x = getRandomInt(2, 6);
-    vars = { a, b, x, ans: x * a + b };
-    taskVariables.set(vars);
-    correctAnswer.set(vars.ans);
+  const vars = setupTask(() => {
+    const a = getRandomInt(2, 5);
+    const b = getRandomInt(1, 10);
+    const x = getRandomInt(2, 6);
+    const ans = x * a + b;
+    return {
+      vars: { a, b, x, ans },
+      answer: String(ans),
+      solution: `f(${x}) = ${x}×${a} + ${b} = ${x * a} + ${b} = <b>${ans}</b>.`,
+    };
   });
 
   export function check(answer) {
-    return parseInt(answer) === vars.ans;
+    return !!$vars && parseInt(answer) === $vars.ans;
   }
 </script>
 
-{#if vars}
-<div class="space-y-6 animate-fade">
-  <h3 class="font-medium text-zinc-800 text-lg">Задание 18: Функции</h3>
-  <div class="bg-slate-800 p-5 rounded-2xl text-emerald-400 font-mono text-sm">
-    <code>def f(x): return x * {vars.a} + {vars.b}<br>print(f({vars.x}))</code>
+{#if $vars}
+<div>
+  <div class="vk-task-code">
+    <code>def f(x): return x * {$vars.a} + {$vars.b}<br>print(f({$vars.x}))</code>
   </div>
-  <p class="text-sm text-zinc-500 font-light">Что выведет программа?</p>
+  <p class="vk-row-sub">Что выведет программа?</p>
 </div>
 {/if}
