@@ -16,6 +16,7 @@
       vars: { files, targetMask, ans },
       answer: String(ans),
       solution: `Маска <b>${targetMask}</b> — файл с расширением, начинающимся на «${prefix}». Подходящих файлов: <b>${ans}</b>.`,
+      hideFromChat: ['ans'],
     };
   });
 

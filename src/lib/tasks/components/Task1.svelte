@@ -24,6 +24,7 @@
     return {
       vars: { text, targetWord, diffBytes, bits: enc.bits, name: enc.name, bytes: enc.bytes },
       answer: targetWord.toLowerCase(),
+      hideFromChat: ['targetWord'],
     };
   });
 

@@ -12,6 +12,7 @@
       vars: { data, targetSub, q1Ans },
       answer: String(q1Ans),
       solution: `Подсчитываем строки с предметом «${targetSub}» в таблице. Ответ: <b>${q1Ans}</b>.`,
+      hideFromChat: ['q1Ans'],
     };
   });
 

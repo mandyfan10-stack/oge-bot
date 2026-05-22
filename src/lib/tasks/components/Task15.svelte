@@ -1,6 +1,6 @@
 <script>
   import { onMount } from 'svelte';
-  import { taskVariables, correctAnswer } from '../../stores/taskStore.js';
+  import { taskVariables, correctAnswer, taskSolution, chatContextVars } from '../../stores/taskStore.js';
   import { getRandomInt, getRandomBool, shuffleArray, getRandomElement } from '../utils.js';
 
   let vars = null;
@@ -182,6 +182,20 @@
     robot = { x: vars.startX, y: vars.startY, painted: new Set() };
     taskVariables.set(vars);
     correctAnswer.set("Robot Done");
+    taskSolution.set(
+      `Нужно закрасить ${vars.targetCount} клеток и привести Робота из (${vars.startX},${vars.startY}) в (${vars.finishX},${vars.finishY}). ` +
+      `Подсказка: <code>нц пока не сверху свободно ... кц</code> двигает Робота вдоль стены.`
+    );
+    // Chat sees only counts and start/finish — never the cell list (would be a recipe).
+    chatContextVars.set({
+      targetCount: vars.targetCount,
+      wallCount: vars.wallCount,
+      startX: vars.startX,
+      startY: vars.startY,
+      finishX: vars.finishX,
+      finishY: vars.finishY,
+      gridSize: `${vars.w}x${vars.h}`,
+    });
   });
 
   const hasWall = (x, y, dir) => {
@@ -315,7 +329,11 @@
   }
 
   export function check() {
-    return successMsg !== "";
+    if (!successMsg) {
+      if (!errorMsg) errorMsg = 'Нажми «Запустить алгоритм» перед проверкой.';
+      return false;
+    }
+    return true;
   }
 
   function resetRobot() {

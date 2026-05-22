@@ -29,6 +29,7 @@
       vars: { targetNode, edges: currentEdges, qText, count },
       answer: String(count),
       solution: `Перебираем все пути из A в ${targetNode}${reqType === 1 ? ` через ${specNode}` : reqType === 2 ? ` без ${specNode}` : ''}. Таких путей: <b>${count}</b>.`,
+      hideFromChat: ['count'],
     };
   });
 

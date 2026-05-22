@@ -9,6 +9,7 @@
       vars: { arr, index: idx, target: arr[idx] },
       answer: String(arr[idx]),
       solution: `<code>arr[${idx}]</code> — элемент с индексом ${idx} (нумерация с 0). Значение: <b>${arr[idx]}</b>.`,
+      hideFromChat: ['target'],
     };
   });
 

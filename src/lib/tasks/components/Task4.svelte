@@ -15,6 +15,7 @@
       vars: { w, minLen },
       answer: String(minLen),
       solution: `Перебирая все пути из A в E, кратчайший имеет длину <b>${minLen}</b>.`,
+      hideFromChat: ['minLen'],
     };
   });
 

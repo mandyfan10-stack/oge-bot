@@ -21,6 +21,7 @@
       vars: { targetWord, encoded, htmlTable },
       answer: targetWord.toUpperCase(),
       solution: `Расшифровываем последовательность «${encoded}» по таблице: ${htmlTable.map(r => `${r.char}=${r.code}`).join(', ')}. Ответ: <b>${targetWord.toUpperCase()}</b>.`,
+      hideFromChat: ['targetWord'],
     };
   });
 

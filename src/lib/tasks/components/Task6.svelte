@@ -33,6 +33,7 @@
       vars: { code, pairs, askFor, targetCount },
       answer: String(targetCount),
       solution: `Проверяем каждую из ${pairs.length} пар по условию. Количество запусков с выводом «${askFor}»: <b>${targetCount}</b>.`,
+      hideFromChat: ['targetCount'],
     };
   });
 

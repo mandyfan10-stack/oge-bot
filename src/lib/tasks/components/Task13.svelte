@@ -1,29 +1,53 @@
 <script>
-  import { onMount } from 'svelte';
-  import { taskVariables, correctAnswer } from '../../stores/taskStore.js';
+  import { setupTask } from '../taskSetup.js';
   import { shuffleArray } from '../utils.js';
 
-  let vars = null;
   let editorHtml = '';
+  let mapRef = null;
 
-  onMount(() => {
-    const v = { text: "Байкал — самое глубокое озеро на планете. В нём обитает уникальная нерпа.", words: ["Байкал", "озеро", "нерпа"] };
-    const shuffled = shuffleArray([...v.words]);
-    vars = { text: v.text, map: { bold: shuffled[0], underline: shuffled[1], italic: shuffled[2] } };
-    editorHtml = v.text;
-    taskVariables.set(vars);
-    correctAnswer.set('Formatted');
+  // Extract all text nodes wrapped in any of the given tags.
+  function extractFormatted(html, tags) {
+    const result = new Set();
+    for (const tag of tags) {
+      const re = new RegExp(`<${tag}\\b[^>]*>([^<]*)</${tag}>`, 'gi');
+      let m;
+      while ((m = re.exec(html))) {
+        const text = m[1].trim();
+        if (text) result.add(text);
+      }
+    }
+    return result;
+  }
+
+  const vars = setupTask(() => {
+    const text = 'Байкал — самое глубокое озеро на планете. В нём обитает уникальная нерпа.';
+    const shuffled = shuffleArray(['Байкал', 'озеро', 'нерпа']);
+    const map = { bold: shuffled[0], underline: shuffled[1], italic: shuffled[2] };
+    mapRef = map;
+    editorHtml = text;
+    return {
+      vars: { text, map },
+      answer: 'formatted',
+      solution: `Нужно: «${map.bold}» — <b>жирным</b>, «${map.underline}» — <u>подчёркнутым</u>, «${map.italic}» — <i>курсивом</i>.`,
+      hideFromChat: ['map'],
+    };
   });
 
   export function check() {
-    return editorHtml.includes('<b>') || editorHtml.includes('<strong>') || editorHtml.includes('<u>') || editorHtml.includes('<i>');
+    if (!mapRef) return false;
+    const bolds = extractFormatted(editorHtml, ['b', 'strong']);
+    const unders = extractFormatted(editorHtml, ['u']);
+    const itals = extractFormatted(editorHtml, ['i', 'em']);
+    return bolds.has(mapRef.bold)
+        && unders.has(mapRef.underline)
+        && itals.has(mapRef.italic);
   }
 </script>
 
-{#if vars}
+{#if $vars}
 <div>
   <p class="vk-row-sub" style="margin-bottom: 8px;">
-    Сделайте <b>{vars.map.bold}</b> жирным, <b>{vars.map.underline}</b> подчёркнутым, а <b>{vars.map.italic}</b> курсивом.
+    Сделайте <b>{$vars.map.bold}</b> жирным, <b>{$vars.map.underline}</b> подчёркнутым, а <b>{$vars.map.italic}</b> курсивом.
   </p>
   <div
     bind:innerHTML={editorHtml}

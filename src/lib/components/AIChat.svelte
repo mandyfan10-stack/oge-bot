@@ -1,6 +1,6 @@
 <script>
   import { tick } from 'svelte';
-  import { currentTask, taskVariables } from '../stores/taskStore.js';
+  import { currentTask, chatContextVars } from '../stores/taskStore.js';
   import { chat } from '../stores/chatStore.js';
   import { sendChatMessage, ChatError } from '../api/chatClient.js';
   import { renderMarkdown } from '../util/markdown.js';
@@ -24,7 +24,7 @@
   }
 
   function buildTaskContext() {
-    return `Задание №${$currentTask} | Переменные: ${JSON.stringify($taskVariables)}`;
+    return `Задание №${$currentTask} | Условие: ${JSON.stringify($chatContextVars)}`;
   }
 
   function formatTime(ts) {

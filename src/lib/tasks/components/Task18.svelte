@@ -11,6 +11,7 @@
       vars: { a, b, x, ans },
       answer: String(ans),
       solution: `f(${x}) = ${x}×${a} + ${b} = ${x * a} + ${b} = <b>${ans}</b>.`,
+      hideFromChat: ['ans'],
     };
   });
 

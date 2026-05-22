@@ -6,7 +6,7 @@
     const words = [['Коты', 'Собаки'], ['Розы', 'Тюльпаны'], ['Чай', 'Кофе']];
     const pair = getRandomElement(words);
     const A = getRandomInt(200, 599); const B = getRandomInt(200, 599);
-    const Inter = Math.floor(Math.random() * 100) + 10;
+    const Inter = getRandomInt(10, 109);
     const Union = A + B - Inter;
     const types = [
       { q: `${pair[0]} | ${pair[1]}`, ans: Union, table: [[pair[0], A], [pair[1], B], [`${pair[0]} & ${pair[1]}`, Inter]] },
@@ -17,6 +17,7 @@
       vars: { q: sel.q, ans: sel.ans, table: shuffleArray(sel.table) },
       answer: String(sel.ans),
       solution: `|${pair[0]}| = ${A}, |${pair[1]}| = ${B}, |пересечение| = ${Inter}. По формуле объединения: ${A}+${B}−${Inter} = ${Union}. Ответ на запрос «${sel.q}»: <b>${sel.ans}</b>.`,
+      hideFromChat: ['ans'],
     };
   });
 

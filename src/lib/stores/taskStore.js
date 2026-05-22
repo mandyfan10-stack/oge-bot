@@ -29,11 +29,14 @@ currentTask.subscribe((id) => {
  *  @type {import('svelte/store').Writable<TaskVariables>} */
 export const taskVariables = writable({});
 
-/** Expected answer for the active task.
- *
- *  ⚠️ SECURITY: see TODO in AIChat.svelte / server.py — until the backend
- *  exposes a task_id lookup, this value is still read into the chat
- *  request, which leaks the answer to anyone inspecting network traffic.
+/** Subset of taskVariables exposed to the AI chat context. Tasks declare a
+ *  `hideFromChat` list in their setupTask return so answer-revealing keys
+ *  (e.g. `target`, `ans`, `count`) never reach the backend prompt.
+ *  @type {import('svelte/store').Writable<TaskVariables>} */
+export const chatContextVars = writable({});
+
+/** Expected answer for the active task. Used by Task*.svelte locally only —
+ *  it is never sent to the backend (the chat receives `chatContextVars`).
  *  Never persist this to localStorage.
  *  @type {import('svelte/store').Writable<unknown>} */
 export const correctAnswer = writable(null);

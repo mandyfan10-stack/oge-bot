@@ -14,6 +14,7 @@
       vars: { typeStr, target, n1, n2, n3, val1, val2, val3 },
       answer: String(target),
       solution: `Переводим в десятичную: ${n1}<sub>16</sub> = ${val1}, ${n2}<sub>8</sub> = ${val2}, ${n3}<sub>2</sub> = ${val3}. ${typeStr.charAt(0).toUpperCase() + typeStr.slice(1)}: <b>${target}</b>.`,
+      hideFromChat: ['target', 'val1', 'val2', 'val3'],
     };
   });
 

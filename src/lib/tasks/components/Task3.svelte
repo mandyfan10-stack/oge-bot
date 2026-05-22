@@ -17,6 +17,7 @@
       vars: { logicStr: sel.logicStr, findStr: sel.find, truth: sel.truth, target },
       answer: String(target),
       solution: `Ищем ${sel.find} X, при котором выражение «${sel.logicStr}» = ${sel.truth}. Перебираем значения — ответ: <b>${target}</b>.`,
+      hideFromChat: ['target'],
     };
   });
 

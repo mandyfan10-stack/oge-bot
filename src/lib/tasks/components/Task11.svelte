@@ -11,6 +11,7 @@
       vars: { target: targetWord, text: text.join(' '), count },
       answer: String(count),
       solution: `Слово «${targetWord}» встречается в тексте <b>${count}</b> раз.`,
+      hideFromChat: ['count'],
     };
   });
 

@@ -24,6 +24,7 @@
       vars: { A, b, start, end, seq, op2_text },
       answer: String(b),
       solution: `Алгоритм: прибавь ${A} (команда 1), ${op2_text} (команда 2). Программа ${seq} переводит ${start} в ${end}. Подбором: b = <b>${b}</b>.`,
+      hideFromChat: ['b'],
     };
   });
 
