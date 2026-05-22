@@ -28,6 +28,26 @@ const AUTH_ERROR =
 const TIMEOUT_ERROR =
   'Сервер не ответил за 90 секунд. Возможно, сервер просыпается — попробуйте ещё раз.';
 
+function stringifyDetail(value) {
+  if (value == null) return null;
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) {
+    const parts = value
+      .map((item) => {
+        if (item == null) return null;
+        if (typeof item === 'string') return item;
+        if (typeof item === 'object') return item.msg || item.message || item.detail || null;
+        return String(item);
+      })
+      .filter(Boolean);
+    return parts.length ? parts.join('; ') : null;
+  }
+  if (typeof value === 'object') {
+    return value.msg || value.message || value.detail || null;
+  }
+  return String(value);
+}
+
 async function extractErrorMessage(response) {
   let text;
   try {
@@ -38,7 +58,13 @@ async function extractErrorMessage(response) {
   if (!text) return null;
   try {
     const data = JSON.parse(text);
-    return data.reply || data.message || data.error || data.detail || null;
+    return (
+      stringifyDetail(data.reply) ||
+      stringifyDetail(data.message) ||
+      stringifyDetail(data.error) ||
+      stringifyDetail(data.detail) ||
+      null
+    );
   } catch {
     return text.slice(0, 200);
   }
@@ -46,6 +72,9 @@ async function extractErrorMessage(response) {
 
 function messageForStatus(status, message) {
   if (status === 401 || status === 403) return AUTH_ERROR;
+  if (status === 422) {
+    return `Некорректный запрос${message ? `: ${message}` : ''} (HTTP 422).`;
+  }
   if (status >= 500) {
     return `${message || 'Сервер недоступен'} (HTTP ${status}). Попробуйте через минуту.`;
   }
