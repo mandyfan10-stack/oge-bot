@@ -1,6 +1,7 @@
 import { getInitData } from '../util/telegram.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://oge-backend.onrender.com';
+const REQUEST_TIMEOUT_MS = 90_000;
 
 /**
  * @typedef {Object} ChatMessage
@@ -21,13 +22,34 @@ export class ChatError extends Error {
 const GENERIC_NETWORK_ERROR =
   'Не удалось связаться с сервером. Проверьте соединение и попробуйте снова.';
 
+const AUTH_ERROR =
+  'Авторизация Telegram не пройдена. Перезапустите мини-приложение через бота.';
+
+const TIMEOUT_ERROR =
+  'Сервер не ответил за 90 секунд. Возможно, сервер просыпается — попробуйте ещё раз.';
+
 async function extractErrorMessage(response) {
+  let text;
   try {
-    const data = await response.json();
-    return data.reply || data.message || data.error || null;
+    text = await response.text();
   } catch {
     return null;
   }
+  if (!text) return null;
+  try {
+    const data = JSON.parse(text);
+    return data.reply || data.message || data.error || data.detail || null;
+  } catch {
+    return text.slice(0, 200);
+  }
+}
+
+function messageForStatus(status, message) {
+  if (status === 401 || status === 403) return AUTH_ERROR;
+  if (status >= 500) {
+    return `${message || 'Сервер недоступен'} (HTTP ${status}). Попробуйте через минуту.`;
+  }
+  return message || GENERIC_NETWORK_ERROR;
 }
 
 /**
@@ -41,51 +63,82 @@ async function extractErrorMessage(response) {
  * @returns {AsyncGenerator<string, void, void>}
  */
 export async function* sendChatMessage({ text, history, taskDescription, signal }) {
-  let response;
-  try {
-    response = await fetch(`${API_URL}/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Telegram-Init-Data': getInitData(),
-      },
-      body: JSON.stringify({
-        history,
-        text,
-        task_description: taskDescription,
-      }),
-      signal,
-    });
-  } catch (err) {
-    if (err?.name === 'AbortError') throw err;
-    throw new ChatError(GENERIC_NETWORK_ERROR);
-  }
+  const internalCtrl = new AbortController();
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    internalCtrl.abort();
+  }, REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
-    const message = await extractErrorMessage(response);
-    throw new ChatError(message || GENERIC_NETWORK_ERROR, response.status);
-  }
-
-  if (!response.body) {
-    // No streaming support — fall back to text.
-    const fallback = await response.text();
-    if (fallback) yield fallback;
-    return;
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder('utf-8');
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      if (chunk) yield chunk;
+  const onExternalAbort = () => internalCtrl.abort();
+  if (signal) {
+    if (signal.aborted) {
+      clearTimeout(timeoutId);
+      throw new DOMException('Aborted', 'AbortError');
     }
-    const tail = decoder.decode();
-    if (tail) yield tail;
+    signal.addEventListener('abort', onExternalAbort, { once: true });
+  }
+
+  try {
+    let response;
+    try {
+      response = await fetch(`${API_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-Init-Data': getInitData(),
+        },
+        body: JSON.stringify({
+          history,
+          text,
+          task_description: taskDescription,
+        }),
+        signal: internalCtrl.signal,
+      });
+    } catch (err) {
+      if (signal?.aborted) throw err;
+      if (timedOut) {
+        console.error('Chat API timeout', { url: API_URL, timeoutMs: REQUEST_TIMEOUT_MS });
+        throw new ChatError(TIMEOUT_ERROR);
+      }
+      console.error('Chat API fetch failed', err);
+      throw new ChatError(GENERIC_NETWORK_ERROR);
+    }
+
+    if (!response.ok) {
+      const body = await extractErrorMessage(response);
+      console.error('Chat API error', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+        body,
+      });
+      throw new ChatError(messageForStatus(response.status, body), response.status);
+    }
+
+    if (!response.body) {
+      const fallback = await response.text();
+      if (fallback) yield fallback;
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        if (chunk) yield chunk;
+      }
+      const tail = decoder.decode();
+      if (tail) yield tail;
+    } finally {
+      try { reader.releaseLock(); } catch { /* ignore */ }
+    }
   } finally {
-    try { reader.releaseLock(); } catch { /* ignore */ }
+    clearTimeout(timeoutId);
+    if (signal) signal.removeEventListener('abort', onExternalAbort);
   }
 }
