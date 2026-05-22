@@ -14,6 +14,19 @@ function getStorageKey() {
 }
 const MAX_PERSIST = 50;
 
+// Backend rejects history items with empty content (min_length=1) → HTTP 422.
+// We must never persist, restore, or transmit a message whose content is
+// empty or whitespace-only (e.g. a placeholder left over from an interrupted
+// stream).
+function isNonEmptyMessage(m) {
+  return (
+    m &&
+    (m.role === 'user' || m.role === 'assistant') &&
+    typeof m.content === 'string' &&
+    m.content.trim().length > 0
+  );
+}
+
 function loadInitial() {
   if (typeof localStorage === 'undefined') return [];
   try {
@@ -21,9 +34,7 @@ function loadInitial() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (m) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'
-    );
+    return parsed.filter(isNonEmptyMessage);
   } catch (err) {
     console.debug('[chatStore] localStorage parse failed:', err);
     return [];
@@ -34,6 +45,7 @@ function persist(messages) {
   if (typeof localStorage === 'undefined') return;
   try {
     const safe = messages
+      .filter(isNonEmptyMessage)
       .slice(-MAX_PERSIST)
       .map((m) => ({ role: m.role, content: m.content, ts: m.ts ?? Date.now() }));
     localStorage.setItem(getStorageKey(), JSON.stringify(safe));
@@ -110,8 +122,13 @@ export const chat = {
   clear() {
     chatHistory.set([]);
   },
-  /** Snapshot used for sending the recent context to the backend. */
+  /** Snapshot used for sending the recent context to the backend.
+   *  Filters out any empty/whitespace-only messages — sending them would
+   *  cause the backend to return HTTP 422. */
   recent(n = 15) {
-    return get(chatHistory).slice(-n).map((m) => ({ role: m.role, content: m.content }));
+    return get(chatHistory)
+      .filter(isNonEmptyMessage)
+      .slice(-n)
+      .map((m) => ({ role: m.role, content: m.content }));
   },
 };

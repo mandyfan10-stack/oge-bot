@@ -72,4 +72,52 @@ describe('chatStore', () => {
     expect(recent[0]).toHaveProperty('role');
     expect(recent[0]).toHaveProperty('content');
   });
+
+  it('recent skips empty assistant placeholder', () => {
+    chat.pushUser('hi');
+    chat.startAssistant(); // empty content
+    const recent = chat.recent(15);
+    expect(recent).toHaveLength(1);
+    expect(recent[0].role).toBe('user');
+  });
+
+  it('recent skips whitespace-only messages', () => {
+    chat.pushUser('   ');
+    chat.pushUser('real');
+    const recent = chat.recent(15);
+    expect(recent).toHaveLength(1);
+    expect(recent[0].content).toBe('real');
+  });
+
+  it('persist drops trailing empty assistant placeholder', async () => {
+    chat.pushUser('hi');
+    chat.startAssistant();
+    // wait one microtask for the subscribe → persist to flush
+    await new Promise((r) => setTimeout(r, 0));
+    const persisted = JSON.parse(localStorage.getItem('oge-bot:chat-history:v1'));
+    expect(persisted).toHaveLength(1);
+    expect(persisted[0].role).toBe('user');
+  });
+});
+
+// loadInitial is exercised via a fresh module import — verify that empty
+// messages in localStorage are filtered out on cold start.
+describe('chatStore.loadInitial', () => {
+  it('filters out empty-content messages restored from localStorage', async () => {
+    // seed localStorage with a poisoned history from a previous interrupted stream
+    localStorage.setItem(
+      'oge-bot:chat-history:v1',
+      JSON.stringify([
+        { role: 'user', content: 'ку', ts: 1 },
+        { role: 'assistant', content: '', ts: 2 },
+        { role: 'assistant', content: '   ', ts: 3 },
+        { role: 'user', content: 'ещё', ts: 4 },
+      ])
+    );
+    vi.resetModules();
+    const { chat: freshChat } = await import('./chatStore.js');
+    const messages = get(freshChat);
+    expect(messages).toHaveLength(2);
+    expect(messages.every((m) => m.content.trim().length > 0)).toBe(true);
+  });
 });

@@ -73,7 +73,7 @@ async function extractErrorMessage(response) {
 function messageForStatus(status, message) {
   if (status === 401 || status === 403) return AUTH_ERROR;
   if (status === 422) {
-    return `Некорректный запрос${message ? `: ${message}` : ''} (HTTP 422).`;
+    return 'Не удалось отправить сообщение. Попробуйте очистить чат и отправить снова.';
   }
   if (status >= 500) {
     return `${message || 'Сервер недоступен'} (HTTP ${status}). Попробуйте через минуту.`;

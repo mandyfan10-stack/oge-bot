@@ -53,13 +53,17 @@
     lastError = '';
     pendingText = text;
     inputMessage = '';
+
+    // Snapshot history BEFORE adding placeholders. `recent` already filters
+    // out empty-content messages, so the payload is guaranteed to satisfy
+    // the backend's min_length=1 constraint on history items.
+    const history = chat.recent(15);
+    const taskDescription = buildTaskContext();
+
     chat.pushUser(text);
     chat.startAssistant();
     isTyping = true;
     scrollToBottom();
-
-    const history = chat.recent(15).slice(0, -1); // exclude the empty assistant placeholder
-    const taskDescription = buildTaskContext();
 
     try {
       const stream = sendChatMessage({ text, history, taskDescription });
