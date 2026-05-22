@@ -1,0 +1,1 @@
+import{q as u,r as i,u as l,v as f,w as h,A as k}from"./index-Db7Lf-uh.js";function m(e){const t=k(null);return u(()=>{const{vars:s,answer:o,solution:r,hideFromChat:n=[]}=e();t.set(s),i.set(s),l.set(o),f.set(r??"");const a={...s};for(const c of n)delete a[c];h.set(a)}),t}export{m as s};

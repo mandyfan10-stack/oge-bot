@@ -1,1 +1,0 @@
-import{o as e,p as n,q as u,y as i,z as l}from"./index-BYTN_Tku.js";function p(a){const s=l(null);return e(()=>{const{vars:t,answer:o,solution:r}=a();s.set(t),n.set(t),u.set(o),i.set(r??"")}),s}export{p as s};
