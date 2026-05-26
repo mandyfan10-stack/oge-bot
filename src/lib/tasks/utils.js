@@ -1,10 +1,12 @@
 const cryptoSource = (typeof window !== 'undefined' && (window.crypto || window.msCrypto)) || null;
+// ⚡ Bolt: Pre-allocate randomBuffer to avoid GC thrashing on high-frequency calls.
+// Impact: Eliminates O(N) Uint32Array allocations in tight loops (e.g., shuffleArray).
+const randomBuffer = new Uint32Array(1);
 
 export function randomUnit() {
   if (cryptoSource?.getRandomValues) {
-    const buffer = new Uint32Array(1);
-    cryptoSource.getRandomValues(buffer);
-    return buffer[0] / 0x100000000;
+    cryptoSource.getRandomValues(randomBuffer);
+    return randomBuffer[0] / 0x100000000;
   }
   return Math.random();
 }
