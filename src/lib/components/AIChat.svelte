@@ -42,8 +42,9 @@
     const vars = $chatContextVars;
     if (!vars || Object.keys(vars).length === 0) return header;
     // Format vars as "key=value; key2=value2" for readability in the prompt.
+    // Non-scalar values are JSON-encoded — `${v}` would yield "[object Object]".
     const pairs = Object.entries(vars)
-      .map(([k, v]) => `${k}=${Array.isArray(v) ? JSON.stringify(v) : v}`)
+      .map(([k, v]) => `${k}=${typeof v === 'object' && v !== null ? JSON.stringify(v) : v}`)
       .join('; ');
     const full = `${header} | ${pairs}`;
     return full.length <= TASK_DESCRIPTION_LIMIT

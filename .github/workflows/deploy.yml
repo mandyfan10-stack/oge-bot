@@ -5,20 +5,54 @@ on:
     branches:
       - main
       - feature/svelte-migration
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
-  build-and-deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+  build-and-deploy:
+    # Deploy only on push to a deploy branch, never for pull requests,
+    # and only after the test job is green.
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
       - name: Install and Build
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: Deploy
