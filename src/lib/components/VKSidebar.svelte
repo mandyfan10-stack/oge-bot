@@ -3,6 +3,7 @@
 
   const items = [
     { id: 'profile',  label: 'Моя страница' },
+    { id: 'practice', label: 'Практика' },
     { id: 'tasks',    label: 'Задания' },
     { id: 'messages', label: 'Сообщения' },
     { id: 'settings', label: 'Настройки' },

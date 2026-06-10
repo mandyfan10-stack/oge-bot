@@ -1,7 +1,8 @@
 <script>
   import { tick, afterUpdate } from 'svelte';
   import { currentTask, taskSolution } from '../stores/taskStore.js';
-  import { TASK_INDEX } from '../tasks/taskMetadata.js';
+  import { currentSection } from '../stores/uiStore.js';
+  import { TASK_INDEX, TASK_LIST } from '../tasks/taskMetadata.js';
   import { hapticSuccess, hapticError } from '../util/telegram.js';
   import { progress } from '../stores/progressStore.js';
   import VKPanel from './VKPanel.svelte';
@@ -18,6 +19,17 @@
 
   $: loadTaskComponent($currentTask);
   $: meta = $currentTask ? TASK_INDEX.get($currentTask) : null;
+  $: taskIdx = TASK_LIST.findIndex((t) => t.id === $currentTask);
+  $: prevTask = taskIdx > 0 ? TASK_LIST[taskIdx - 1] : null;
+  $: nextTask = taskIdx >= 0 && taskIdx < TASK_LIST.length - 1 ? TASK_LIST[taskIdx + 1] : null;
+
+  function goToTask(id) {
+    currentTask.set(id);
+  }
+
+  function askAI() {
+    currentSection.set('messages');
+  }
 
   async function loadTaskComponent(id) {
     if (!id) return;
@@ -103,6 +115,7 @@
     <div style="margin-top: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
       <VKButton on:click={checkAnswer}>Проверить</VKButton>
       <VKButton variant="secondary" on:click={() => loadTaskComponent($currentTask)}>Новый вариант</VKButton>
+      <VKButton variant="secondary" on:click={askAI}>Спросить ИИ</VKButton>
       {#if feedback.message}
         <span
           class="vk-feedback"
@@ -121,6 +134,23 @@
         <p class="vk-row-sub" style="margin-top: 4px;">{@html $taskSolution}</p>
       </div>
     {/if}
+
+    {#if feedback.type === 'success' && nextTask}
+      <div style="margin-top: 10px;">
+        <VKButton on:click={() => goToTask(nextTask.id)}>Следующее задание →</VKButton>
+      </div>
+    {/if}
+
+    <div style="margin-top: 14px; display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid var(--vk-border); padding-top: 10px;">
+      {#if prevTask}
+        <button class="vk-link-button" on:click={() => goToTask(prevTask.id)}>← Задание {prevTask.number}</button>
+      {:else}
+        <span></span>
+      {/if}
+      {#if nextTask}
+        <button class="vk-link-button" on:click={() => goToTask(nextTask.id)}>Задание {nextTask.number} →</button>
+      {/if}
+    </div>
   {:else}
     <div class="vk-skeleton">
       <div class="vk-skeleton-bar"></div>

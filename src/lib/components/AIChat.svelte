@@ -4,8 +4,17 @@
   import { chat } from '../stores/chatStore.js';
   import { sendChatMessage, ChatError } from '../api/chatClient.js';
   import { renderMarkdown } from '../util/markdown.js';
+  import { TASK_INDEX } from '../tasks/taskMetadata.js';
   import VKPanel from './VKPanel.svelte';
   import VKButton from './VKButton.svelte';
+
+  const QUICK_PROMPTS = [
+    'Объясни, как решать это задание',
+    'Дай подсказку, не раскрывая ответ',
+    'Разбери похожий пример',
+  ];
+
+  $: taskMeta = $currentTask ? TASK_INDEX.get($currentTask) : null;
 
   let inputMessage = '';
   let isTyping = false;
@@ -99,7 +108,16 @@
 
   <div bind:this={listEl} class="vk-chat-list" style="max-height: 60vh; overflow-y: auto;">
     {#if $chat.length === 0}
-      <div class="vk-chat-empty">Задайте вопрос ИИ-репетитору</div>
+      <div class="vk-chat-empty">
+        Задайте вопрос ИИ-репетитору
+        <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px; align-items: center;">
+          {#each QUICK_PROMPTS as prompt}
+            <button class="vk-task-chip" disabled={isTyping} on:click={() => sendMessage(prompt)}>
+              {prompt}
+            </button>
+          {/each}
+        </div>
+      </div>
     {:else}
       {#each $chat as msg (msg.ts + ':' + msg.role)}
         <div class="vk-chat-row">
@@ -134,6 +152,12 @@
     <div style="margin-top: 6px;">
       <VKButton on:click={() => sendMessage(pendingText)}>Повторить</VKButton>
     </div>
+  {/if}
+
+  {#if taskMeta}
+    <p class="vk-row-sub" style="margin-top: 8px; font-size: 11px;">
+      Контекст: задание {taskMeta.number} «{taskMeta.title}» — репетитор видит его условие.
+    </p>
   {/if}
 
   <form on:submit|preventDefault={() => sendMessage()} style="margin-top: 8px; display: flex; gap: 6px;">

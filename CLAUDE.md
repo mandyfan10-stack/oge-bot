@@ -11,16 +11,17 @@ src/app.css, tailwind.css  — стили; Tailwind собирается в styl
 src/lib/
   api/chatClient.js        — sendChatMessage() async-generator над POST /api/chat (streaming reader)
   components/
-    AIChat.svelte          — вкладка «Сообщения» (ИИ-репетитор)
-    TaskRunner.svelte      — текущая задача
-    TaskList.svelte        — список 20 заданий
+    ProfileDashboard.svelte — «Моя страница»: решено N/20, точность, прогресс по темам, чипы нерешённых
+    AIChat.svelte          — вкладка «Сообщения» (ИИ-репетитор, быстрые подсказки, чип контекста задания)
+    TaskRunner.svelte      — «Практика»: текущая задача + навигация пред./след. + «Спросить ИИ»
+    TaskList.svelte        — список 20 заданий (поиск + фильтр Все/Решённые/Нерешённые)
     SettingsPanel.svelte   — настройки
     VKHeader/VKSidebar/VKPanel/VKButton.svelte — VK-стилизованные примитивы
   stores/
     chatStore.js     — история чата (persist в localStorage, rAF-coalesced стриминг)
     taskStore.js     — currentTask, taskVariables, correctAnswer, taskSolution
-    progressStore.js — попытки и правильность ответов (persist)
-    uiStore.js       — активная секция (profile/tasks/messages/settings)
+    progressStore.js — попытки/correctCount/правильность (persist) + derived progressStats
+    uiStore.js       — активная секция (profile/practice/tasks/messages/settings)
   tasks/
     components/TaskN.svelte (N=1..20) — компоненты заданий
     taskMetadata.js / taskSetup.js / utils.js — генераторы и валидаторы
@@ -83,7 +84,8 @@ npm test       # vitest, прогон *.test.js
 ## Конвенции / подводные камни
 
 - Запуск из `file://` блокируется CORS на бэкенде (Origin становится `null`). Открывать через GitHub Pages или dev-сервер.
-- Markdown — только escape + `**bold**` + `\n→<br>` (`util/markdown.js`). Не подключать внешний markdown-парсер без аудита XSS.
+- Markdown — escape + `**bold**`/`*italic*`/`` `code` `` + `\n→<br>` (`util/markdown.js`); whitelist тегов: strong/em/code/br. Код-спаны изолируются NUL-плейсхолдерами (NUL вычищается из входа). Не подключать внешний markdown-парсер без аудита XSS.
+- Анти-лик инвариант заданий: значения, видимые в условии и попадающие в `chatContextVars`, не должны совпадать со скрытым ответом (см. constraint в Task5 и smoke-тест `chatContextVars never contains the correct answer`).
 - Стрим Groq отдаёт plain `text/plain` (не SSE) — не пытаться парсить как `EventSource`.
 - Telegram-haptic вызовы обёрнуты в try/catch (`util/telegram.js`) — безопасно дёргать вне Telegram WebApp.
 - При добавлении новых элементов истории чата всегда проверять: попадают ли они в `recent()` с непустым `content`. Тесты в `stores/chatStore.test.js` ловят регресс.

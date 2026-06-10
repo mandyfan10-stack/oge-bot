@@ -11,6 +11,7 @@
 
   import VKHeader from './lib/components/VKHeader.svelte';
   import VKSidebar from './lib/components/VKSidebar.svelte';
+  import ProfileDashboard from './lib/components/ProfileDashboard.svelte';
   import TaskRunner from './lib/components/TaskRunner.svelte';
   import TaskList from './lib/components/TaskList.svelte';
   import AIChat from './lib/components/AIChat.svelte';
@@ -34,6 +35,8 @@
 
     <main>
       {#if $currentSection === 'profile'}
+        <ProfileDashboard />
+      {:else if $currentSection === 'practice'}
         <TaskRunner />
       {:else if $currentSection === 'tasks'}
         <TaskList />

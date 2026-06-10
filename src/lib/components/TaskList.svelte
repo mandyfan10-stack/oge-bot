@@ -2,20 +2,36 @@
   import { currentTask } from '../stores/taskStore.js';
   import { currentSection } from '../stores/uiStore.js';
   import { TASK_LIST, filterTasks } from '../tasks/taskMetadata.js';
-  import { progress } from '../stores/progressStore.js';
+  import { progress, progressStats } from '../stores/progressStore.js';
   import VKPanel from './VKPanel.svelte';
 
   let query = '';
+  /** @type {'all' | 'solved' | 'unsolved'} */
+  let statusFilter = 'all';
 
-  $: visibleTasks = filterTasks(query);
+  const FILTERS = [
+    ['all', 'Все'],
+    ['unsolved', 'Нерешённые'],
+    ['solved', 'Решённые'],
+  ];
+
+  $: visibleTasks = filterTasks(query).filter((t) => {
+    if (statusFilter === 'all') return true;
+    const solved = Boolean($progress[t.id]?.correct);
+    return statusFilter === 'solved' ? solved : !solved;
+  });
 
   function openTask(id) {
     currentTask.set(id);
-    currentSection.set('profile');
+    currentSection.set('practice');
   }
 </script>
 
 <VKPanel title="Задания">
+  <svelte:fragment slot="actions">
+    <span class="vk-row-sub">Решено {$progressStats.solved} из {TASK_LIST.length}</span>
+  </svelte:fragment>
+
   <div style="margin-bottom: 8px;">
     <input
       class="vk-input"
@@ -25,6 +41,17 @@
       maxlength="50"
       aria-label="Поиск задания"
     />
+  </div>
+
+  <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+    {#each FILTERS as [val, label]}
+      <button
+        class="vk-task-chip"
+        class:is-selected={statusFilter === val}
+        style={statusFilter === val ? 'background: var(--vk-row-h); border-color: var(--vk-header); color: var(--vk-link); font-weight: 700;' : ''}
+        on:click={() => (statusFilter = val)}
+      >{label}</button>
+    {/each}
   </div>
 
   {#if visibleTasks.length === 0}
@@ -43,7 +70,9 @@
           <span class="vk-avatar">{task.number}</span>
           <div style="min-width: 0; flex: 1;">
             <div class="vk-row-title">Задание {task.number}. {task.title}</div>
-            <div class="vk-row-sub">{task.topic}</div>
+            <div class="vk-row-sub">
+              {task.topic}{#if $progress[task.id]?.attempts > 0}&nbsp;· попыток: {$progress[task.id].attempts}{/if}
+            </div>
           </div>
           {#if $progress[task.id]?.correct}
             <span class="vk-solved-badge">✓</span>

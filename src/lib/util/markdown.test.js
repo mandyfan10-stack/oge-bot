@@ -39,4 +39,45 @@ describe('renderMarkdown', () => {
   it('handles plain text unchanged (modulo escaping)', () => {
     expect(renderMarkdown('hello world')).toBe('hello world');
   });
+
+  it('renders italic text', () => {
+    expect(renderMarkdown('*hello*')).toBe('<em>hello</em>');
+  });
+
+  it('renders bold and italic together', () => {
+    expect(renderMarkdown('**a** and *b*')).toBe('<strong>a</strong> and <em>b</em>');
+  });
+
+  it('renders inline code', () => {
+    expect(renderMarkdown('use `print(x)` here')).toBe('use <code>print(x)</code> here');
+  });
+
+  it('does not format markdown inside inline code', () => {
+    expect(renderMarkdown('`a**b**c`')).toBe('<code>a**b**c</code>');
+    expect(renderMarkdown('`x*y*z`')).toBe('<code>x*y*z</code>');
+  });
+
+  it('escapes XSS inside inline code', () => {
+    const result = renderMarkdown('`<img onerror=alert(1)>`');
+    expect(result).toContain('&lt;img');
+    expect(result).not.toContain('<img');
+  });
+
+  it('renders multiple code spans independently', () => {
+    expect(renderMarkdown('`a` and `b`')).toBe('<code>a</code> and <code>b</code>');
+  });
+
+  it('strips NUL sentinels from input (no placeholder spoofing)', () => {
+    const NUL = String.fromCharCode(0);
+    const result = renderMarkdown('x' + NUL + '0' + NUL + 'y `code`');
+    expect(result).toBe('x0y <code>code</code>');
+  });
+
+  it('keeps unpaired backticks literal', () => {
+    expect(renderMarkdown('a ` b')).toBe('a ` b');
+  });
+
+  it('keeps unpaired asterisks literal', () => {
+    expect(renderMarkdown('2 * 3 = 6')).toBe('2 * 3 = 6');
+  });
 });

@@ -16,7 +16,10 @@
           else curr *= b;
         }
       }
-      if (valid && curr > 0 && curr !== start) { end = curr; break; }
+      // A and end are visible in the prompt (and in the AI chat context):
+      // they must never coincide with the hidden answer b, otherwise the
+      // answer would be readable straight from the statement.
+      if (valid && curr > 0 && curr !== start && A !== b && curr !== b) { end = curr; break; }
     }
     const op2_text = op2_type === 'div' ? `раздели на b` : `умножь на b`;
     const seq = seqArray.join('');
