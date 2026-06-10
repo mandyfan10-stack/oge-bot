@@ -1,5 +1,5 @@
 <script>
-  import { tick, afterUpdate } from 'svelte';
+  import { tick } from 'svelte';
   import { currentTask, taskSolution } from '../stores/taskStore.js';
   import { currentSection } from '../stores/uiStore.js';
   import { TASK_INDEX, TASK_LIST } from '../tasks/taskMetadata.js';
@@ -23,8 +23,18 @@
   $: prevTask = taskIdx > 0 ? TASK_LIST[taskIdx - 1] : null;
   $: nextTask = taskIdx >= 0 && taskIdx < TASK_LIST.length - 1 ? TASK_LIST[taskIdx + 1] : null;
 
+  // Recreate lucide icons only when a new task component is mounted, not on
+  // every reactive update. afterUpdate ran too broadly and caused extra work.
+  $: if (TaskComponent && typeof window !== 'undefined') {
+    tick().then(() => window.lucide?.createIcons?.());
+  }
+
   function goToTask(id) {
     currentTask.set(id);
+  }
+
+  function startFirst() {
+    currentTask.set('1');
   }
 
   function askAI() {
@@ -32,7 +42,11 @@
   }
 
   async function loadTaskComponent(id) {
-    if (!id) return;
+    if (!id) {
+      TaskComponent = null;
+      loadError = '';
+      return;
+    }
     loadError = '';
     userInput = '';
     feedback = { message: '', type: '' };
@@ -53,13 +67,6 @@
       loadError = `Не удалось загрузить задание ${id}.`;
     }
   }
-
-  afterUpdate(() => {
-    // Some task components use lucide icons; re-render after each mount.
-    if (typeof window !== 'undefined' && window.lucide?.createIcons) {
-      window.lucide.createIcons();
-    }
-  });
 
   async function checkAnswer() {
     if (!taskComponentRef || typeof taskComponentRef.check !== 'function') return;
@@ -82,7 +89,7 @@
     {#if meta}
       Задание {meta.number}. {meta.title}
     {:else}
-      Моя страница
+      Практика
     {/if}
   </svelte:fragment>
   <svelte:fragment slot="actions">
@@ -93,6 +100,17 @@
 
   {#if loadError}
     <p class="vk-feedback is-error">{loadError}</p>
+  {:else if !$currentTask}
+    <div class="empty-state">
+      <p class="empty-title">Выберите задание</p>
+      <p class="vk-row-sub" style="margin-top: 4px; margin-bottom: 16px;">
+        Откройте каталог и нажмите на любое из 20 заданий, или начните с первого.
+      </p>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+        <VKButton on:click={startFirst}>Начать с задания 01</VKButton>
+        <VKButton variant="secondary" on:click={() => currentSection.set('tasks')}>Каталог заданий</VKButton>
+      </div>
+    </div>
   {:else if TaskComponent}
     <div class="task-content">
       <svelte:component this={TaskComponent} bind:this={taskComponentRef} />
@@ -125,7 +143,9 @@
           {feedback.message}
         </span>
       {/if}
-      {#if $progress[$currentTask]?.attempts > 0}<span class="vk-row-sub">Попыток: {$progress[$currentTask].attempts}</span>{/if}
+      {#if $progress[$currentTask]?.attempts > 0}
+        <span class="vk-row-sub">Попыток: {$progress[$currentTask].attempts}</span>
+      {/if}
     </div>
 
     {#if feedback.type === 'success' && $taskSolution}
@@ -159,3 +179,14 @@
     </div>
   {/if}
 </VKPanel>
+
+<style>
+.empty-state {
+  padding: 24px 8px;
+  text-align: center;
+}
+.empty-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+</style>

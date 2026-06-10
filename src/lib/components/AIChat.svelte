@@ -32,8 +32,23 @@
     }
   }
 
+  // Max backend field length is 500 chars. Task15 (Robot) can have large
+  // chatContextVars, so we truncate the JSON payload with a safe margin.
+  const TASK_DESCRIPTION_LIMIT = 450;
+
   function buildTaskContext() {
-    return `Задание №${$currentTask} | Условие: ${JSON.stringify($chatContextVars)}`;
+    if (!$currentTask) return null;
+    const header = `Задание №${$currentTask}`;
+    const vars = $chatContextVars;
+    if (!vars || Object.keys(vars).length === 0) return header;
+    // Format vars as "key=value; key2=value2" for readability in the prompt.
+    const pairs = Object.entries(vars)
+      .map(([k, v]) => `${k}=${Array.isArray(v) ? JSON.stringify(v) : v}`)
+      .join('; ');
+    const full = `${header} | ${pairs}`;
+    return full.length <= TASK_DESCRIPTION_LIMIT
+      ? full
+      : full.slice(0, TASK_DESCRIPTION_LIMIT);
   }
 
   function formatTime(ts) {
@@ -67,7 +82,7 @@
     // out empty-content messages, so the payload is guaranteed to satisfy
     // the backend's min_length=1 constraint on history items.
     const history = chat.recent(15);
-    const taskDescription = buildTaskContext();
+    const taskDescription = buildTaskContext() || null;
 
     chat.pushUser(text);
     chat.startAssistant();
@@ -86,6 +101,12 @@
         chat.setLastAssistant('(пустой ответ от сервера)');
       }
     } catch (err) {
+      // AbortError = user navigated away or browser closed the connection.
+      // Drop the empty placeholder instead of showing a cryptic error.
+      if (err?.name === 'AbortError') {
+        chat.dropTrailingEmptyAssistant();
+        return;
+      }
       const msg =
         err instanceof ChatError
           ? err.userMessage
